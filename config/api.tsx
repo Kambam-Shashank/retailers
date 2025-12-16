@@ -1,0 +1,1 @@
+export const WEBSOCKET_URL = "live.karatpay.in";

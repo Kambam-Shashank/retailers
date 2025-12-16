@@ -1,98 +1,225 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useEffect } from "react";
+import * as Font from 'expo-font';
+import { useFonts } from 'expo-font';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function Karatpay() {
+  const router = useRouter();
 
-export default function HomeScreen() {
+  const handleWhatsAppShare = () => {
+    Alert.alert("WhatsApp Share", "This will open WhatsApp to share the app");
+  };
+   
+
+  
+
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ScrollView style={styles.container}>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.header}>
+        <Text style={styles.logo}>Karatpay</Text>
+        <Text style={styles.tagline}>
+          Real-time bullion rates for your jewellery business
+        </Text>
+      </View>
+
+      <View style={styles.cardsContainer}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/ratesDIsplay")}
+        >
+          <View style={styles.iconContainer}>
+            <MaterialIcons name="remove-red-eye" size={24} color="#FFD700" />
+          </View>
+          <Text style={styles.cardTitle}>Rate Display</Text>
+          <Text style={styles.cardDescription}>
+            Show real-time gold and silver rates to your customers with
+            beautiful, customizable displays
+          </Text>
+          <View style={styles.cardButton}>
+            <Text style={styles.cardButtonText}>View Live Rates</Text>
+            <MaterialIcons name="arrow-forward" size={16} color="#FFD700" />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push("/rateSetup")}
+        >
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons name="cog" size={24} color="#FFD700" />
+          </View>
+          <Text style={styles.cardTitle}>Rate Setup</Text>
+          <Text style={styles.cardDescription}>
+            Configure margins, making charges, branding, and notifications for
+            your rate display
+          </Text>
+          <View style={styles.cardButton}>
+            <Text style={styles.cardButtonText}>Configure Rates</Text>
+            <MaterialIcons name="arrow-forward" size={16} color="#FFD700" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.featuresContainer}>
+        <View style={styles.featureTag}>
+          <Text style={styles.featureText}>• Live API Updates</Text>
+        </View>
+        <View style={styles.featureTag}>
+          <Text style={styles.featureText}>• Custom Margins</Text>
+        </View>
+        <View style={styles.featureTag}>
+          <Text style={styles.featureText}>• Making Charges</Text>
+        </View>
+        <View style={styles.featureTag}>
+          <Text style={styles.featureText}>• GST Settings</Text>
+        </View>
+        <View style={styles.featureTag}>
+          <Text style={styles.featureText}>• Branding Options</Text>
+        </View>
+        <View style={styles.featureTag}>
+          <Text style={styles.featureText}>• Notifications</Text>
+        </View>
+      </View>
+
+      <TouchableOpacity
+        style={styles.whatsappButton}
+        onPress={handleWhatsAppShare}
+      >
+        <MaterialIcons name="chat" size={24} color="#25D366" />
+        <Text style={styles.whatsappButtonText}>Share on WhatsApp</Text>
+      </TouchableOpacity>
+
+      <View style={styles.footer}>
+        <Text style={styles.copyright}>
+          {" "}
+          2024 Karatpay. All rights reserved.
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#0A0A0A",
   },
-  stepContainer: {
-    gap: 8,
+  header: {
+    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+  logo: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#FFD700",
+    marginBottom: 12,
+  },
+  tagline: {
+    fontSize: 16,
+    color: "#888888",
+    textAlign: "center",
+    paddingHorizontal: 20,
+  },
+  cardsContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 30,
+  },
+  card: {
+    backgroundColor: "#1A1A1A",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#2A2A2A",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#FFFFFF",
     marginBottom: 8,
+    fontFamily:"Inter Tight"
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  cardDescription: {
+    fontSize: 14,
+    color: "#888888",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  cardButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  cardButtonText: {
+    fontSize: 14,
+    color: "#FFD700",
+    marginRight: 8,
+  },
+  featuresContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  featureTag: {
+    backgroundColor: "#2A2A2A",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    margin: 4,
+  },
+  featureText: {
+    fontSize: 12,
+    color: "#888888",
+  },
+  whatsappButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1A1A1A",
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: "#25D366",
+  },
+  whatsappButtonText: {
+    fontSize: 16,
+    color: "#25D366",
+    marginLeft: 12,
+    fontWeight: "500",
+  },
+  footer: {
+    alignItems: "center",
+    paddingBottom: 40,
+  },
+  copyright: {
+    fontSize: 12,
+    color: "#666666",
   },
 });
