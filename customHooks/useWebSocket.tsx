@@ -3,6 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export interface GoldPriceData {
   sell_price_999?: number;
   sell_price_995?: number;
+  gold_999?: number;
+  gold_995?: number;
+  price_999?: number;
+  price_995?: number;
   timestamp?: number;
   providers_count?: number;
   [key: string]: any;
@@ -41,6 +45,7 @@ export default function useWebSocket(uri: string) {
       ws.onmessage = (event) => {
         try {
           const parsedData = JSON.parse(event.data);
+          console.log("WebSocket raw data:", parsedData);
 
           if (parsedData && typeof parsedData === "object") {
             let validData: GoldPriceData | null = null;
@@ -58,6 +63,7 @@ export default function useWebSocket(uri: string) {
             }
 
             if (validData) {
+              console.log("Valid WebSocket data:", validData);
               setData(validData);
               setLastValidData(validData);
             }
@@ -66,7 +72,7 @@ export default function useWebSocket(uri: string) {
           }
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
-          // console.log("Raw message data:", event.data);
+          console.log("Raw message data:", event.data);
         }
       };
       ws.onerror = () => {

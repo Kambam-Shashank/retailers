@@ -24,11 +24,13 @@ const Index = () => {
 
   const { config } = useRateConfig();
   const { data: aaravRates } = useAaravRates();
-  // Pass fetched silver price (if available) to calculations
   const calculatedRates = useRateCalculations(
     cachedWsData,
     withGST,
-    aaravRates.silver
+    aaravRates.silver,
+    undefined,
+    aaravRates.silverWithGST,
+    false
   );
 
   const {
@@ -98,154 +100,231 @@ const Index = () => {
       ]}
     >
       <View style={[styles.header, isDesktop && styles.headerDesktop]}>
-        {/* LEFT SECTION */}
-        <View style={[styles.leftSection, { alignItems: "flex-start" }]}>
-          {config.brandAlignment === "left" && (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+        {/* MOBILE HEADER LAYOUT (Column) */}
+        {!isDesktop && (
+          <View style={{ width: '100%', gap: 15 }}>
+            {/* Row 1: Branding (Centered) */}
+            <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               {config.logoBase64 && (
                 <Image
                   source={{ uri: config.logoBase64 }}
-                  style={styles.shopLogo}
+                  style={{ width: 100, height: 100, marginBottom: 10 }}
+                  resizeMode="contain"
                 />
               )}
               {config.showShopName && (
                 <Text
                   style={[
                     styles.shopName,
-                    { color: config.textColor || "#FFFFFF" },
+                    { color: config.textColor || "#FFFFFF", textAlign: "center", fontSize: 28 },
                     config.fontTheme === "serif" && { fontFamily: "serif" },
-                    config.fontTheme === "classic" && {
-                      fontFamily: "monospace",
-                    },
+                    config.fontTheme === "classic" && { fontFamily: "monospace" },
                   ]}
                 >
                   {config.shopName || "Karatpay"}
                 </Text>
               )}
             </View>
-          )}
-          {config.brandAlignment === "center" && config.showTime && (
-            <Text
-              style={[
-                styles.time,
-                { color: config.textColor || "#FFFFFF" },
-                config.fontTheme === "serif" && { fontFamily: "serif" },
-                config.fontTheme === "classic" && { fontFamily: "monospace" },
-              ]}
-            >
-              {formatTime(currentTime)}
-            </Text>
-          )}
-          {config.brandAlignment === "right" && config.showTime && (
-            <Text
-              style={[
-                styles.time,
-                { color: config.textColor || "#FFFFFF" },
-                config.fontTheme === "serif" && { fontFamily: "serif" },
-                config.fontTheme === "classic" && { fontFamily: "monospace" },
-              ]}
-            >
-              {formatTime(currentTime)}
-            </Text>
-          )}
-        </View>
 
-        {/* CENTER SECTION */}
-        <View style={styles.centerSection}>
-          {config.brandAlignment === "center" && (
-            <>
-              {config.logoBase64 && (
-                <Image
-                  source={{ uri: config.logoBase64 }}
-                  style={styles.shopLogo}
-                />
-              )}
-              {config.showShopName && (
-                <Text
-                  style={[
-                    styles.shopName,
-                    { color: config.textColor || "#FFFFFF" },
-                    config.fontTheme === "serif" && { fontFamily: "serif" },
-                    config.fontTheme === "classic" && {
-                      fontFamily: "monospace",
-                    },
-                  ]}
-                >
-                  {config.shopName || "Karatpay"}
-                </Text>
-              )}
-            </>
-          )}
-          {config.brandAlignment === "left" && config.showTime && (
-            <Text
-              style={[
-                styles.time,
-                { color: config.textColor || "#FFFFFF" },
-                config.fontTheme === "serif" && { fontFamily: "serif" },
-                config.fontTheme === "classic" && { fontFamily: "monospace" },
-              ]}
-            >
-              {formatTime(currentTime)}
-            </Text>
-          )}
-          {/* If right aligned, center is empty or could have actions? Keeping it simple. */}
-        </View>
+            {/* Row 2: Controls & Time */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
 
-        {/* RIGHT SECTION */}
-        <View style={styles.rightSection}>
-          {config.brandAlignment === "right" ? (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {config.showShopName && (
-                <Text
-                  style={[
-                    styles.shopName,
-                    { color: config.textColor || "#FFFFFF", marginRight: 12 },
-                    config.fontTheme === "serif" && { fontFamily: "serif" },
-                    config.fontTheme === "classic" && {
-                      fontFamily: "monospace",
-                    },
-                  ]}
-                >
-                  {config.shopName || "Karatpay"}
-                </Text>
-              )}
-              {config.logoBase64 && (
-                <Image
-                  source={{ uri: config.logoBase64 }}
-                  style={styles.shopLogo}
-                />
-              )}
-            </View>
-          ) : (
-            <View>
-              <TouchableOpacity onPress={onShare} style={styles.shareButton}>
-                <Text style={styles.shareButtonText}>Share</Text>
-              </TouchableOpacity>
+              {/* Left Side: Time (if enabled) */}
+              <View>
+                {config.showTime && (
+                  <Text style={[styles.time, { color: config.textColor || "#FFFFFF", fontSize: 16 }]}>
+                    {formatTime(currentTime)}
+                  </Text>
+                )}
+              </View>
 
-              <View style={styles.gstToggle}>
-                <Text
-                  style={[
-                    styles.gstText,
-                    { color: config.textColor || "#FFFFFF" },
-                  ]}
-                >
-                  {withGST ? "GST On" : "GST Off"}
-                </Text>
+              {/* Right Side: Tools */}
+              <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                <TouchableOpacity onPress={onShare} style={[styles.shareButton, { paddingHorizontal: 10, paddingVertical: 6 }]}>
+                  <Text style={[styles.shareButtonText, { fontSize: 12 }]}>Share</Text>
+                </TouchableOpacity>
+
+                <View style={styles.gstToggle}>
+                  <Text style={[styles.gstText, { color: config.textColor || "#FFFFFF", fontSize: 12 }]}>
+                    {withGST ? "GST On" : "GST Off"}
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.toggle, withGST && styles.toggleActive, { width: 36, height: 20 }]}
+                    onPress={onToggleGST}
+                  >
+                    <View style={[styles.toggleCircle, withGST && { transform: [{ translateX: 16 }] }, { width: 18, height: 18, borderRadius: 9 }]} />
+                  </TouchableOpacity>
+                </View>
+
                 <TouchableOpacity
-                  style={[styles.toggle, withGST && styles.toggleActive]}
-                  onPress={onToggleGST}
+                  onPress={() => (window.location.href = "/rateSetup")}
+                  style={[styles.backButton, { padding: 6 }]}
                 >
-                  <View
-                    style={[
-                      styles.toggleCircle,
-                      withGST && styles.toggleCircleActive,
-                    ]}
-                  />
+                  <Text style={[styles.backArrow, { fontSize: 20 }]}>⚙️</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          )}
-        </View>
+          </View>
+        )}
+
+        {/* DESKTOP HEADER LAYOUT (Row) */}
+        {isDesktop && (
+          <>
+            <View style={[styles.leftSection, { alignItems: "flex-start" }]}>
+
+              {config.brandAlignment === "left" && (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  {config.logoBase64 && (
+                    <Image
+                      source={{ uri: config.logoBase64 }}
+                      style={[styles.shopLogo, { width: 80, height: 80 }]}
+                      resizeMode="contain"
+                    />
+                  )}
+                  {config.showShopName && (
+                    <Text
+                      style={[
+                        styles.shopName,
+                        { color: config.textColor || "#FFFFFF" },
+                        config.fontTheme === "serif" && { fontFamily: "serif" },
+                        config.fontTheme === "classic" && {
+                          fontFamily: "monospace",
+                        },
+                      ]}
+                    >
+                      {config.shopName || "Karatpay"}
+                    </Text>
+                  )}
+                </View>
+              )}
+              {config.brandAlignment === "center" && config.showTime && (
+                <Text
+                  style={[
+                    styles.time,
+                    { color: config.textColor || "#FFFFFF" },
+                    config.fontTheme === "serif" && { fontFamily: "serif" },
+                    config.fontTheme === "classic" && { fontFamily: "monospace" },
+                  ]}
+                >
+                  {formatTime(currentTime)}
+                </Text>
+              )}
+              {config.brandAlignment === "right" && config.showTime && (
+                <Text
+                  style={[
+                    styles.time,
+                    { color: config.textColor || "#FFFFFF" },
+                    config.fontTheme === "serif" && { fontFamily: "serif" },
+                    config.fontTheme === "classic" && { fontFamily: "monospace" },
+                  ]}
+                >
+                  {formatTime(currentTime)}
+                </Text>
+              )}
+            </View>
+            <View style={[styles.centerSection, { flexDirection: isDesktop ? "row" : "column", gap: 10 }]}>
+              {config.brandAlignment === "center" && (
+                <>
+                  {config.logoBase64 && (
+                    <Image
+                      source={{ uri: config.logoBase64 }}
+                      style={[styles.shopLogo, !isDesktop && { width: 120, height: 120, marginBottom: 10 }]}
+                      resizeMode="contain"
+                    />
+                  )}
+                  {config.showShopName && (
+                    <Text
+                      style={[
+                        styles.shopName,
+                        { color: config.textColor || "#FFFFFF", textAlign: "center" },
+                        config.fontTheme === "serif" && { fontFamily: "serif" },
+                        config.fontTheme === "classic" && {
+                          fontFamily: "monospace",
+                        },
+                        !isDesktop && { fontSize: 26 }
+                      ]}
+                    >
+                      {config.shopName || "Karatpay"}
+                    </Text>
+                  )}
+                </>
+              )}
+              {config.brandAlignment === "left" && config.showTime && (
+                <Text
+                  style={[
+                    styles.time,
+                    { color: config.textColor || "#FFFFFF" },
+                    config.fontTheme === "serif" && { fontFamily: "serif" },
+                    config.fontTheme === "classic" && { fontFamily: "monospace" },
+                  ]}
+                >
+                  {formatTime(currentTime)}
+                </Text>
+              )}
+            </View>
+            <View style={styles.rightSection}>
+              {config.brandAlignment === "right" ? (
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  {config.showShopName && (
+                    <Text
+                      style={[
+                        styles.shopName,
+                        { color: config.textColor || "#FFFFFF", marginRight: 12 },
+                        config.fontTheme === "serif" && { fontFamily: "serif" },
+                        config.fontTheme === "classic" && {
+                          fontFamily: "monospace",
+                        },
+                      ]}
+                    >
+                      {config.shopName || "Karatpay"}
+                    </Text>
+                  )}
+                  {config.logoBase64 && (
+                    <Image
+                      source={{ uri: config.logoBase64 }}
+                      style={styles.shopLogo}
+                    />
+                  )}
+                </View>
+              ) : (
+                <View style={styles.headerIcons}>
+                  <TouchableOpacity
+                    onPress={() => (window.location.href = "/rateSetup")}
+                    style={[styles.backButton, { marginRight: 5 }]}
+                  >
+                    <Text style={styles.backArrow}>⚙️</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={onShare} style={styles.shareButton}>
+                    <Text style={styles.shareButtonText}>Share</Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.gstToggle}>
+                    <Text
+                      style={[
+                        styles.gstText,
+                        { color: config.textColor || "#FFFFFF" },
+                      ]}
+                    >
+                      {withGST ? "GST On" : "GST Off"}
+                    </Text>
+                    <TouchableOpacity
+                      style={[styles.toggle, withGST && styles.toggleActive]}
+                      onPress={onToggleGST}
+                    >
+                      <View
+                        style={[
+                          styles.toggleCircle,
+                          withGST && styles.toggleCircleActive,
+                        ]}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          </>
+        )}
       </View>
 
       {config.brandAlignment === "right" && (
@@ -289,12 +368,22 @@ const Index = () => {
             config.theme === "glass" && styles.glassCard,
             config.theme === "classic" && styles.classicCard,
             config.theme === "modern" && styles.modernCard,
-            // User Request: If background is black, card should also be black
-            (config.backgroundColor === "#000000" ||
-              config.backgroundColor.toLowerCase() === "black") && {
-              backgroundColor: "#000000",
-              borderColor: "#333", // Maintain subtle border for structure
+            config.theme === "modern" && styles.modernCard,
+            (config.backgroundColor &&
+              config.backgroundColor !== "#000000" &&
+              config.backgroundColor.toLowerCase() !== "black") && {
+              backgroundColor: "rgba(0,0,0,0.3)", // Semi-transparent black overlay
+              borderColor: config.cardBorderColor || "rgba(255,255,255,0.1)",
             },
+            (!config.backgroundColor || config.backgroundColor === "#000000") && {
+              borderColor: config.cardBorderColor || "#333",
+            },
+            // Apply Custom Border Props
+            {
+              borderRadius: config.cardBorderRadius ?? 16,
+              borderWidth: config.cardBorderWidth ?? 1,
+              borderColor: config.cardBorderColor || (config.backgroundColor === "#000000" ? "#333" : "rgba(255,255,255,0.1)")
+            }
           ]}
         >
           {config.showGold24k && (
@@ -318,12 +407,18 @@ const Index = () => {
                 >
                   {config.gold24kLabel}
                 </Text>
+
                 {config.makingChargesEnabled &&
                   (calculatedRates.gold999.makingCharges ?? 0) > 0 && (
-                    <Text style={styles.makingChargesRow}>
-                      MC: ₹
-                      {(calculatedRates.gold999.makingCharges ?? 0).toFixed(2)}
-                      /g
+                    <Text style={styles.makingChargesBig}>
+                      MC:{" "}
+                      {config.makingChargesType === "percentage"
+                        ? `${config.makingChargesValue}%`
+                        : `${(
+                          ((calculatedRates.gold999.makingCharges ?? 0) /
+                            calculatedRates.gold999.priceWithGST) *
+                          100
+                        ).toFixed(2)}%`}
                     </Text>
                   )}
               </View>
@@ -365,12 +460,18 @@ const Index = () => {
                 >
                   {config.gold22kLabel}
                 </Text>
+
                 {config.makingChargesEnabled &&
-                  (calculatedRates.gold995.makingCharges ?? 0) > 0 && (
-                    <Text style={styles.makingChargesRow}>
-                      MC: ₹
-                      {(calculatedRates.gold995.makingCharges ?? 0).toFixed(2)}
-                      /g
+                  (calculatedRates.gold916.makingCharges ?? 0) > 0 && (
+                    <Text style={styles.makingChargesBig}>
+                      MC:{" "}
+                      {config.makingChargesType === "percentage"
+                        ? `${config.makingChargesValue}%`
+                        : `${(
+                          ((calculatedRates.gold916.makingCharges ?? 0) /
+                            calculatedRates.gold916.priceWithGST) *
+                          100
+                        ).toFixed(2)}%`}
                     </Text>
                   )}
               </View>
@@ -382,7 +483,7 @@ const Index = () => {
                   config.fontTheme === "classic" && { fontFamily: "monospace" },
                 ]}
               >
-                {formatPricePerGram(calculatedRates.gold995.finalPrice)}
+                {formatPricePerGram(calculatedRates.gold916.finalPrice)}
               </Text>
             </View>
           )}
@@ -467,7 +568,22 @@ const Index = () => {
           )}
         </View>
       </View>
-    </ScrollView>
+
+
+      {/* Notifications Footer */}
+      {
+        config.notifications && config.notifications.some(n => n.enabled) && (
+          <View style={styles.notificationFooter}>
+            <Text style={styles.notificationText} numberOfLines={1}>
+              {config.notifications
+                .filter(n => n.enabled)
+                .map(n => n.message)
+                .join("  •  ")}
+            </Text>
+          </View>
+        )
+      }
+    </ScrollView >
   );
 };
 
@@ -478,10 +594,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center", // Center vertically
-    padding: 20,
+    alignItems: "center",
+    padding: 10,
     paddingBottom: 16,
     backgroundColor: "transparent",
+    flexWrap: "wrap", // Allow wrapping on very small screens
   },
   headerDesktop: {
     paddingHorizontal: 40,
@@ -504,20 +621,18 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   shopLogo: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     borderRadius: 8,
     marginRight: 12,
   },
   shopName: {
-    fontSize: 28, // Slightly larger for center prominence
+    fontSize: 28,
     fontWeight: "bold",
-    // color will be applied inline from config
   },
   time: {
     fontSize: 18,
     fontWeight: "600",
-    // color will be applied inline from config
   },
   shareButton: {
     backgroundColor: "#ffffff20",
@@ -579,21 +694,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    // color will be applied inline from config
   },
   price: {
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 5,
-    // color will be applied inline from config
   },
   unit: {
     fontSize: 14,
     marginBottom: 20,
-    // color will be applied inline from config
   },
   gstText: {
-    fontSize: 14, // Smaller to fit
+    fontSize: 14,
     fontWeight: "400",
     color: "#FFFFFF",
   },
@@ -635,7 +747,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 5,
   },
-  // New Styles
   consolidatedCard: {
     margin: 15,
     borderRadius: 16,
@@ -661,7 +772,7 @@ const styles = StyleSheet.create({
   },
   modernCard: {
     backgroundColor: "#111",
-    borderColor: "#D4AF37", // Gold border
+    borderColor: "#D4AF37",
   },
   rateRow: {
     flexDirection: "row",
@@ -685,6 +796,35 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     marginVertical: 4,
   },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  backArrow: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  makingChargesBig: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#D4AF37", // Gold color for importance
+    marginTop: 5,
+  },
+  notificationFooter: {
+    padding: 10,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    marginTop: 20,
+    alignItems: "center"
+  },
+  notificationText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600"
+  }
 });
 
 export default Index;

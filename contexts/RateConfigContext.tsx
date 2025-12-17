@@ -53,6 +53,10 @@ export interface RateConfig {
   showSilver925: boolean;
   // Price formatting
   priceDecimalPlaces: 0 | 1 | 2;
+  // Card Styling
+  cardBorderRadius: number;
+  cardBorderWidth: number;
+  cardBorderColor: string;
 }
 
 interface RateConfigProviderProps {
@@ -96,6 +100,10 @@ const DEFAULT_CONFIG: RateConfig = {
   showSilver999: true,
   showSilver925: false,
   priceDecimalPlaces: 0,
+
+  cardBorderRadius: 16,
+  cardBorderWidth: 1,
+  cardBorderColor: "#333333",
 };
 
 interface RateConfigContextType {

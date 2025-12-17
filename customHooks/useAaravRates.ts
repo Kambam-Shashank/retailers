@@ -4,6 +4,8 @@ import useFetch from "./useFetch";
 export interface AaravRateData {
   silver?: number;
   gold?: number;
+  silverWithGST?: boolean;
+  goldWithGST?: boolean;
 }
 
 const AARAV_API_URL =
@@ -37,10 +39,14 @@ export const useAaravRates = () => {
         const validPrice = !isNaN(ask) ? ask : bid;
 
         if (!isNaN(validPrice)) {
-          if (id === "2129") newData.gold = validPrice; 
+          if (id === "2129") {
+            newData.gold = validPrice;
+            newData.goldWithGST = true; // Aarav API prices include GST
+          }
           if (id === "2128") {
-            const silverPerTenGram = validPrice / 100; 
+            const silverPerTenGram = validPrice / 100;
             newData.silver = silverPerTenGram;
+            newData.silverWithGST = true; // Aarav API prices include GST
           }
         }
       });

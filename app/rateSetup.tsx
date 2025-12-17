@@ -169,9 +169,17 @@ export default function RateSetupScreen(): ReactElement {
       <View
         style={[styles.headerWrapper, isDesktop && styles.headerWrapperDesktop]}
       >
-        <View>
-          <Text style={styles.title}>Rate Setup</Text>
-          <Text style={styles.subtitle}>Configure your rate display</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{ marginRight: 15, padding: 5 }}
+          >
+            <Text style={{ fontSize: 24, color: "#FFF" }}>←</Text>
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.title}>Rate Setup</Text>
+            <Text style={styles.subtitle}>Configure your rate display</Text>
+          </View>
         </View>
 
         <View style={styles.buttonRow}>
@@ -206,10 +214,6 @@ export default function RateSetupScreen(): ReactElement {
           isDesktop && styles.scrollContentDesktop,
         ]}
       >
-        {/* LIVE RATES TICKER */}
-        {/* LIVE RATES TICKER - REMOVED */}
-        {/* <LiveRatesTicker /> */}
-
         {/* SHOP BRANDING CARD */}
         <ShopBrandingCard
           shopName={shopName}
@@ -218,29 +222,6 @@ export default function RateSetupScreen(): ReactElement {
           onShopNameBlur={onShopNameBlur}
           onPickLogo={handlePickLogo}
           onDeleteLogo={handleDeleteLogo}
-        />
-
-        {/* THEME CARD */}
-        <ThemeCard
-          theme={localConfig.theme}
-          layoutDensity={localConfig.layoutDensity}
-          onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
-        />
-
-        {/* DISPLAY CUSTOMIZATION CARD */}
-        <DisplayCustomizationCard
-          fontTheme={localConfig.fontTheme}
-          cardStyle={localConfig.cardStyle}
-          showTime={localConfig.showTime}
-          showShopName={localConfig.showShopName}
-          showDate={localConfig.showDate}
-          brandAlignment={localConfig.brandAlignment}
-          showGold24k={localConfig.showGold24k}
-          showGold22k={localConfig.showGold22k}
-          showSilver999={localConfig.showSilver999}
-          showSilver925={localConfig.showSilver925}
-          priceDecimalPlaces={localConfig.priceDecimalPlaces}
-          onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
         />
 
         {/* PURITY LABELS CARD */}
@@ -370,6 +351,94 @@ export default function RateSetupScreen(): ReactElement {
           )}
         </View>
 
+        {/* DISPLAY CUSTOMIZATION CARD */}
+        <DisplayCustomizationCard
+          fontTheme={localConfig.fontTheme}
+          cardStyle={localConfig.cardStyle}
+          showTime={localConfig.showTime}
+          showShopName={localConfig.showShopName}
+          showDate={localConfig.showDate}
+          brandAlignment={localConfig.brandAlignment}
+          showGold24k={localConfig.showGold24k}
+          showGold22k={localConfig.showGold22k}
+          showSilver999={localConfig.showSilver999}
+          showSilver925={localConfig.showSilver925}
+          priceDecimalPlaces={localConfig.priceDecimalPlaces}
+          onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
+        />
+
+        {/* THEME CARD */}
+        <ThemeCard
+          theme={localConfig.theme}
+          layoutDensity={localConfig.layoutDensity}
+          onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
+        />
+
+        {/* COLOR CUSTOMIZATION CARD */}
+        <ColorCustomizationCard
+          backgroundColor={localConfig.backgroundColor}
+          textColor={localConfig.textColor}
+          priceColor={localConfig.priceColor}
+          onColorChange={handleColorChange}
+        />
+
+        {/* NEW: CARD STYLING CUSTOMIZATION */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Card Background & Border</Text>
+          <Text style={styles.cardSubtitle}>
+            Fine-tune the look of your rate card
+          </Text>
+
+          {/* Border Radius Control */}
+          <View style={styles.sectionRow}>
+            <Text style={styles.label}>Corner Roundness</Text>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              {[0, 16, 24, 32].map((radius) => (
+                <TouchableOpacity
+                  key={radius}
+                  onPress={() => handleLocalUpdate({ cardBorderRadius: radius })}
+                  style={[
+                    styles.radioOption,
+                    { paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: "#333", borderRadius: 8 },
+                    localConfig.cardBorderRadius === radius && { backgroundColor: "#D4AF37", borderColor: "#D4AF37" }
+                  ]}
+                >
+                  <Text style={{ color: localConfig.cardBorderRadius === radius ? "#000" : "#FFF", fontWeight: "600" }}>
+                    {radius === 0 ? "Square" : `${radius}px`}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Border Color Control */}
+          <View style={[styles.sectionRow, { marginTop: 20 }]}>
+            <Text style={styles.label}>Border Color</Text>
+            <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+              {["#333333", "#FFFFFF", "#D4AF37", "transparent"].map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  onPress={() => handleLocalUpdate({ cardBorderColor: color })}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: color === "transparent" ? "#000" : color,
+                    borderWidth: 2,
+                    borderColor: localConfig.cardBorderColor === color ? "#4CAF50" : "#555",
+                    justifyContent: "center",
+                    alignItems: "center"
+                  }}
+                >
+                  {color === "transparent" && (
+                    <View style={{ width: 30, height: 2, backgroundColor: "red", transform: [{ rotate: "45deg" }] }} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+
         {/* NOTIFICATIONS CARD */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Notifications</Text>
@@ -386,14 +455,6 @@ export default function RateSetupScreen(): ReactElement {
             />
           ))}
         </View>
-
-        {/* COLOR CUSTOMIZATION CARD */}
-        <ColorCustomizationCard
-          backgroundColor={localConfig.backgroundColor}
-          textColor={localConfig.textColor}
-          priceColor={localConfig.priceColor}
-          onColorChange={handleColorChange}
-        />
 
         {/* RATE STATUS CARD */}
         <View style={styles.card}>
@@ -510,10 +571,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
+    width: "100%",
   },
   scrollContentDesktop: {
-    width: "100%",
-    maxWidth: 800,
+    width: "90%",
+    maxWidth: 1000,
     alignSelf: "center",
     paddingVertical: 24,
   },
