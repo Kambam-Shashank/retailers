@@ -9,19 +9,27 @@ const TEXT_MUTED = "#A1A1A1";
 interface ShopBrandingCardProps {
     shopName: string;
     logoBase64: string | null;
+    logoSize: number;
+    logoPlacement: "header" | "card";
+    logoOpacity: number;
     onShopNameChange: (text: string) => void;
     onShopNameBlur: () => void;
     onPickLogo: () => void;
     onDeleteLogo: () => void;
+    onUpdate: (updates: Partial<any>) => void;
 }
 
 export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
     shopName,
     logoBase64,
+    logoSize,
+    logoPlacement,
+    logoOpacity,
     onShopNameChange,
     onShopNameBlur,
     onPickLogo,
     onDeleteLogo,
+    onUpdate,
 }) => {
     return (
         <View style={styles.card}>
@@ -48,7 +56,7 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
             </View>
 
             {/* Shop Logo */}
-            <View style={styles.section}>
+            <View style={[styles.section, { marginBottom: 10 }]}>
                 <Text style={styles.label}>Shop Logo</Text>
 
                 <View style={styles.logoRow}>
@@ -86,6 +94,77 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
                     </View>
                 </View>
             </View>
+
+            {logoBase64 && (
+                <View style={{ marginTop: 20 }}>
+                    {/* Logo Size */}
+                    <View style={styles.controlRow}>
+                        <Text style={styles.controlLabel}>Logo Size</Text>
+                        <View style={styles.sizeOptions}>
+                            {[60, 80, 100, 140].map((size) => (
+                                <TouchableOpacity
+                                    key={size}
+                                    onPress={() => onUpdate({ logoSize: size })}
+                                    style={[
+                                        styles.sizeBadge,
+                                        logoSize === size && styles.activeBadge,
+                                    ]}
+                                >
+                                    <Text style={[styles.badgeText, logoSize === size && styles.activeBadgeText]}>
+                                        {size === 60 ? "S" : size === 80 ? "M" : size === 100 ? "L" : "XL"}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* Logo Placement */}
+                    <View style={styles.controlRow}>
+                        <Text style={styles.controlLabel}>Placement</Text>
+                        <View style={styles.toggleContainer}>
+                            <TouchableOpacity
+                                onPress={() => onUpdate({ logoPlacement: "header" })}
+                                style={[styles.toggleButton, logoPlacement === "header" && styles.activeToggle]}
+                            >
+                                <Text style={[styles.toggleText, logoPlacement === "header" && styles.activeToggleText]}>
+                                    Header
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => onUpdate({ logoPlacement: "card" })}
+                                style={[styles.toggleButton, logoPlacement === "card" && styles.activeToggle]}
+                            >
+                                <Text style={[styles.toggleText, logoPlacement === "card" && styles.activeToggleText]}>
+                                    Inside Card
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Logo Opacity (Watermark Effect) */}
+                    {logoPlacement === "card" && (
+                        <View style={styles.controlRow}>
+                            <Text style={styles.controlLabel}>Opacity</Text>
+                            <View style={styles.sizeOptions}>
+                                {[0.1, 0.3, 0.6, 1.0].map((op) => (
+                                    <TouchableOpacity
+                                        key={op}
+                                        onPress={() => onUpdate({ logoOpacity: op })}
+                                        style={[
+                                            styles.sizeBadge,
+                                            logoOpacity === op && styles.activeBadge,
+                                        ]}
+                                    >
+                                        <Text style={[styles.badgeText, logoOpacity === op && styles.activeBadgeText]}>
+                                            {op * 100}%
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+                </View>
+            )}
         </View>
     );
 };
@@ -190,5 +269,63 @@ const styles = StyleSheet.create({
     deleteIcon: {
         fontSize: 12,
         color: "#fff",
+    },
+    controlRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 15,
+    },
+    controlLabel: {
+        fontSize: 14,
+        color: "#fff",
+        fontWeight: "500",
+    },
+    sizeOptions: {
+        flexDirection: "row",
+        gap: 8,
+    },
+    sizeBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#333",
+        backgroundColor: "#1A1A1A",
+    },
+    activeBadge: {
+        backgroundColor: GOLD,
+        borderColor: GOLD,
+    },
+    badgeText: {
+        color: "#A1A1A1",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+    activeBadgeText: {
+        color: "#000",
+    },
+    toggleContainer: {
+        flexDirection: "row",
+        backgroundColor: "#1A1A1A",
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#333",
+        overflow: "hidden",
+    },
+    toggleButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    activeToggle: {
+        backgroundColor: GOLD,
+    },
+    toggleText: {
+        color: "#A1A1A1",
+        fontSize: 12,
+        fontWeight: "600",
+    },
+    activeToggleText: {
+        color: "#000",
     },
 });

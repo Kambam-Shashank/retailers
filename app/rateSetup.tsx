@@ -218,10 +218,14 @@ export default function RateSetupScreen(): ReactElement {
         <ShopBrandingCard
           shopName={shopName}
           logoBase64={logoBase64}
+          logoSize={localConfig.logoSize}
+          logoPlacement={localConfig.logoPlacement}
+          logoOpacity={localConfig.logoOpacity}
           onShopNameChange={handleShopNameChange}
           onShopNameBlur={onShopNameBlur}
           onPickLogo={handlePickLogo}
           onDeleteLogo={handleDeleteLogo}
+          onUpdate={handleLocalUpdate}
         />
 
         {/* PURITY LABELS CARD */}

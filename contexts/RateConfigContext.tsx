@@ -57,6 +57,10 @@ export interface RateConfig {
   cardBorderRadius: number;
   cardBorderWidth: number;
   cardBorderColor: string;
+  // Logo customization
+  logoSize: number;
+  logoPlacement: "header" | "card";
+  logoOpacity: number;
 }
 
 interface RateConfigProviderProps {
@@ -104,6 +108,10 @@ const DEFAULT_CONFIG: RateConfig = {
   cardBorderRadius: 16,
   cardBorderWidth: 1,
   cardBorderColor: "#333333",
+
+  logoSize: 80,
+  logoPlacement: "header",
+  logoOpacity: 1,
 };
 
 interface RateConfigContextType {

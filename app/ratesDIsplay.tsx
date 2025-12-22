@@ -105,10 +105,10 @@ const Index = () => {
           <View style={{ width: '100%', gap: 15 }}>
             {/* Row 1: Branding (Centered) */}
             <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              {config.logoBase64 && (
+              {config.logoBase64 && config.logoPlacement === 'header' && (
                 <Image
                   source={{ uri: config.logoBase64 }}
-                  style={{ width: 100, height: 100, marginBottom: 10 }}
+                  style={{ width: config.logoSize, height: config.logoSize, marginBottom: 10 }}
                   resizeMode="contain"
                 />
               )}
@@ -174,10 +174,10 @@ const Index = () => {
 
               {config.brandAlignment === "left" && (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  {config.logoBase64 && (
+                  {config.logoBase64 && config.logoPlacement === 'header' && (
                     <Image
                       source={{ uri: config.logoBase64 }}
-                      style={[styles.shopLogo, { width: 80, height: 80 }]}
+                      style={[styles.shopLogo, { width: config.logoSize, height: config.logoSize }]}
                       resizeMode="contain"
                     />
                   )}
@@ -225,10 +225,10 @@ const Index = () => {
             <View style={[styles.centerSection, { flexDirection: isDesktop ? "row" : "column", gap: 10 }]}>
               {config.brandAlignment === "center" && (
                 <>
-                  {config.logoBase64 && (
+                  {config.logoBase64 && config.logoPlacement === 'header' && (
                     <Image
                       source={{ uri: config.logoBase64 }}
-                      style={[styles.shopLogo, !isDesktop && { width: 120, height: 120, marginBottom: 10 }]}
+                      style={[styles.shopLogo, { width: config.logoSize, height: config.logoSize }, !isDesktop && { marginBottom: 10 }]}
                       resizeMode="contain"
                     />
                   )}
@@ -279,10 +279,10 @@ const Index = () => {
                       {config.shopName || "Karatpay"}
                     </Text>
                   )}
-                  {config.logoBase64 && (
+                  {config.logoBase64 && config.logoPlacement === 'header' && (
                     <Image
                       source={{ uri: config.logoBase64 }}
-                      style={styles.shopLogo}
+                      style={[styles.shopLogo, { width: config.logoSize, height: config.logoSize }]}
                     />
                   )}
                 </View>
@@ -386,6 +386,16 @@ const Index = () => {
             }
           ]}
         >
+          {config.logoBase64 && config.logoPlacement === 'card' && (
+            <View style={{ alignItems: 'center', marginBottom: 15, opacity: config.logoOpacity }}>
+              <Image
+                source={{ uri: config.logoBase64 }}
+                style={{ width: config.logoSize * 1.5, height: config.logoSize * 1.5 }}
+                resizeMode="contain"
+              />
+            </View>
+          )}
+
           {config.showGold24k && (
             <View
               style={[

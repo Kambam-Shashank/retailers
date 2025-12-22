@@ -64,7 +64,7 @@ export const useAaravRates = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 3000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [refetch]);
 

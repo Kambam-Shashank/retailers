@@ -76,14 +76,23 @@ export const useRateCalculations = (
     }
     const gold999Base =
       externalGoldPrice ||
-      wsData?.sell_price_999 ||
       wsData?.gold_999 ||
+      wsData?.gold_spot ||
+      wsData?.spot ||
+      wsData?.bid ||
+      wsData?.buy_price_999 ||
       wsData?.price_999 ||
+      wsData?.rate_999 ||
+      wsData?.sell_price_999 ||
+      wsData?.gold ||
+      wsData?.rate ||
+      wsData?.price ||
+      (wsData && wsData["999"]) || 
       0;
     const gold995Base = externalGoldPrice
       ? externalGoldPrice * 0.998
-      : wsData?.sell_price_995 ||
-      wsData?.gold_995 ||
+      : wsData?.gold_995 ||
+      wsData?.sell_price_995 ||
       wsData?.price_995 ||
       (gold999Base ? gold999Base * 0.998 : 0);
     const gold916FromWS =
@@ -117,7 +126,15 @@ export const useRateCalculations = (
     const silver999WithMargin = silver999Base + config.silver999Margin;
     const silver925WithMargin = silver925Base + config.silver925Margin;
 
-    const shouldAddGST = withGST && !externalGoldIncludesGST;
+    // If data comes from WebSocket (Karatpay), it often includes taxes or margins in 'sell_price'.
+    // We assume Karatpay rates are either Final or we should not add additional GST unless the user toggles it.
+    const isKaratpayData = !!wsData && (
+      "gold_999" in wsData ||
+      "sell_price_999" in wsData ||
+      "price_999" in wsData ||
+      "spot" in wsData
+    );
+    const shouldAddGST = withGST && !externalGoldIncludesGST && !isKaratpayData;
     const gold999WithGST = shouldAddGST
       ? gold999WithMargin + gold999WithMargin * GST_RATE
       : gold999WithMargin;

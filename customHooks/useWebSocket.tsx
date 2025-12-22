@@ -50,16 +50,21 @@ export default function useWebSocket(uri: string) {
           if (parsedData && typeof parsedData === "object") {
             let validData: GoldPriceData | null = null;
 
-            if (
-              "sell_price_999" in parsedData ||
-              "sell_price_995" in parsedData
-            ) {
+            const knownKeys = ["sell_price_999", "sell_price_995", "gold_999", "gold_995", "price_999", "price_995", "gold", "silver"];
+            const hasKnownKey = (obj: any) => obj && knownKeys.some(key => key in obj);
+
+            if (hasKnownKey(parsedData)) {
               validData = parsedData as GoldPriceData;
-            } else if (parsedData.data && typeof parsedData.data === "object") {
-              // Handle nested data structure
+            } else if (parsedData.data && typeof parsedData.data === "object" && hasKnownKey(parsedData.data)) {
               validData = parsedData.data as GoldPriceData;
             } else {
-              console.warn("Unexpected data structure:", parsedData);
+              // Be even more lenient: if it's an object with numeric values, try to use it
+              const hasNumericValues = Object.values(parsedData).some(v => typeof v === 'number');
+              if (hasNumericValues && !Array.isArray(parsedData)) {
+                validData = parsedData as GoldPriceData;
+              } else {
+                console.warn("Unexpected data structure:", parsedData);
+              }
             }
 
             if (validData) {
