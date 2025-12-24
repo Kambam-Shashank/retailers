@@ -11,200 +11,111 @@ interface MakingChargesCardProps {
     onUpdate: (updates: Partial<RateConfig>) => void;
 }
 
-export const MakingChargesCard: React.FC<MakingChargesCardProps> = ({ config, onUpdate }) => {
+export const MakingChargesCard: React.FC<MakingChargesCardProps> = ({ config: globalConfig, onUpdate }) => {
     const {
         makingChargesEnabled,
-        makingChargesGoldType,
-        makingChargesGoldValue,
-        makingChargesSilverType,
-        makingChargesSilverValue,
         handleToggleMakingCharges,
         handleChangeMakingType,
         handleMakingValueChange,
-    } = useRateSetupMakingCharges(config, onUpdate);
+        handleTitleChange,
+        config
+    } = useRateSetupMakingCharges(globalConfig, onUpdate);
+
+    const renderPuritySection = (
+        key: "24k" | "22k" | "999" | "925",
+        label: string,
+        color: string
+    ) => {
+        const typeKey = `makingCharges${key}Type` as keyof RateConfig;
+        const valueKey = `makingCharges${key}Value` as keyof RateConfig;
+        const titleKey = `makingCharges${key}Title` as keyof RateConfig;
+
+        const currentType = config[typeKey] as string;
+        const currentValue = config[valueKey] as number;
+        const currentTitle = config[titleKey] as string;
+
+        return (
+            <View key={key} style={styles.puritySection}>
+                <View style={styles.nameRow}>
+                    <Text style={[styles.label, { color, fontWeight: "bold", marginBottom: 0 }]}>{label}</Text>
+                    <TextInput
+                        style={[styles.nameInput, { color }]}
+                        value={currentTitle}
+                        onChangeText={(text) => handleTitleChange(key, text)}
+                        placeholder="Label (e.g. MC)"
+                        placeholderTextColor="#555"
+                    />
+                </View>
+
+                <View style={styles.radioRow}>
+                    <TouchableOpacity
+                        style={styles.radioOption}
+                        onPress={() => handleChangeMakingType(key, "percentage")}
+                        activeOpacity={0.8}
+                    >
+                        <View style={[styles.radioOuter, currentType === "percentage" && styles.radioOuterActive]}>
+                            {currentType === "percentage" && <View style={styles.radioInner} />}
+                        </View>
+                        <Text style={[styles.radioLabel, currentType === "percentage" && styles.radioLabelActive]}>%</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.radioOption}
+                        onPress={() => handleChangeMakingType(key, "perGram")}
+                        activeOpacity={0.8}
+                    >
+                        <View style={[styles.radioOuter, currentType === "perGram" && styles.radioOuterActive]}>
+                            {currentType === "perGram" && <View style={styles.radioInner} />}
+                        </View>
+                        <Text style={[styles.radioLabel, currentType === "perGram" && styles.radioLabelActive]}>/g</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.makingValueRow}>
+                    <View style={[styles.inputWrapper, styles.makingInputWrapper]}>
+                        <TextInput
+                            keyboardType="numeric"
+                            style={styles.textInput}
+                            value={currentValue === 0 ? "" : String(currentValue)}
+                            onChangeText={(text) => handleMakingValueChange(key, text)}
+                            placeholder="0"
+                            placeholderTextColor="#A3A3A3"
+                        />
+                    </View>
+                    <Text style={styles.makingUnitText}>
+                        {currentType === "percentage" ? "%" : "/ gram"}
+                    </Text>
+                </View>
+                <View style={styles.divider} />
+            </View>
+        );
+    };
 
     return (
         <View style={styles.card}>
             <Text style={styles.cardTitle}>Making Charges</Text>
             <Text style={styles.cardSubtitle}>
-                Display making charges on the rate board
+                Set individual charges for each metal purity
             </Text>
 
             <View style={styles.sectionRow}>
                 <Text style={styles.label}>Enable Making Charges</Text>
                 <TouchableOpacity
-                    style={[
-                        styles.switchTrack,
-                        makingChargesEnabled && styles.switchTrackOn,
-                    ]}
+                    style={[styles.switchTrack, makingChargesEnabled && styles.switchTrackOn]}
                     onPress={handleToggleMakingCharges}
                     activeOpacity={0.8}
                 >
-                    <View
-                        style={[
-                            styles.switchThumb,
-                            makingChargesEnabled && styles.switchThumbOn,
-                        ]}
-                    />
+                    <View style={[styles.switchThumb, makingChargesEnabled && styles.switchThumbOn]} />
                 </TouchableOpacity>
             </View>
 
             {makingChargesEnabled && (
-                <>
-                    {/* Gold Section */}
-                    <Text style={[styles.label, { color: GOLD, marginTop: 10, marginBottom: 10, fontWeight: "bold" }]}>Gold Making Charges</Text>
-                    <View style={styles.radioRow}>
-                        <TouchableOpacity
-                            style={styles.radioOption}
-                            onPress={() => handleChangeMakingType("gold", "percentage")}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    makingChargesGoldType === "percentage" &&
-                                    styles.radioOuterActive,
-                                ]}
-                            >
-                                {makingChargesGoldType === "percentage" && (
-                                    <View style={styles.radioInner} />
-                                )}
-                            </View>
-                            <Text
-                                style={[
-                                    styles.radioLabel,
-                                    makingChargesGoldType === "percentage" &&
-                                    styles.radioLabelActive,
-                                ]}
-                            >
-                                Percentage (%)
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.radioOption}
-                            onPress={() => handleChangeMakingType("gold", "perGram")}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    makingChargesGoldType === "perGram" &&
-                                    styles.radioOuterActive,
-                                ]}
-                            >
-                                {makingChargesGoldType === "perGram" && (
-                                    <View style={styles.radioInner} />
-                                )}
-                            </View>
-                            <Text
-                                style={[
-                                    styles.radioLabel,
-                                    makingChargesGoldType === "perGram" &&
-                                    styles.radioLabelActive,
-                                ]}
-                            >
-                                Per Gram (₹/g)
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.makingValueRow}>
-                        <View style={[styles.inputWrapper, styles.makingInputWrapper]}>
-                            <TextInput
-                                keyboardType="numeric"
-                                style={styles.textInput}
-                                value={
-                                    makingChargesGoldValue === 0 ? "" : String(makingChargesGoldValue)
-                                }
-                                onChangeText={(text) => handleMakingValueChange("gold", text)}
-                                placeholder="0"
-                                placeholderTextColor="#A3A3A3"
-                            />
-                        </View>
-                        <Text style={styles.makingUnitText}>
-                            {makingChargesGoldType === "percentage" ? "%" : "₹/g"}
-                        </Text>
-                    </View>
-
-                    <View style={{ height: 1, backgroundColor: "#333", marginVertical: 20 }} />
-
-                    {/* Silver Section */}
-                    <Text style={[styles.label, { color: "#C0C0C0", marginTop: 0, marginBottom: 10, fontWeight: "bold" }]}>Silver Making Charges</Text>
-                    <View style={styles.radioRow}>
-                        <TouchableOpacity
-                            style={styles.radioOption}
-                            onPress={() => handleChangeMakingType("silver", "percentage")}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    makingChargesSilverType === "percentage" &&
-                                    styles.radioOuterActive,
-                                ]}
-                            >
-                                {makingChargesSilverType === "percentage" && (
-                                    <View style={styles.radioInner} />
-                                )}
-                            </View>
-                            <Text
-                                style={[
-                                    styles.radioLabel,
-                                    makingChargesSilverType === "percentage" &&
-                                    styles.radioLabelActive,
-                                ]}
-                            >
-                                Percentage (%)
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.radioOption}
-                            onPress={() => handleChangeMakingType("silver", "perGram")}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    makingChargesSilverType === "perGram" &&
-                                    styles.radioOuterActive,
-                                ]}
-                            >
-                                {makingChargesSilverType === "perGram" && (
-                                    <View style={styles.radioInner} />
-                                )}
-                            </View>
-                            <Text
-                                style={[
-                                    styles.radioLabel,
-                                    makingChargesSilverType === "perGram" &&
-                                    styles.radioLabelActive,
-                                ]}
-                            >
-                                Per Gram (₹/g)
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.makingValueRow}>
-                        <View style={[styles.inputWrapper, styles.makingInputWrapper]}>
-                            <TextInput
-                                keyboardType="numeric"
-                                style={styles.textInput}
-                                value={
-                                    makingChargesSilverValue === 0 ? "" : String(makingChargesSilverValue)
-                                }
-                                onChangeText={(text) => handleMakingValueChange("silver", text)}
-                                placeholder="0"
-                                placeholderTextColor="#A3A3A3"
-                            />
-                        </View>
-                        <Text style={styles.makingUnitText}>
-                            {makingChargesSilverType === "percentage" ? "%" : "₹/g"}
-                        </Text>
-                    </View>
-                </>
+                <View style={styles.purityContainer}>
+                    {renderPuritySection("24k", "24K Gold", GOLD)}
+                    {renderPuritySection("22k", "22K Gold", GOLD)}
+                    {renderPuritySection("999", "999 Silver", "#C0C0C0")}
+                    {renderPuritySection("925", "925 Silver", "#C0C0C0")}
+                </View>
             )}
         </View>
     );
@@ -323,15 +234,42 @@ const styles = StyleSheet.create({
     makingInputWrapper: {
         flex: 0.4,
     },
+    nameRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    nameInput: {
+        flex: 1,
+        marginLeft: 15,
+        color: GOLD,
+        fontSize: 14,
+        fontWeight: "600",
+        borderBottomWidth: 1,
+        borderBottomColor: "#333",
+        paddingVertical: 4,
+    },
     textInput: {
         color: "#fff",
         fontSize: 14,
         paddingVertical: 8,
     },
+    divider: {
+        height: 1,
+        backgroundColor: "#222",
+        marginVertical: 15,
+    },
+    purityContainer: {
+        marginTop: 10,
+    },
+    puritySection: {
+        marginBottom: 20,
+    },
     makingUnitText: {
-        marginLeft: 10,
-        fontSize: 15,
         color: TEXT_MUTED,
-        fontWeight: "600",
+        fontSize: 12,
+        marginLeft: 5,
     },
 });

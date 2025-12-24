@@ -58,7 +58,6 @@ export default function useWebSocket(uri: string) {
             } else if (parsedData.data && typeof parsedData.data === "object" && hasKnownKey(parsedData.data)) {
               validData = parsedData.data as GoldPriceData;
             } else {
-              // Be even more lenient: if it's an object with numeric values, try to use it
               const hasNumericValues = Object.values(parsedData).some(v => typeof v === 'number');
               if (hasNumericValues && !Array.isArray(parsedData)) {
                 validData = parsedData as GoldPriceData;

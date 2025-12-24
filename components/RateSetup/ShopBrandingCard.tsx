@@ -165,6 +165,13 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
                     )}
                 </View>
             )}
+
+            <TouchableOpacity
+                style={styles.previewButton}
+                onPress={() => onUpdate({ showBrandingPreview: true })}
+            >
+                <Text style={styles.previewButtonText}>👁️ Live Preview</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -328,4 +335,18 @@ const styles = StyleSheet.create({
     activeToggleText: {
         color: "#000",
     },
+    previewButton: {
+        marginTop: 20,
+        backgroundColor: "#1A1A1A",
+        borderWidth: 1,
+        borderColor: "#333",
+        borderRadius: 12,
+        paddingVertical: 12,
+        alignItems: "center",
+    },
+    previewButtonText: {
+        color: GOLD,
+        fontSize: 14,
+        fontWeight: "700",
+    }
 });

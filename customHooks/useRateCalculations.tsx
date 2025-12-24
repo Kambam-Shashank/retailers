@@ -72,10 +72,11 @@ export const useRateCalculations = (
           basePrice: 0,
           priceWithMargin: 0,
           priceWithGST: 0,
+          makingCharges: config.makingChargesEnabled ? 0 : undefined,
           finalPrice: 0,
         },
-        silver999: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, finalPrice: 0 },
-        silver925: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, finalPrice: 0 },
+        silver999: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
+        silver925: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
       } as CalculatedRates;
     }
     const gold999Base =
@@ -170,25 +171,35 @@ export const useRateCalculations = (
     let silver925MakingCharges = 0;
 
     if (config.makingChargesEnabled) {
-      if (config.makingChargesGoldType === "percentage") {
-        gold999MakingCharges =
-          gold999WithGST * (config.makingChargesGoldValue / 100);
-        gold995MakingCharges =
-          gold995WithGST * (config.makingChargesGoldValue / 100);
-        gold916MakingCharges =
-          gold916WithGST * (config.makingChargesGoldValue / 100);
+      // 24K
+      if (config.makingCharges24kType === "percentage") {
+        gold999MakingCharges = gold999WithGST * (config.makingCharges24kValue / 100);
       } else {
-        gold999MakingCharges = config.makingChargesGoldValue;
-        gold995MakingCharges = config.makingChargesGoldValue;
-        gold916MakingCharges = config.makingChargesGoldValue;
+        gold999MakingCharges = config.makingCharges24kValue;
       }
 
-      if (config.makingChargesSilverType === "percentage") {
-        silver999MakingCharges = silver999WithGST * (config.makingChargesSilverValue / 100);
-        silver925MakingCharges = silver925WithGST * (config.makingChargesSilverValue / 100);
+      // 22K (916) - We use 22k settings for both 995 and 916 as per existing logic, 
+      // but let's see if we should use 22k for both.
+      if (config.makingCharges22kType === "percentage") {
+        gold995MakingCharges = gold995WithGST * (config.makingCharges22kValue / 100);
+        gold916MakingCharges = gold916WithGST * (config.makingCharges22kValue / 100);
       } else {
-        silver999MakingCharges = config.makingChargesSilverValue;
-        silver925MakingCharges = config.makingChargesSilverValue;
+        gold995MakingCharges = config.makingCharges22kValue;
+        gold916MakingCharges = config.makingCharges22kValue;
+      }
+
+      // Silver 999
+      if (config.makingCharges999Type === "percentage") {
+        silver999MakingCharges = silver999WithGST * (config.makingCharges999Value / 100);
+      } else {
+        silver999MakingCharges = config.makingCharges999Value;
+      }
+
+      // Silver 925
+      if (config.makingCharges925Type === "percentage") {
+        silver925MakingCharges = silver925WithGST * (config.makingCharges925Value / 100);
+      } else {
+        silver925MakingCharges = config.makingCharges925Value;
       }
     }
 

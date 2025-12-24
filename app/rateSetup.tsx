@@ -1,4 +1,5 @@
-﻿import { CardStyleCard } from "@/components/RateSetup/CardStyleCard";
+﻿import { BrandingPreviewModal } from "@/components/RateSetup/BrandingPreviewModal";
+import { CardStyleCard } from "@/components/RateSetup/CardStyleCard";
 import { ColorCustomizationCard } from "@/components/RateSetup/ColorCustomizationCard";
 import { DisplayCustomizationCard } from "@/components/RateSetup/DisplayCustomizationCard";
 import { MakingChargesCard } from "@/components/RateSetup/MakingChargesCard";
@@ -7,7 +8,9 @@ import { NotificationsCard } from "@/components/RateSetup/NotificationsCard";
 import { PurityLabelsCard } from "@/components/RateSetup/PurityLabelsCard";
 import { RateStatusCard } from "@/components/RateSetup/RateStatusCard";
 import { ResetConfirmationModal } from "@/components/RateSetup/ResetConfirmationModal";
+import { SaveSuccessModal } from "@/components/RateSetup/SaveSuccessModal";
 import { ShopBrandingCard } from "@/components/RateSetup/ShopBrandingCard";
+import { ShopDetailsCard } from "@/components/RateSetup/ShopDetailsCard";
 import { ThemeCard } from "@/components/RateSetup/ThemeCard";
 
 import { useRateSetupBranding } from "@/customHooks/useRateSetupBranding";
@@ -16,14 +19,12 @@ import { useRateSetupMargins } from "@/customHooks/useRateSetupMargins";
 import { useRouter } from "expo-router";
 import React, { ReactElement, useEffect, useState } from "react";
 import {
-  Alert,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 import { RateConfig, useRateConfig } from "../contexts/RateConfigContext";
 
@@ -40,6 +41,8 @@ export default function RateSetupScreen(): ReactElement {
   const { config, updateConfig, resetConfig } = useRateConfig();
   const [localConfig, setLocalConfig] = useState<RateConfig>(config);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [showBrandingPreview, setShowBrandingPreview] = useState(false);
 
   useEffect(() => {
     setLocalConfig(config);
@@ -86,11 +89,7 @@ export default function RateSetupScreen(): ReactElement {
   const handleSave = async () => {
     if (!isDirty) return;
     await updateConfig(localConfig);
-    if (Platform.OS === 'web') {
-      window.alert("Configuration saved successfully");
-    } else {
-      Alert.alert("Success", "Configuration saved successfully");
-    }
+    setShowSaveSuccess(true);
   };
 
   // Setup handlers for onBlur behavior
@@ -174,6 +173,19 @@ export default function RateSetupScreen(): ReactElement {
           onShopNameBlur={onShopNameBlur}
           onPickLogo={handlePickLogo}
           onDeleteLogo={handleDeleteLogo}
+          onUpdate={(u) => {
+            if ("showBrandingPreview" in u) {
+              setShowBrandingPreview(true);
+            } else {
+              handleLocalUpdate(u);
+            }
+          }}
+        />
+
+        <ShopDetailsCard
+          address={localConfig.shopAddress}
+          phone={localConfig.shopPhone}
+          email={localConfig.shopEmail}
           onUpdate={handleLocalUpdate}
         />
 
@@ -267,6 +279,21 @@ export default function RateSetupScreen(): ReactElement {
         visible={showResetConfirm}
         onClose={() => setShowResetConfirm(false)}
         onConfirm={performReset}
+      />
+
+      <SaveSuccessModal
+        visible={showSaveSuccess}
+        onClose={() => setShowSaveSuccess(false)}
+      />
+
+      <BrandingPreviewModal
+        visible={showBrandingPreview}
+        onClose={() => setShowBrandingPreview(false)}
+        shopName={shopName}
+        logoBase64={logoBase64}
+        logoSize={localConfig.logoSize}
+        logoPlacement={localConfig.logoPlacement}
+        logoOpacity={localConfig.logoOpacity}
       />
     </View>
   );

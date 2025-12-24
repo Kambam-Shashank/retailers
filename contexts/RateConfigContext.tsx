@@ -19,6 +19,9 @@ export interface NotificationConfig {
 
 export interface RateConfig {
   shopName: string;
+  shopAddress: string;
+  shopPhone: string;
+  shopEmail: string;
   logoBase64: string | null;
   gold24kLabel: string;
   gold22kLabel: string;
@@ -29,10 +32,18 @@ export interface RateConfig {
   silver999Margin: number;
   silver925Margin: number;
   makingChargesEnabled: boolean;
-  makingChargesGoldType: MakingChargesType;
-  makingChargesGoldValue: number;
-  makingChargesSilverType: MakingChargesType;
-  makingChargesSilverValue: number;
+  makingCharges24kType: MakingChargesType;
+  makingCharges24kValue: number;
+  makingCharges22kType: MakingChargesType;
+  makingCharges22kValue: number;
+  makingCharges999Type: MakingChargesType;
+  makingCharges999Value: number;
+  makingCharges925Type: MakingChargesType;
+  makingCharges925Value: number;
+  makingCharges24kTitle: string;
+  makingCharges22kTitle: string;
+  makingCharges999Title: string;
+  makingCharges925Title: string;
   notifications: NotificationConfig[];
   ratesFrozen: boolean;
   frozenAt: string | null;
@@ -71,6 +82,9 @@ interface RateConfigProviderProps {
 
 const DEFAULT_CONFIG: RateConfig = {
   shopName: "",
+  shopAddress: "",
+  shopPhone: "",
+  shopEmail: "",
   logoBase64: null,
   gold24kLabel: "24K Gold (999)",
   gold22kLabel: "22K Gold (916)",
@@ -81,10 +95,18 @@ const DEFAULT_CONFIG: RateConfig = {
   silver999Margin: 0,
   silver925Margin: 0,
   makingChargesEnabled: false,
-  makingChargesGoldType: "percentage",
-  makingChargesGoldValue: 0,
-  makingChargesSilverType: "percentage",
-  makingChargesSilverValue: 0,
+  makingCharges24kType: "percentage",
+  makingCharges24kValue: 0,
+  makingCharges24kTitle: "MC",
+  makingCharges22kType: "percentage",
+  makingCharges22kValue: 0,
+  makingCharges22kTitle: "MC",
+  makingCharges999Type: "percentage",
+  makingCharges999Value: 0,
+  makingCharges999Title: "MC",
+  makingCharges925Type: "percentage",
+  makingCharges925Value: 0,
+  makingCharges925Title: "MC",
   notifications: [
     { id: 1, enabled: false, message: "" },
     { id: 2, enabled: false, message: "" },

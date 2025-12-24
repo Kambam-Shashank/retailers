@@ -418,19 +418,14 @@ const Index = () => {
                   {config.gold24kLabel}
                 </Text>
 
-                {config.makingChargesEnabled &&
-                  (calculatedRates.gold999.makingCharges ?? 0) > 0 && (
-                    <Text style={styles.makingChargesBig}>
-                      MC:{" "}
-                      {config.makingChargesGoldType === "percentage"
-                        ? `${config.makingChargesGoldValue}%`
-                        : `${(
-                          ((calculatedRates.gold999.makingCharges ?? 0) /
-                            calculatedRates.gold999.priceWithGST) *
-                          100
-                        ).toFixed(2)}%`}
-                    </Text>
-                  )}
+                {config.makingChargesEnabled && (
+                  <Text style={styles.makingChargesBig}>
+                    {config.makingCharges24kTitle}:{" "}
+                    {config.makingCharges24kType === "percentage"
+                      ? `${config.makingCharges24kValue}%`
+                      : `₹${(config.makingCharges24kValue / 10).toFixed(config.priceDecimalPlaces ?? 0)}/g`}
+                  </Text>
+                )}
               </View>
               <Text
                 style={[
@@ -471,19 +466,14 @@ const Index = () => {
                   {config.gold22kLabel}
                 </Text>
 
-                {config.makingChargesEnabled &&
-                  (calculatedRates.gold916.makingCharges ?? 0) > 0 && (
-                    <Text style={styles.makingChargesBig}>
-                      MC:{" "}
-                      {config.makingChargesGoldType === "percentage"
-                        ? `${config.makingChargesGoldValue}%`
-                        : `${(
-                          ((calculatedRates.gold916.makingCharges ?? 0) /
-                            calculatedRates.gold916.priceWithGST) *
-                          100
-                        ).toFixed(2)}%`}
-                    </Text>
-                  )}
+                {config.makingChargesEnabled && (
+                  <Text style={styles.makingChargesBig}>
+                    {config.makingCharges22kTitle}:{" "}
+                    {config.makingCharges22kType === "percentage"
+                      ? `${config.makingCharges22kValue}%`
+                      : `₹${(config.makingCharges22kValue / 10).toFixed(config.priceDecimalPlaces ?? 0)}/g`}
+                  </Text>
+                )}
               </View>
               <Text
                 style={[
@@ -524,19 +514,14 @@ const Index = () => {
                 >
                   {config.silver999Label}
                 </Text>
-                {config.makingChargesEnabled &&
-                  (calculatedRates.silver999.makingCharges ?? 0) > 0 && (
-                    <Text style={styles.makingChargesBig}>
-                      MC:{" "}
-                      {config.makingChargesSilverType === "percentage"
-                        ? `${config.makingChargesSilverValue}%`
-                        : `${(
-                          ((calculatedRates.silver999.makingCharges ?? 0) /
-                            calculatedRates.silver999.priceWithGST) *
-                          100
-                        ).toFixed(2)}%`}
-                    </Text>
-                  )}
+                {config.makingChargesEnabled && (
+                  <Text style={styles.makingChargesBig}>
+                    {config.makingCharges999Title}:{" "}
+                    {config.makingCharges999Type === "percentage"
+                      ? `${config.makingCharges999Value}%`
+                      : `₹${(config.makingCharges999Value / 10).toFixed(config.priceDecimalPlaces ?? 0)}/g`}
+                  </Text>
+                )}
               </View>
               <Text
                 style={[
@@ -576,19 +561,14 @@ const Index = () => {
                 >
                   {config.silver925Label}
                 </Text>
-                {config.makingChargesEnabled &&
-                  (calculatedRates.silver925.makingCharges ?? 0) > 0 && (
-                    <Text style={styles.makingChargesBig}>
-                      MC:{" "}
-                      {config.makingChargesSilverType === "percentage"
-                        ? `${config.makingChargesSilverValue}%`
-                        : `${(
-                          ((calculatedRates.silver925.makingCharges ?? 0) /
-                            calculatedRates.silver925.priceWithGST) *
-                          100
-                        ).toFixed(2)}%`}
-                    </Text>
-                  )}
+                {config.makingChargesEnabled && (
+                  <Text style={styles.makingChargesBig}>
+                    {config.makingCharges925Title}:{" "}
+                    {config.makingCharges925Type === "percentage"
+                      ? `${config.makingCharges925Value}%`
+                      : `₹${(config.makingCharges925Value / 10).toFixed(config.priceDecimalPlaces ?? 0)}/g`}
+                  </Text>
+                )}
               </View>
               <Text
                 style={[
@@ -603,6 +583,53 @@ const Index = () => {
             </View>
           )}
         </View>
+
+        {/* SHOP DETAILS FOOTER */}
+        {(config.shopAddress || config.shopPhone || config.shopEmail) && (
+          <View style={styles.shopDetailsFooter}>
+            <View style={styles.footerBranding}>
+              {config.logoBase64 && (
+                <Image
+                  source={{ uri: config.logoBase64 }}
+                  style={styles.footerLogo}
+                  resizeMode="contain"
+                />
+              )}
+              <Text style={styles.footerShopName}>{config.shopName || "Karatpay"}</Text>
+            </View>
+
+            <View style={styles.footerColumns}>
+              {config.shopAddress && (
+                <View style={styles.footerColumn}>
+                  <Text style={styles.footerLabel}>Address</Text>
+                  <Text style={styles.footerValue}>{config.shopAddress}</Text>
+                </View>
+              )}
+
+              {config.shopPhone && (
+                <View style={styles.footerColumn}>
+                  <Text style={styles.footerLabel}>Phone</Text>
+                  {config.shopPhone.split(",").map((p, i) => (
+                    <View key={i} style={styles.footerValueRow}>
+                      <Text style={styles.footerBullet}>›</Text>
+                      <Text style={styles.footerValue}>{p.trim()}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {config.shopEmail && (
+                <View style={styles.footerColumn}>
+                  <Text style={styles.footerLabel}>Email</Text>
+                  <View style={styles.footerValueRow}>
+                    <Text style={styles.footerBullet}>›</Text>
+                    <Text style={styles.footerValue}>{config.shopEmail}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
       </View>
 
 
@@ -860,7 +887,64 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 16,
     fontWeight: "600"
-  }
+  },
+  shopDetailsFooter: {
+    marginTop: 40,
+    padding: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.05)",
+  },
+  footerBranding: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  footerLogo: {
+    width: 50,
+    height: 50,
+    marginRight: 15,
+  },
+  footerShopName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFF",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  footerColumns: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 30,
+  },
+  footerColumn: {
+    flex: 1,
+    minWidth: 200,
+  },
+  footerLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFF",
+    marginBottom: 12,
+  },
+  footerValue: {
+    fontSize: 14,
+    color: "#A1A1A1",
+    lineHeight: 20,
+  },
+  footerValueRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  footerBullet: {
+    color: "#D4AF37",
+    fontSize: 18,
+    marginRight: 8,
+    marginTop: -2,
+    fontWeight: "bold",
+  },
 });
 
 export default Index;

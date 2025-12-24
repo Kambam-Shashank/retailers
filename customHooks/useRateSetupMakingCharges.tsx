@@ -14,34 +14,37 @@ export const useRateSetupMakingCharges = (
   };
 
   const handleChangeMakingType = (
-    metal: "gold" | "silver",
+    key: "24k" | "22k" | "999" | "925",
     type: MakingChargesType
   ) => {
-    if (metal === "gold") {
-      activeUpdate({ makingChargesGoldType: type });
-    } else {
-      activeUpdate({ makingChargesSilverType: type });
-    }
+    if (key === "24k") activeUpdate({ makingCharges24kType: type });
+    else if (key === "22k") activeUpdate({ makingCharges22kType: type });
+    else if (key === "999") activeUpdate({ makingCharges999Type: type });
+    else if (key === "925") activeUpdate({ makingCharges925Type: type });
   };
 
-  const handleMakingValueChange = (metal: "gold" | "silver", text: string) => {
+  const handleMakingValueChange = (key: "24k" | "22k" | "999" | "925", text: string) => {
     const numeric = parseFloat(text.replace(/[^0-9.]/g, ""));
     const safe = isNaN(numeric) ? 0 : numeric;
-    if (metal === "gold") {
-      activeUpdate({ makingChargesGoldValue: safe });
-    } else {
-      activeUpdate({ makingChargesSilverValue: safe });
-    }
+    if (key === "24k") activeUpdate({ makingCharges24kValue: safe });
+    else if (key === "22k") activeUpdate({ makingCharges22kValue: safe });
+    else if (key === "999") activeUpdate({ makingCharges999Value: safe });
+    else if (key === "925") activeUpdate({ makingCharges925Value: safe });
+  };
+
+  const handleTitleChange = (key: "24k" | "22k" | "999" | "925", text: string) => {
+    if (key === "24k") activeUpdate({ makingCharges24kTitle: text });
+    else if (key === "22k") activeUpdate({ makingCharges22kTitle: text });
+    else if (key === "999") activeUpdate({ makingCharges999Title: text });
+    else if (key === "925") activeUpdate({ makingCharges925Title: text });
   };
 
   return {
     makingChargesEnabled: activeConfig.makingChargesEnabled,
-    makingChargesGoldType: activeConfig.makingChargesGoldType,
-    makingChargesGoldValue: activeConfig.makingChargesGoldValue,
-    makingChargesSilverType: activeConfig.makingChargesSilverType,
-    makingChargesSilverValue: activeConfig.makingChargesSilverValue,
     handleToggleMakingCharges,
     handleChangeMakingType,
     handleMakingValueChange,
+    handleTitleChange,
+    config: activeConfig
   };
 };
