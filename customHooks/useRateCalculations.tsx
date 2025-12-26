@@ -145,7 +145,7 @@ export const useRateCalculations = (
       "price_999" in wsData ||
       "spot" in wsData
     );
-    const shouldAddGST = withGST && !externalGoldIncludesGST && !isKaratpayData;
+    const shouldAddGST = withGST && !externalGoldIncludesGST;
     const gold999WithGST = shouldAddGST
       ? gold999WithMargin + gold999WithMargin * GST_RATE
       : gold999WithMargin;

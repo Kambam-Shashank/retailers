@@ -151,7 +151,7 @@ const Index = () => {
     <ScrollView
       style={[
         styles.container,
-        { backgroundColor: config.backgroundColor || "#000000" },
+        { backgroundColor: config.backgroundColor || "#fff" },
       ]}
     >
       <View style={[styles.header, isDesktop && styles.headerDesktop]}>

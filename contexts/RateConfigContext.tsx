@@ -114,9 +114,9 @@ const DEFAULT_CONFIG: RateConfig = {
   ],
   ratesFrozen: false,
   frozenAt: null,
-  backgroundColor: "#000000",
-  textColor: "#FFFFFF",
-  priceColor: "#D4AF37",
+  backgroundColor: "#FFFFFF",
+  textColor: "#1A1A1A",
+  priceColor: "#000000",
   theme: "modern",
   layoutDensity: "normal",
   fontTheme: "modern",
@@ -133,7 +133,7 @@ const DEFAULT_CONFIG: RateConfig = {
 
   cardBorderRadius: 16,
   cardBorderWidth: 1,
-  cardBorderColor: "#333333",
+  cardBorderColor: "#EEEEEE",
 
   logoSize: 80,
   logoPlacement: "header",
@@ -145,6 +145,7 @@ interface RateConfigContextType {
   updateConfig: (updates: Partial<RateConfig>) => Promise<void>;
   loadConfig: () => Promise<void>;
   resetConfig: () => Promise<void>;
+  resetConfigByTab: (tab: "profile" | "rates" | "visual") => Promise<void>;
 }
 
 const RateConfigContext = createContext<RateConfigContextType | undefined>(
@@ -200,13 +201,80 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
     }
   };
 
+  const resetConfigByTab = async (tab: string) => {
+    try {
+      const freshConfig = getDefaultConfig();
+      const updates: Partial<RateConfig> = {};
+
+      if (tab === "profile") {
+        updates.shopName = freshConfig.shopName;
+        updates.shopAddress = freshConfig.shopAddress;
+        updates.shopPhone = freshConfig.shopPhone;
+        updates.shopEmail = freshConfig.shopEmail;
+        updates.logoBase64 = freshConfig.logoBase64;
+        updates.logoSize = freshConfig.logoSize;
+        updates.logoPlacement = freshConfig.logoPlacement;
+        updates.logoOpacity = freshConfig.logoOpacity;
+        updates.brandAlignment = freshConfig.brandAlignment;
+        updates.notifications = freshConfig.notifications;
+      } else if (tab === "rates") {
+        updates.gold24kLabel = freshConfig.gold24kLabel;
+        updates.gold22kLabel = freshConfig.gold22kLabel;
+        updates.silver999Label = freshConfig.silver999Label;
+        updates.silver925Label = freshConfig.silver925Label;
+        updates.gold24kMargin = freshConfig.gold24kMargin;
+        updates.gold22kMargin = freshConfig.gold22kMargin;
+        updates.silver999Margin = freshConfig.silver999Margin;
+        updates.silver925Margin = freshConfig.silver925Margin;
+        updates.makingChargesEnabled = freshConfig.makingChargesEnabled;
+        updates.makingCharges24kType = freshConfig.makingCharges24kType;
+        updates.makingCharges24kValue = freshConfig.makingCharges24kValue;
+        updates.makingCharges24kTitle = freshConfig.makingCharges24kTitle;
+        updates.makingCharges22kType = freshConfig.makingCharges22kType;
+        updates.makingCharges22kValue = freshConfig.makingCharges22kValue;
+        updates.makingCharges22kTitle = freshConfig.makingCharges22kTitle;
+        updates.makingCharges999Type = freshConfig.makingCharges999Type;
+        updates.makingCharges999Value = freshConfig.makingCharges999Value;
+        updates.makingCharges999Title = freshConfig.makingCharges999Title;
+        updates.makingCharges925Type = freshConfig.makingCharges925Type;
+        updates.makingCharges925Value = freshConfig.makingCharges925Value;
+        updates.makingCharges925Title = freshConfig.makingCharges925Title;
+        updates.ratesFrozen = freshConfig.ratesFrozen;
+        updates.frozenAt = freshConfig.frozenAt;
+      } else if (tab === "visual") {
+        updates.backgroundColor = freshConfig.backgroundColor;
+        updates.textColor = freshConfig.textColor;
+        updates.priceColor = freshConfig.priceColor;
+        updates.theme = freshConfig.theme;
+        updates.layoutDensity = freshConfig.layoutDensity;
+        updates.fontTheme = freshConfig.fontTheme;
+        updates.cardStyle = freshConfig.cardStyle;
+        updates.showTime = freshConfig.showTime;
+        updates.showDate = freshConfig.showDate;
+        updates.showShopName = freshConfig.showShopName;
+        updates.showGold24k = freshConfig.showGold24k;
+        updates.showGold22k = freshConfig.showGold22k;
+        updates.showSilver999 = freshConfig.showSilver999;
+        updates.showSilver925 = freshConfig.showSilver925;
+        updates.priceDecimalPlaces = freshConfig.priceDecimalPlaces;
+        updates.cardBorderRadius = freshConfig.cardBorderRadius;
+        updates.cardBorderWidth = freshConfig.cardBorderWidth;
+        updates.cardBorderColor = freshConfig.cardBorderColor;
+      }
+
+      await updateConfig(updates);
+    } catch (error) {
+      console.warn(`Failed to reset ${tab} config:`, error);
+    }
+  };
+
   useEffect(() => {
     loadConfig();
   }, []);
 
   return (
     <RateConfigContext.Provider
-      value={{ config, updateConfig, loadConfig, resetConfig }}
+      value={{ config, updateConfig, loadConfig, resetConfig, resetConfigByTab }}
     >
       {children}
     </RateConfigContext.Provider>

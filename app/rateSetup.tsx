@@ -1,17 +1,22 @@
-﻿import { BrandingPreviewModal } from "@/components/RateSetup/BrandingPreviewModal";
-import { CardStyleCard } from "@/components/RateSetup/CardStyleCard";
-import { ColorCustomizationCard } from "@/components/RateSetup/ColorCustomizationCard";
-import { DisplayCustomizationCard } from "@/components/RateSetup/DisplayCustomizationCard";
-import { MakingChargesCard } from "@/components/RateSetup/MakingChargesCard";
-import { MarginsCard } from "@/components/RateSetup/MarginsCard";
-import { NotificationsCard } from "@/components/RateSetup/NotificationsCard";
-import { PurityLabelsCard } from "@/components/RateSetup/PurityLabelsCard";
-import { RateStatusCard } from "@/components/RateSetup/RateStatusCard";
-import { ResetConfirmationModal } from "@/components/RateSetup/ResetConfirmationModal";
-import { SaveSuccessModal } from "@/components/RateSetup/SaveSuccessModal";
-import { ShopBrandingCard } from "@/components/RateSetup/ShopBrandingCard";
-import { ShopDetailsCard } from "@/components/RateSetup/ShopDetailsCard";
-import { ThemeCard } from "@/components/RateSetup/ThemeCard";
+﻿import {
+  BrandingPreviewModal,
+  NotificationsCard,
+  ShopBrandingCard
+} from "@/components/RateSetup/BrandingSettings";
+import {
+  MakingChargesCard,
+  MarginsCard,
+  PurityLabelsCard,
+  RateStatusCard
+} from "@/components/RateSetup/RateSettings";
+import { RateSetupTabs, TabType } from "@/components/RateSetup/SetupCore";
+import { ResetConfirmationModal, SaveSuccessModal } from "@/components/RateSetup/SetupModals";
+import {
+  CardStyleCard,
+  ColorCustomizationCard,
+  DisplayCustomizationCard,
+  ThemeCard
+} from "@/components/RateSetup/VisualSettings";
 
 import { useRateSetupBranding } from "@/customHooks/useRateSetupBranding";
 import { useRateSetupLabels } from "@/customHooks/useRateSetupLabels";
@@ -29,8 +34,8 @@ import {
 import { RateConfig, useRateConfig } from "../contexts/RateConfigContext";
 
 const GOLD = "#D4AF37";
-const BG_DARK = "#000000";
-const TEXT_MUTED = "#A1A1A1";
+const BG_LIGHT = "#FFFFFF";
+const TEXT_MUTED = "#666"; // Darker muted text for readability on white background
 
 // ====== Main Component ======
 export default function RateSetupScreen(): ReactElement {
@@ -38,11 +43,12 @@ export default function RateSetupScreen(): ReactElement {
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
 
-  const { config, updateConfig, resetConfig } = useRateConfig();
+  const { config, updateConfig, resetConfigByTab } = useRateConfig();
   const [localConfig, setLocalConfig] = useState<RateConfig>(config);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [showBrandingPreview, setShowBrandingPreview] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("profile");
 
   useEffect(() => {
     setLocalConfig(config);
@@ -109,7 +115,7 @@ export default function RateSetupScreen(): ReactElement {
   };
 
   const performReset = () => {
-    resetConfig();
+    resetConfigByTab(activeTab);
     setShowResetConfirm(false);
   };
 
@@ -123,7 +129,7 @@ export default function RateSetupScreen(): ReactElement {
             onPress={() => router.back()}
             style={{ marginRight: 15, padding: 5 }}
           >
-            <Text style={{ fontSize: 24, color: "#FFF" }}>←</Text>
+            <Text style={{ fontSize: 24, color: "#000" }}>←</Text>
           </TouchableOpacity>
           <View>
             <Text style={styles.title}>Rate Setup</Text>
@@ -156,6 +162,12 @@ export default function RateSetupScreen(): ReactElement {
         </View>
       </View>
 
+      <RateSetupTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        isDesktop={isDesktop}
+      />
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
@@ -163,91 +175,132 @@ export default function RateSetupScreen(): ReactElement {
           isDesktop && styles.scrollContentDesktop,
         ]}
       >
-        <ShopBrandingCard
-          shopName={shopName}
-          logoBase64={logoBase64}
-          logoSize={localConfig.logoSize}
-          logoPlacement={localConfig.logoPlacement}
-          logoOpacity={localConfig.logoOpacity}
-          onShopNameChange={handleShopNameChange}
-          onShopNameBlur={onShopNameBlur}
-          onPickLogo={handlePickLogo}
-          onDeleteLogo={handleDeleteLogo}
-          onUpdate={(u) => {
-            if ("showBrandingPreview" in u) {
-              setShowBrandingPreview(true);
-            } else {
-              handleLocalUpdate(u);
-            }
-          }}
-        />
+        {activeTab === "profile" && (
+          <>
+            <ShopBrandingCard
+              shopName={shopName}
+              address={localConfig.shopAddress}
+              phone={localConfig.shopPhone}
+              logoBase64={logoBase64}
+              logoSize={localConfig.logoSize}
+              logoPlacement={localConfig.logoPlacement}
+              logoOpacity={localConfig.logoOpacity}
+              onShopNameChange={handleShopNameChange}
+              onShopNameBlur={onShopNameBlur}
+              onPickLogo={handlePickLogo}
+              onDeleteLogo={handleDeleteLogo}
+              onUpdate={(u) => {
+                if ("showBrandingPreview" in u) {
+                  setShowBrandingPreview(true);
+                } else {
+                  handleLocalUpdate(u);
+                }
+              }}
+            />
 
-        <ShopDetailsCard
-          address={localConfig.shopAddress}
-          phone={localConfig.shopPhone}
-          email={localConfig.shopEmail}
-          onUpdate={handleLocalUpdate}
-        />
+            <RateStatusCard config={localConfig} onUpdate={handleLocalUpdate} />
 
-        <PurityLabelsCard
-          gold24kLabel={gold24kLabel}
-          gold22kLabel={gold22kLabel}
-          silver999Label={silver999Label}
-          silver925Label={silver925Label}
-          isDesktop={isDesktop}
-          onLabelChange={(key, val) => updateLabels({ [key]: val })}
-          onLabelsBlur={onLabelsBlur}
-        />
+            {/* Brand Alignment logic - showing it here as requested */}
+            <View style={styles.alignmentCard}>
+              <Text style={styles.cardTitleInternal}>Branding Alignment</Text>
+              <View style={styles.row}>
+                {(["left", "center", "right"] as const).map((align) => (
+                  <TouchableOpacity
+                    key={align}
+                    style={[
+                      styles.optionButton,
+                      localConfig.brandAlignment === align &&
+                      styles.optionButtonActive,
+                    ]}
+                    onPress={() => handleLocalUpdate({ brandAlignment: align })}
+                  >
+                    <Text
+                      style={[
+                        styles.optionText,
+                        localConfig.brandAlignment === align &&
+                        styles.optionTextActive,
+                      ]}
+                    >
+                      {align.charAt(0).toUpperCase() + align.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
 
-        <MarginsCard
-          gold24kMargin={gold24kMargin}
-          gold22kMargin={gold22kMargin}
-          silver999Margin={silver999Margin}
-          silver925Margin={silver925Margin}
-          isDesktop={isDesktop}
-          onMarginUpdate={(key, val) => updateMargin(key as any, val)}
-          onMarginInputChange={handleMarginInputChange}
-        />
+        {activeTab === "rates" && (
+          <>
+            <PurityLabelsCard
+              gold24kLabel={gold24kLabel}
+              gold22kLabel={gold22kLabel}
+              silver999Label={silver999Label}
+              silver925Label={silver925Label}
+              isDesktop={isDesktop}
+              onLabelChange={(key, val) => updateLabels({ [key]: val })}
+              onLabelsBlur={onLabelsBlur}
+            />
 
-        <MakingChargesCard config={localConfig} onUpdate={handleLocalUpdate} />
+            <MarginsCard
+              gold24kMargin={gold24kMargin}
+              gold22kMargin={gold22kMargin}
+              silver999Margin={silver999Margin}
+              silver925Margin={silver925Margin}
+              isDesktop={isDesktop}
+              onMarginUpdate={(key, val) => updateMargin(key as any, val)}
+              onMarginInputChange={handleMarginInputChange}
+            />
 
-        <DisplayCustomizationCard
-          fontTheme={localConfig.fontTheme}
-          cardStyle={localConfig.cardStyle}
-          showTime={localConfig.showTime}
-          showShopName={localConfig.showShopName}
-          showDate={localConfig.showDate}
-          brandAlignment={localConfig.brandAlignment}
-          showGold24k={localConfig.showGold24k}
-          showGold22k={localConfig.showGold22k}
-          showSilver999={localConfig.showSilver999}
-          showSilver925={localConfig.showSilver925}
-          priceDecimalPlaces={localConfig.priceDecimalPlaces}
-          onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
-        />
+            <MakingChargesCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+            />
 
-        <ThemeCard
-          theme={localConfig.theme}
-          layoutDensity={localConfig.layoutDensity}
-          onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
-        />
+            <NotificationsCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+            />
+          </>
+        )}
 
-        <ColorCustomizationCard
-          backgroundColor={localConfig.backgroundColor}
-          textColor={localConfig.textColor}
-          priceColor={localConfig.priceColor}
-          onColorChange={handleColorChange}
-        />
+        {activeTab === "visual" && (
+          <>
+            <ThemeCard
+              theme={localConfig.theme}
+              layoutDensity={localConfig.layoutDensity}
+              onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
+            />
 
-        <CardStyleCard
-          cardBorderRadius={localConfig.cardBorderRadius}
-          cardBorderColor={localConfig.cardBorderColor}
-          onUpdate={handleLocalUpdate}
-        />
+            <DisplayCustomizationCard
+              fontTheme={localConfig.fontTheme}
+              cardStyle={localConfig.cardStyle}
+              showTime={localConfig.showTime}
+              showShopName={localConfig.showShopName}
+              showDate={localConfig.showDate}
+              brandAlignment={localConfig.brandAlignment}
+              showGold24k={localConfig.showGold24k}
+              showGold22k={localConfig.showGold22k}
+              showSilver999={localConfig.showSilver999}
+              showSilver925={localConfig.showSilver925}
+              priceDecimalPlaces={localConfig.priceDecimalPlaces}
+              onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
+            />
 
-        <NotificationsCard config={localConfig} onUpdate={handleLocalUpdate} />
+            <ColorCustomizationCard
+              backgroundColor={localConfig.backgroundColor}
+              textColor={localConfig.textColor}
+              priceColor={localConfig.priceColor}
+              onColorChange={handleColorChange}
+            />
 
-        <RateStatusCard config={localConfig} onUpdate={handleLocalUpdate} />
+            <CardStyleCard
+              cardBorderRadius={localConfig.cardBorderRadius}
+              cardBorderColor={localConfig.cardBorderColor}
+              onUpdate={handleLocalUpdate}
+            />
+          </>
+        )}
 
         <View style={styles.footerActions}>
           <View style={{ flex: 1 }} />
@@ -302,17 +355,17 @@ export default function RateSetupScreen(): ReactElement {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: BG_DARK,
+    backgroundColor: BG_LIGHT,
     alignItems: "center",
   },
   headerWrapper: {
     width: "100%",
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: "#EEEEEE",
     paddingHorizontal: 16,
     paddingVertical: 16,
     paddingTop: 20,
-    backgroundColor: "rgba(0,0,0,0.95)",
+    backgroundColor: "#FFFFFF",
     justifyContent: "space-between",
     alignItems: "center",
     flexDirection: "row",
@@ -341,15 +394,16 @@ const styles = StyleSheet.create({
   button: {
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: "#1F1F1F",
+    backgroundColor: "#FFFFFF",
     borderRadius: 8,
     marginLeft: 12,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: "#E0E0E0",
   },
   buttonText: {
-    color: "#fff",
+    color: "#1A1A1A",
     fontSize: 14,
+    fontWeight: "600",
   },
   scroll: {
     flex: 1,
@@ -379,8 +433,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#333",
-    backgroundColor: "#1F1F1F",
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFFFFF",
   },
   resetText: {
     color: "#EF4444", // Red text for reset
@@ -418,13 +472,59 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   disabledButton: {
-    backgroundColor: "#222",
+    backgroundColor: "#F5F5F5",
     shadowOpacity: 0,
     elevation: 0,
-    borderColor: "#333",
-    borderWidth: 0,
+    borderColor: "#E0E0E0",
+    borderWidth: 1,
   },
   disabledButtonText: {
-    color: "#555",
+    color: "#A1A1A1",
+  },
+  alignmentCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+    marginHorizontal: 16,
+    marginTop: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardTitleInternal: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: GOLD,
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#F9F9F9",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    alignItems: "center",
+  },
+  optionButtonActive: {
+    backgroundColor: GOLD,
+    borderColor: GOLD,
+  },
+  optionText: {
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  optionTextActive: {
+    color: "#000",
+    fontWeight: "600",
   },
 });
