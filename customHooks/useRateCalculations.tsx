@@ -145,24 +145,23 @@ export const useRateCalculations = (
       "price_999" in wsData ||
       "spot" in wsData
     );
-    const shouldAddGST = withGST && !externalGoldIncludesGST;
-    const gold999WithGST = shouldAddGST
-      ? gold999WithMargin + gold999WithMargin * GST_RATE
-      : gold999WithMargin;
-    const gold995WithGST = shouldAddGST
-      ? gold995WithMargin + gold995WithMargin * GST_RATE
-      : gold995WithMargin;
-    const gold916WithGST = shouldAddGST
-      ? gold916WithMargin + gold916WithMargin * GST_RATE
-      : gold916WithMargin;
+    // Helper to calculate price with/without GST based on source
+    const calculateFinalGSTPrice = (price: number, sourceIncludesGST: boolean | undefined) => {
+      if (withGST) {
+        // Toggle ON: Should show WITH GST
+        return sourceIncludesGST ? price : price + price * GST_RATE;
+      } else {
+        // Toggle OFF: Should show WITHOUT GST
+        return sourceIncludesGST ? price / (1 + GST_RATE) : price;
+      }
+    };
 
-    const shouldAddSilverGST = withGST && !externalSilverIncludesGST;
-    const silver999WithGST = shouldAddSilverGST
-      ? silver999WithMargin + silver999WithMargin * GST_RATE
-      : silver999WithMargin;
-    const silver925WithGST = shouldAddSilverGST
-      ? silver925WithMargin + silver925WithMargin * GST_RATE
-      : silver925WithMargin;
+    const gold999WithGST = calculateFinalGSTPrice(gold999WithMargin, externalGoldIncludesGST);
+    const gold995WithGST = calculateFinalGSTPrice(gold995WithMargin, externalGoldIncludesGST);
+    const gold916WithGST = calculateFinalGSTPrice(gold916WithMargin, externalGoldIncludesGST);
+
+    const silver999WithGST = calculateFinalGSTPrice(silver999WithMargin, externalSilverIncludesGST);
+    const silver925WithGST = calculateFinalGSTPrice(silver925WithMargin, externalSilverIncludesGST);
 
     let gold999MakingCharges = 0;
     let gold995MakingCharges = 0;

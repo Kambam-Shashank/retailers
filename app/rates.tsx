@@ -21,7 +21,7 @@ import useWebSocket, { GoldPriceData } from "../customHooks/useWebSocket";
 const Index = () => {
   const { viewOnly } = useLocalSearchParams();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [withGST, setWithGST] = useState(false);
+  const [withGST, setWithGST] = useState(true);
   const [cachedWsData, setCachedWsData] = useState<GoldPriceData | null>(null);
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
@@ -45,7 +45,7 @@ const Index = () => {
     aaravRates.silver,
     undefined,
     aaravRates.silverWithGST,
-    false
+    true
   );
 
   // Track price changes for all metals
@@ -92,11 +92,10 @@ const Index = () => {
   }, [calculatedRates, withGST]);
 
   const formatPricePerGram = (price: number) => {
-    const decimals = config.priceDecimalPlaces ?? 0;
     const perGram = price / 10;
     return `₹${perGram.toLocaleString("en-IN", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     })}`;
   };
 
@@ -120,53 +119,53 @@ const Index = () => {
   };
 
   const onShare = async () => {
-  try {
-    let baseUrl = "https://karatpay-retailers.vercel.app";
+    try {
+      let baseUrl = "https://karatpay-retailers.vercel.app";
 
-    if (
-      Platform.OS === "web" &&
-      typeof window !== "undefined" &&
-      window.location?.origin
-    ) {
-      baseUrl = window.location.origin;
-    }
+      if (
+        Platform.OS === "web" &&
+        typeof window !== "undefined" &&
+        window.location?.origin
+      ) {
+        baseUrl = window.location.origin;
+      }
 
-    const shareUrl = `${baseUrl}/rates?viewOnly=true`;
+      const shareUrl = `${baseUrl}/rates?viewOnly=true`;
 
-    const message = `Gold & Silver Live Rates
+      const message = `Gold & Silver Live Rates
 
 Gold 999 (per gram): ${formatPricePerGram(
-      calculatedRates.gold999.finalPrice
-    )}
+        calculatedRates.gold999.finalPrice
+      )}
 Silver 999 (per gram): ${formatPricePerGram(
-      calculatedRates.silver999.finalPrice
-    )}
+        calculatedRates.silver999.finalPrice
+      )}
 
 View live rates here:
 ${shareUrl}`;
 
-    if (Platform.OS === "web") {
-      if (navigator.share) {
-        await navigator.share({
-          title: "Live Gold & Silver Rates",
-          text: message,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("Rate link copied to clipboard!");
+      if (Platform.OS === "web") {
+        if (navigator.share) {
+          await navigator.share({
+            title: "Live Gold & Silver Rates",
+            text: message,
+            url: shareUrl,
+          });
+        } else {
+          await navigator.clipboard.writeText(shareUrl);
+          alert("Rate link copied to clipboard!");
+        }
+        return;
       }
-      return;
-    }
 
-    await Share.share({
-      message,
-      url: shareUrl, 
-    });
-  } catch (error: any) {
-    console.error("Share failed:", error?.message || error);
-  }
-};
+      await Share.share({
+        message,
+        url: shareUrl,
+      });
+    } catch (error: any) {
+      console.error("Share failed:", error?.message || error);
+    }
+  };
 
   const renderPriceChange = (changeInfo: ReturnType<typeof usePriceChange>) => {
     if (!changeInfo.hasChanged) return null;

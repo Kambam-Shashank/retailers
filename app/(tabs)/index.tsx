@@ -19,7 +19,7 @@ import useWebSocket, { GoldPriceData } from "../../customHooks/useWebSocket";
 
 const Index = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [withGST, setWithGST] = useState(false);
+  const [withGST, setWithGST] = useState(true);
   const [cachedWsData, setCachedWsData] = useState<GoldPriceData | null>(null);
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
@@ -43,7 +43,7 @@ const Index = () => {
     aaravRates.silver,
     undefined,
     aaravRates.silverWithGST,
-    false
+    true
   );
 
   // Track price changes for all metals
@@ -90,11 +90,10 @@ const Index = () => {
   }, [calculatedRates, withGST]);
 
   const formatPricePerGram = (price: number) => {
-    const decimals = config.priceDecimalPlaces ?? 0;
     const perGram = price / 10;
     return `₹${perGram.toLocaleString("en-IN", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     })}`;
   };
 

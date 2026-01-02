@@ -251,30 +251,7 @@ export const DisplayCustomizationCard: React.FC<DisplayCustomizationCardProps> =
                 ))}
             </View>
 
-            <View style={displayStyles.section}>
-                <Text style={displayStyles.sectionTitle}>Price Precision</Text>
-                <View style={displayStyles.row}>
-                    {[0, 1, 2].map((places) => (
-                        <TouchableOpacity
-                            key={places}
-                            style={[
-                                displayStyles.optionButton,
-                                priceDecimalPlaces === places && displayStyles.optionButtonActive,
-                            ]}
-                            onPress={() => onUpdate("priceDecimalPlaces", places)}
-                        >
-                            <Text
-                                style={[
-                                    displayStyles.optionText,
-                                    priceDecimalPlaces === places && displayStyles.optionTextActive,
-                                ]}
-                            >
-                                {places} decimals
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
+
         </View>
     );
 };
