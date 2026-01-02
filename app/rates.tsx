@@ -120,8 +120,14 @@ const Index = () => {
 
   const onShare = async () => {
     try {
+      // Determine the base URL
+      let baseUrl = "https://karatpay-retailers.vercel.app";
+      if (typeof window !== "undefined" && window.location && window.location.origin) {
+        baseUrl = window.location.origin;
+      }
+
       const result = await Share.share({
-        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: https://karatpay.in/rates?viewOnly=true`,
+        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: ${baseUrl}/rates?viewOnly=true`,
       });
     } catch (error: any) {
       console.error(error.message);
