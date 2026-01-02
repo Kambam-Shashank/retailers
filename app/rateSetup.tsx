@@ -140,7 +140,7 @@ export default function RateSetupScreen(): ReactElement {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push("/ratesDIsplay")}
+            onPress={() => router.push("/rates")}
           >
             <Text style={styles.buttonText}>Preview</Text>
           </TouchableOpacity>
