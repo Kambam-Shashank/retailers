@@ -120,36 +120,53 @@ const Index = () => {
   };
 
   const onShare = async () => {
-    try {
-      // Determine the base URL
-      let baseUrl = "https://karatpay-retailers.vercel.app";
-      if (typeof window !== "undefined" && window.location && window.location.origin) {
-        baseUrl = window.location.origin;
-      }
+  try {
+    let baseUrl = "https://karatpay-retailers.vercel.app";
 
-      const shareUrl = `${baseUrl}/rates?viewOnly=true`;
-      const message = `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: ${shareUrl}`;
-
-      if (Platform.OS === "web") {
-        if (navigator.share) {
-          await navigator.share({
-            title: "Live Rates",
-            text: message,
-            url: shareUrl,
-          });
-        } else {
-          await navigator.clipboard.writeText(shareUrl);
-          alert("Link copied to clipboard!");
-        }
-      } else {
-        await Share.share({
-          message: message,
-        });
-      }
-    } catch (error: any) {
-      console.error(error.message);
+    if (
+      Platform.OS === "web" &&
+      typeof window !== "undefined" &&
+      window.location?.origin
+    ) {
+      baseUrl = window.location.origin;
     }
-  };
+
+    const shareUrl = `${baseUrl}/rates?viewOnly=true`;
+
+    const message = `Gold & Silver Live Rates
+
+Gold 999 (per gram): ${formatPricePerGram(
+      calculatedRates.gold999.finalPrice
+    )}
+Silver 999 (per gram): ${formatPricePerGram(
+      calculatedRates.silver999.finalPrice
+    )}
+
+View live rates here:
+${shareUrl}`;
+
+    if (Platform.OS === "web") {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Live Gold & Silver Rates",
+          text: message,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Rate link copied to clipboard!");
+      }
+      return;
+    }
+
+    await Share.share({
+      message,
+      url: shareUrl, 
+    });
+  } catch (error: any) {
+    console.error("Share failed:", error?.message || error);
+  }
+};
 
   const renderPriceChange = (changeInfo: ReturnType<typeof usePriceChange>) => {
     if (!changeInfo.hasChanged) return null;
