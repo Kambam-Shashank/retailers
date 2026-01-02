@@ -1,4 +1,5 @@
 import { WEBSOCKET_URL } from "@/config/api";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Image,
@@ -17,6 +18,7 @@ import { useRateCalculations } from "../customHooks/useRateCalculations";
 import useWebSocket, { GoldPriceData } from "../customHooks/useWebSocket";
 
 const Index = () => {
+  const { viewOnly } = useLocalSearchParams();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [withGST, setWithGST] = useState(false);
   const [cachedWsData, setCachedWsData] = useState<GoldPriceData | null>(null);
@@ -119,7 +121,7 @@ const Index = () => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: https://karatpay.in/rates`,
+        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: https://karatpay.in/rates?viewOnly=true`,
       });
     } catch (error: any) {
       console.error(error.message);
@@ -211,12 +213,14 @@ const Index = () => {
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity
-                  onPress={() => (window.location.href = "/rateSetup")}
-                  style={[styles.backButton, { padding: 6 }]}
-                >
-                  <Text style={[styles.backArrow, { fontSize: 20 }]}>⚙️</Text>
-                </TouchableOpacity>
+                {!viewOnly && (
+                  <TouchableOpacity
+                    onPress={() => (window.location.href = "/rateSetup")}
+                    style={[styles.backButton, { padding: 6 }]}
+                  >
+                    <Text style={[styles.backArrow, { fontSize: 20 }]}>⚙️</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           </View>
@@ -343,12 +347,14 @@ const Index = () => {
                 </View>
               ) : (
                 <View style={styles.headerIcons}>
-                  <TouchableOpacity
-                    onPress={() => (window.location.href = "/rateSetup")}
-                    style={[styles.backButton, { marginRight: 5 }]}
-                  >
-                    <Text style={styles.backArrow}>⚙️</Text>
-                  </TouchableOpacity>
+                  {!viewOnly && (
+                    <TouchableOpacity
+                      onPress={() => (window.location.href = "/rateSetup")}
+                      style={[styles.backButton, { marginRight: 5 }]}
+                    >
+                      <Text style={styles.backArrow}>⚙️</Text>
+                    </TouchableOpacity>
+                  )}
 
                   <TouchableOpacity onPress={onShare} style={styles.shareButton}>
                     <Text style={styles.shareButtonText}>Share</Text>

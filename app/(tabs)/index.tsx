@@ -119,7 +119,7 @@ const Index = () => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: https://karatpay.in/rates`,
+        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: https://karatpay.in/rates?viewOnly=true`,
       });
     } catch (error: any) {
       console.error(error.message);
