@@ -3,6 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Image,
+  Platform,
   ScrollView,
   Share,
   StyleSheet,
@@ -126,9 +127,25 @@ const Index = () => {
         baseUrl = window.location.origin;
       }
 
-      const result = await Share.share({
-        message: `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: ${baseUrl}/rates?viewOnly=true`,
-      });
+      const shareUrl = `${baseUrl}/rates?viewOnly=true`;
+      const message = `Gold & Silver Live Rates\n\nGold 999 (per gram): ${formatPricePerGram(calculatedRates.gold999.finalPrice)}\nSilver (per gram): ${formatPricePerGram(calculatedRates.silver999.finalPrice)}\n\nCheck live rates here: ${shareUrl}`;
+
+      if (Platform.OS === "web") {
+        if (navigator.share) {
+          await navigator.share({
+            title: "Live Rates",
+            text: message,
+            url: shareUrl,
+          });
+        } else {
+          await navigator.clipboard.writeText(shareUrl);
+          alert("Link copied to clipboard!");
+        }
+      } else {
+        await Share.share({
+          message: message,
+        });
+      }
     } catch (error: any) {
       console.error(error.message);
     }
