@@ -354,9 +354,8 @@ const brandingStyles = StyleSheet.create({
         gap: 4,
     },
     shopNameRow: {
-        flexDirection: "row",
+        flexDirection: "column",
         gap: 12,
-        alignItems: "center",
         marginBottom: 8,
     },
     inputWrapper: {
@@ -392,7 +391,7 @@ const brandingStyles = StyleSheet.create({
         color: "#1A1A1A",
     },
     gridRow: {
-        flexDirection: "row",
+        flexDirection: "column",
         gap: 12,
     },
     gridItem: {

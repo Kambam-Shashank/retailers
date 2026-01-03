@@ -1,4 +1,6 @@
+import { db } from "@/Firebaseconfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, {
   createContext,
   ReactNode,
@@ -6,6 +8,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { useAuth } from "./AuthContext";
 
 const STORAGE_KEY = "@karatpay_rate_setup";
 
@@ -34,16 +37,17 @@ export interface RateConfig {
   makingChargesEnabled: boolean;
   makingCharges24kType: MakingChargesType;
   makingCharges24kValue: number;
+  makingCharges24kTitle: string;
   makingCharges22kType: MakingChargesType;
   makingCharges22kValue: number;
+  makingCharges22kTitle: string;
   makingCharges999Type: MakingChargesType;
   makingCharges999Value: number;
+  makingCharges999Title: string;
   makingCharges925Type: MakingChargesType;
   makingCharges925Value: number;
-  makingCharges24kTitle: string;
-  makingCharges22kTitle: string;
-  makingCharges999Title: string;
   makingCharges925Title: string;
+
   notifications: NotificationConfig[];
   ratesFrozen: boolean;
   frozenAt: string | null;
@@ -56,7 +60,7 @@ export interface RateConfig {
   fontTheme: "modern" | "classic" | "serif";
   cardStyle: "boxed" | "minimal";
   showTime: boolean;
-  showDate: boolean; // Though date isn't explicitly in UI yet, good to have
+  showDate: boolean;
   showShopName: boolean;
   brandAlignment: "left" | "center" | "right";
   // Row visibility controls
@@ -164,17 +168,37 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
   children,
 }) => {
   const getDefaultConfig = (): RateConfig => JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-
   const [config, setConfig] = useState<RateConfig>(getDefaultConfig());
+  const { user } = useAuth();
 
   const loadConfig = async () => {
+    if (!user) return;
+
     try {
-      const json = await AsyncStorage.getItem(STORAGE_KEY);
-      if (json) {
-        const data = JSON.parse(json);
-        // Deep merge logic or just overwrite. 
-        // Safer to start with default and overlay data
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const data = userDoc.data() as RateConfig;
         setConfig({ ...getDefaultConfig(), ...data });
+      } else {
+        // Migration logic: Check local storage
+        const localJson = await AsyncStorage.getItem(STORAGE_KEY);
+        if (localJson) {
+          const localData = JSON.parse(localJson);
+          const migratedConfig = { ...getDefaultConfig(), ...localData };
+
+          // Save to Firestore
+          await setDoc(userDocRef, migratedConfig);
+          setConfig(migratedConfig);
+
+          // Optional: Clear local storage after successful migration
+          // await AsyncStorage.removeItem(STORAGE_KEY);
+        } else {
+          // Initialize new user with default config in Firestore
+          await setDoc(userDocRef, getDefaultConfig());
+          setConfig(getDefaultConfig());
+        }
       }
     } catch (error) {
       console.warn("Failed to load rate config:", error);
@@ -182,26 +206,36 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
   };
 
   const updateConfig = async (updates: Partial<RateConfig>) => {
+    if (!user) return;
+
     try {
       const newConfig = { ...config, ...updates };
       setConfig(newConfig);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
+
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, newConfig, { merge: true });
     } catch (error) {
       console.warn("Failed to update rate config:", error);
     }
   };
 
   const resetConfig = async () => {
+    if (!user) return;
+
     try {
       const freshConfig = getDefaultConfig();
       setConfig(freshConfig);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(freshConfig));
+
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, freshConfig);
     } catch (error) {
       console.warn("Failed to reset rate config:", error);
     }
   };
 
   const resetConfigByTab = async (tab: string) => {
+    if (!user) return;
+
     try {
       const freshConfig = getDefaultConfig();
       const updates: Partial<RateConfig> = {};
@@ -270,7 +304,7 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
 
   useEffect(() => {
     loadConfig();
-  }, []);
+  }, [user]);
 
   return (
     <RateConfigContext.Provider

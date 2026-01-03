@@ -40,20 +40,34 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({
 
             <View style={themeStyles.section}>
                 <Text style={themeStyles.label}>Visual Theme</Text>
-                <View style={themeStyles.buttonGroup}>
+                <View style={themeStyles.themeGrid}>
                     {themes.map((t) => (
                         <TouchableOpacity
                             key={t.id}
                             style={[
-                                themeStyles.optionButton,
-                                theme === t.id && themeStyles.optionButtonActive,
+                                themeStyles.themePreviewCard,
+                                theme === t.id && themeStyles.themePreviewCardActive,
                             ]}
                             onPress={() => onUpdate("theme", t.id)}
                         >
+                            <View style={themeStyles.themePreviewImageWrapper}>
+                                <View
+                                    style={[
+                                        themeStyles.themePreviewPlaceholder,
+                                        t.id === "modern" && { backgroundColor: "#111", borderColor: "#D4AF37" },
+                                        t.id === "classic" && { backgroundColor: "#FFF", borderColor: "#CCC" },
+                                        t.id === "glass" && { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" },
+                                        t.id === "dark" && { backgroundColor: "#1A1A1A", borderColor: "#333" },
+                                    ]}
+                                >
+                                    <View style={themeStyles.themeSampleLine} />
+                                    <View style={themeStyles.themeSampleLine} />
+                                </View>
+                            </View>
                             <Text
                                 style={[
-                                    themeStyles.optionText,
-                                    theme === t.id && themeStyles.optionTextActive,
+                                    themeStyles.themePreviewLabel,
+                                    theme === t.id && themeStyles.themePreviewLabelActive,
                                 ]}
                             >
                                 {t.label}
@@ -402,7 +416,7 @@ export const CardStyleCard: React.FC<CardStyleCardProps> = ({
             <View style={styleCardStyles.sectionRow}>
                 <Text style={styleCardStyles.label}>Corner Roundness</Text>
                 <View style={{ flexDirection: "row", gap: 10 }}>
-                    {[0, 16, 24, 32].map((radius) => (
+                    {[0, 16, 24].map((radius) => (
                         <TouchableOpacity
                             key={radius}
                             onPress={() => onUpdate({ cardBorderRadius: radius })}
@@ -507,6 +521,57 @@ const themeStyles = StyleSheet.create({
     },
     optionTextActive: {
         color: "#000",
+    },
+    // Theme preview styles
+    themeGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
+        marginTop: 8,
+    },
+    themePreviewCard: {
+        width: "47%",
+        minWidth: 140,
+        backgroundColor: "#F9F9F9",
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: "#E0E0E0",
+        padding: 12,
+        alignItems: "center",
+    },
+    themePreviewCardActive: {
+        borderColor: GOLD,
+        backgroundColor: GOLD_SOFT,
+    },
+    themePreviewImageWrapper: {
+        width: "100%",
+        aspectRatio: 1.5,
+        marginBottom: 8,
+        borderRadius: 8,
+        overflow: "hidden",
+    },
+    themePreviewPlaceholder: {
+        flex: 1,
+        borderRadius: 8,
+        borderWidth: 1,
+        padding: 16,
+        justifyContent: "center",
+        gap: 12,
+    },
+    themeSampleLine: {
+        height: 8,
+        backgroundColor: "rgba(212, 175, 55, 0.3)",
+        borderRadius: 4,
+    },
+    themePreviewLabel: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#666",
+        textAlign: "center",
+    },
+    themePreviewLabelActive: {
+        color: GOLD,
+        fontWeight: "700",
     },
 });
 

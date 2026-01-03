@@ -61,7 +61,6 @@ export const RateSetupTabs: React.FC<RateSetupTabsProps> = ({
     );
 };
 
-// ====== LivePreviewCard ======
 interface LivePreviewCardProps {
     config: RateConfig;
     scale?: number;
@@ -71,7 +70,6 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
     config,
     scale = 0.8,
 }) => {
-    // Sample Data for Preview
     const sampleRates = {
         gold24k: 7854.20,
         gold22k: 7215.45,
@@ -241,7 +239,8 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
 const tabsStyles = StyleSheet.create({
     container: {
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingTop: 12,
+        paddingBottom: 16,
         backgroundColor: "transparent",
     },
     tabBar: {
@@ -255,7 +254,7 @@ const tabsStyles = StyleSheet.create({
     },
     tab: {
         flex: 1,
-        paddingVertical: 10,
+        paddingVertical: 8,
         borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",
@@ -263,6 +262,7 @@ const tabsStyles = StyleSheet.create({
     activeTab: {
         backgroundColor: GOLD,
         shadowColor: GOLD,
+        paddingHorizontal: 12,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 8,
@@ -277,7 +277,7 @@ const tabsStyles = StyleSheet.create({
         marginRight: 2,
     },
     tabText: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: "500",
         color: "#666",
     },
