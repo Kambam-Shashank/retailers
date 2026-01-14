@@ -103,47 +103,83 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
         <View style={[previewStyles.previewContainer, { transform: [{ scale }] }]}>
             {/* Mini Header */}
             <View style={[previewStyles.miniHeader, {
-                justifyContent: config.brandAlignment === 'center' ? 'center' :
-                    config.brandAlignment === 'left' ? 'flex-start' : 'flex-end'
+                justifyContent: config.brandAlignment === 'center' ? 'center' : 'flex-start'
             }]}>
-                {config.showTime && config.brandAlignment !== 'left' && (
-                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                        <Text style={[previewStyles.miniTime, { color: config.textColor || "#FFF" }]}>
-                            {formatTime(new Date())}
-                        </Text>
-                    </View>
-                )}
+                {config.brandAlignment === 'right' ? (
+                    <>
+                        {/* Time on the Left */}
+                        {config.showTime && (
+                            <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                                <Text style={[previewStyles.miniTime, { color: config.textColor || "#FFF" }]}>
+                                    {formatTime(new Date())}
+                                </Text>
+                            </View>
+                        )}
 
-                <View style={[previewStyles.brandingContainer, alignmentStyle]}>
-                    {config.logoBase64 && config.logoPlacement === 'header' && (
-                        <Image
-                            source={{ uri: config.logoBase64 }}
-                            style={{ width: config.logoSize * 0.5, height: config.logoSize * 0.5, marginBottom: 4 }}
-                            resizeMode="contain"
-                        />
-                    )}
-                    {config.showShopName && (
-                        <Text
-                            style={[
-                                previewStyles.shopName,
-                                { color: config.textColor || "#FFFFFF" },
-                                config.fontTheme === "serif" && { fontFamily: "serif" },
-                                config.fontTheme === "classic" && { fontFamily: "monospace" },
-                            ]}
-                        >
-                            {config.shopName || "Karatpay"}
-                        </Text>
-                    )}
-                </View>
+                        {/* Branding on the Right */}
+                        <View style={[previewStyles.brandingContainer, alignmentStyle]}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                {config.showShopName && (
+                                    <Text
+                                        style={[
+                                            previewStyles.shopName,
+                                            { color: config.textColor || "#FFFFFF" },
+                                            config.fontTheme === "serif" && { fontFamily: "serif" },
+                                            config.fontTheme === "classic" && { fontFamily: "monospace" },
+                                        ]}
+                                    >
+                                        {config.shopName || "Karatpay"}
+                                    </Text>
+                                )}
+                                {config.logoBase64 && config.logoPlacement === 'header' && (
+                                    <Image
+                                        source={{ uri: config.logoBase64 }}
+                                        style={{ width: config.logoSize * 0.6, height: config.logoSize * 0.6 }}
+                                        resizeMode="contain"
+                                    />
+                                )}
+                            </View>
+                        </View>
+                    </>
+                ) : (
+                    <>
+                        {/* Branding on the Left */}
+                        <View style={[previewStyles.brandingContainer, alignmentStyle]}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                {config.logoBase64 && config.logoPlacement === 'header' && (
+                                    <Image
+                                        source={{ uri: config.logoBase64 }}
+                                        style={{ width: config.logoSize * 0.6, height: config.logoSize * 0.6 }}
+                                        resizeMode="contain"
+                                    />
+                                )}
+                                {config.showShopName && (
+                                    <Text
+                                        style={[
+                                            previewStyles.shopName,
+                                            { color: config.textColor || "#FFFFFF" },
+                                            config.fontTheme === "serif" && { fontFamily: "serif" },
+                                            config.fontTheme === "classic" && { fontFamily: "monospace" },
+                                        ]}
+                                    >
+                                        {config.shopName || "Karatpay"}
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
 
-                {config.showTime && config.brandAlignment === 'left' && (
-                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                        <Text style={[previewStyles.miniTime, { color: config.textColor || "#FFF" }]}>
-                            {formatTime(new Date())}
-                        </Text>
-                    </View>
+                        {config.brandAlignment !== 'center' && <View style={{ flex: 1 }} />}
+
+                        {/* Time on the Right */}
+                        {config.showTime && (
+                            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                                <Text style={[previewStyles.miniTime, { color: config.textColor || "#FFF" }]}>
+                                    {formatTime(new Date())}
+                                </Text>
+                            </View>
+                        )}
+                    </>
                 )}
-                {config.brandAlignment === 'center' && <View style={{ flex: 1 }} />}
             </View>
 
             {/* Mini Card */}
@@ -310,7 +346,7 @@ const previewStyles = StyleSheet.create({
         marginBottom: 15,
     },
     brandingContainer: {
-        flex: 2,
+        // flex: 2 removed to allow spacer to work
     },
     miniTime: {
         fontSize: 10,

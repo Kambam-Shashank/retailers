@@ -139,138 +139,51 @@ export const DisplayCustomizationCard: React.FC<DisplayCustomizationCardProps> =
         <View style={displayStyles.card}>
             <Text style={displayStyles.cardTitle}>Display Options</Text>
             <Text style={displayStyles.cardSubtitle}>
-                Customize layout, fonts, and visibility
+                Customize header and branding settings
             </Text>
 
             <View style={displayStyles.section}>
-                <Text style={displayStyles.sectionTitle}>Font Style</Text>
+                <Text style={displayStyles.sectionTitle}>Price Formatting</Text>
                 <View style={displayStyles.row}>
-                    {(["modern", "classic", "serif"] as const).map((theme) => (
+                    {[0, 1, 2].map((digits) => (
                         <TouchableOpacity
-                            key={theme}
+                            key={digits}
                             style={[
                                 displayStyles.optionButton,
-                                fontTheme === theme && displayStyles.optionButtonActive,
+                                priceDecimalPlaces === digits && displayStyles.optionButtonActive,
                             ]}
-                            onPress={() => onUpdate("fontTheme", theme)}
+                            onPress={() => onUpdate("priceDecimalPlaces", digits)}
                         >
                             <Text
                                 style={[
                                     displayStyles.optionText,
-                                    fontTheme === theme && displayStyles.optionTextActive,
-                                    {
-                                        fontFamily:
-                                            theme === "serif"
-                                                ? "serif"
-                                                : theme === "classic"
-                                                    ? "monospace"
-                                                    : "System",
-                                    },
+                                    priceDecimalPlaces === digits && displayStyles.optionTextActive,
                                 ]}
                             >
-                                {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                                {digits} Decimal{digits !== 1 ? "s" : ""}
                             </Text>
                         </TouchableOpacity>
                     ))}
                 </View>
             </View>
-
-            <View style={displayStyles.section}>
-                <Text style={displayStyles.sectionTitle}>Card Layout</Text>
-                <View style={displayStyles.row}>
-                    {(["boxed", "minimal"] as const).map((style) => (
-                        <TouchableOpacity
-                            key={style}
-                            style={[
-                                displayStyles.optionButton,
-                                cardStyle === style && displayStyles.optionButtonActive,
-                            ]}
-                            onPress={() => onUpdate("cardStyle", style)}
-                        >
-                            <Text
-                                style={[
-                                    displayStyles.optionText,
-                                    cardStyle === style && displayStyles.optionTextActive,
-                                ]}
-                            >
-                                {style.charAt(0).toUpperCase() + style.slice(1)}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
-
-            <View style={displayStyles.section}>
-                <Text style={displayStyles.sectionTitle}>Branding Alignment</Text>
-                <View style={displayStyles.row}>
-                    {(["left", "center", "right"] as const).map((align) => (
-                        <TouchableOpacity
-                            key={align}
-                            style={[
-                                displayStyles.optionButton,
-                                brandAlignment === align && displayStyles.optionButtonActive,
-                            ]}
-                            onPress={() => onUpdate("brandAlignment", align)}
-                        >
-                            <Text
-                                style={[
-                                    displayStyles.optionText,
-                                    brandAlignment === align && displayStyles.optionTextActive,
-                                ]}
-                            >
-                                {align.charAt(0).toUpperCase() + align.slice(1)}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
-
-            <View style={displayStyles.section}>
-                <Text style={displayStyles.sectionTitle}>Header Visibility</Text>
-                {[
-                    { label: "Show Time", key: "showTime", val: showTime },
-                    { label: "Show Shop Name", key: "showShopName", val: showShopName },
-                ].map((item) => (
-                    <View style={displayStyles.toggleRow} key={item.key}>
-                        <Text style={displayStyles.toggleLabel}>{item.label}</Text>
-                        <TouchableOpacity
-                            style={[displayStyles.switchTrack, item.val && displayStyles.switchTrackOn]}
-                            onPress={() => onUpdate(item.key, !item.val)}
-                            activeOpacity={0.8}
-                        >
-                            <View style={[displayStyles.switchThumb, item.val && displayStyles.switchThumbOn]} />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </View>
-
-            <View style={displayStyles.section}>
-                <Text style={displayStyles.sectionTitle}>Rows Visible</Text>
-                {[
-                    { label: "24K Gold (999)", key: "showGold24k", val: showGold24k },
-                    { label: "22K Gold (916)", key: "showGold22k", val: showGold22k },
-                    { label: "Silver (999)", key: "showSilver999", val: showSilver999 },
-                    { label: "Silver (925)", key: "showSilver925", val: showSilver925 },
-                ].map((item) => (
-                    <View style={displayStyles.toggleRow} key={item.key}>
-                        <Text style={displayStyles.toggleLabel}>{item.label}</Text>
-                        <TouchableOpacity
-                            style={[displayStyles.switchTrack, item.val && displayStyles.switchTrackOn]}
-                            onPress={() => onUpdate(item.key, !item.val)}
-                            activeOpacity={0.8}
-                        >
-                            <View style={[displayStyles.switchThumb, item.val && displayStyles.switchThumbOn]} />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </View>
-
 
         </View>
     );
 };
 
 // ====== ColorCustomizationCard ======
+const THEME_PRESETS = [
+    { name: "Classic Gold", bg: "#FFFDF5", text: "#5D4037", price: "#E6A119", cardBg: "#FFFFFF" },
+    { name: "Royal Blue", bg: "#F0F9FF", text: "#1E3A8A", price: "#3B82F6", cardBg: "#FFFFFF" },
+    { name: "Modern Dark", bg: "#0F172A", text: "#F8FAFC", price: "#94A3B8", cardBg: "#1E293B" },
+    { name: "Fresh Green", bg: "#F0FDF4", text: "#14532D", price: "#22C55E", cardBg: "#FFFFFF" },
+    { name: "Rose Gold", bg: "#FFF1F2", text: "#881337", price: "#E11D48", cardBg: "#FFFFFF" },
+    { name: "Midnight", bg: "#1E1B4B", text: "#E0E7FF", price: "#818CF8", cardBg: "#312E81" },
+    { name: "Sunset", bg: "#FFF7ED", text: "#7C2D12", price: "#F97316", cardBg: "#FFFFFF" },
+    { name: "Ocean", bg: "#F0FDFA", text: "#134E4A", price: "#0D9488", cardBg: "#FFFFFF" },
+    { name: "Lavender", bg: "#F5F3FF", text: "#4C1D95", price: "#8B5CF6", cardBg: "#FFFFFF" },
+];
+
 interface ColorCustomizationCardProps {
     backgroundColor: string;
     textColor: string;
@@ -366,26 +279,41 @@ export const ColorCustomizationCard: React.FC<ColorCustomizationCardProps> = ({
             </View>
 
             <View style={colorStyles.presetsSection}>
-                <Text style={colorStyles.presetsTitle}>Quick Presets</Text>
-                <View style={colorStyles.presetsRow}>
-                    {[
-                        { name: "Elegant Dark", bg: "#0A0A0A", text: "#E8E8E8", price: "#FFD700" },
-                        { name: "Royal Blue", bg: "#1A1F3A", text: "#F0F0F0", price: "#FFA500" },
-                        { name: "Deep Purple", bg: "#1C0A28", text: "#E6D5F0", price: "#FFB84D" },
-                    ].map(p => (
-                        <TouchableOpacity
-                            key={p.name}
-                            style={colorStyles.presetButton}
-                            onPress={() => {
-                                onColorChange("backgroundColor", p.bg);
-                                onColorChange("textColor", p.text);
-                                onColorChange("priceColor", p.price);
-                            }}
-                        >
-                            <Text style={colorStyles.presetText}>{p.name}</Text>
-                        </TouchableOpacity>
-                    ))}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                    <Text style={{ fontSize: 24, marginRight: 8 }}>🎨</Text>
+                    <Text style={colorStyles.presetsTitle}>Theme Presets</Text>
                 </View>
+                <Text style={colorStyles.presetsSubtitle}>Choose a preset theme for your display</Text>
+
+                <View style={colorStyles.presetsGrid}>
+                    {THEME_PRESETS.map((p) => {
+                        const isActive = backgroundColor === p.bg && textColor === p.text && priceColor === p.price;
+                        return (
+                            <TouchableOpacity
+                                key={p.name}
+                                style={[
+                                    colorStyles.presetCard,
+                                    { backgroundColor: p.bg },
+                                    isActive && { borderColor: GOLD, borderWidth: 2 }
+                                ]}
+                                onPress={() => {
+                                    onColorChange("backgroundColor", p.bg);
+                                    onColorChange("textColor", p.text);
+                                    onColorChange("priceColor", p.price);
+                                    onColorChange("cardBackgroundColor", p.cardBg);
+                                }}
+                            >
+                                <Text style={[colorStyles.presetCardName, { color: p.text }]}>{p.name}</Text>
+                                <View style={colorStyles.colorDotsRow}>
+                                    <View style={[colorStyles.colorDot, { backgroundColor: p.text }]} />
+                                    <View style={[colorStyles.colorDot, { backgroundColor: p.price, opacity: 0.6 }]} />
+                                    <View style={[colorStyles.colorDot, { backgroundColor: p.cardBg, borderColor: '#DDD', borderWidth: 1 }]} />
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+
                 <TouchableOpacity style={colorStyles.randomButton} onPress={handleRandomize}>
                     <Text style={colorStyles.randomText}>Random Theme</Text>
                 </TouchableOpacity>
@@ -633,9 +561,9 @@ const displayStyles = StyleSheet.create({
     },
     toggleRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
         marginBottom: 16,
+        gap: 12,
     },
     toggleLabel: {
         color: "#1A1A1A",
@@ -746,29 +674,46 @@ const colorStyles = StyleSheet.create({
         borderTopColor: "#EEEEEE",
     },
     presetsTitle: {
-        fontSize: 13,
-        color: "#666",
-        marginBottom: 16,
-        fontWeight: "600",
+        fontSize: 22,
+        color: "#1E293B",
+        fontWeight: "700",
     },
-    presetsRow: {
+    presetsSubtitle: {
+        fontSize: 14,
+        color: "#64748B",
+        marginBottom: 20,
+    },
+    presetsGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 10,
-        marginBottom: 16,
+        justifyContent: "space-between",
+        gap: 12,
+        marginBottom: 24,
     },
-    presetButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        backgroundColor: "#F9F9F9",
-        borderRadius: 8,
+    presetCard: {
+        width: "48%",
+        padding: 16,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: "#E0E0E0",
+        borderColor: "#E2E8F0",
+        alignItems: "center",
+        justifyContent: "center",
+        aspectRatio: 1.6,
     },
-    presetText: {
-        color: "#1A1A1A",
-        fontSize: 13,
-        fontWeight: "500",
+    presetCardName: {
+        fontSize: 15,
+        fontWeight: "600",
+        marginBottom: 8,
+        textAlign: "center",
+    },
+    colorDotsRow: {
+        flexDirection: "row",
+        gap: 6,
+    },
+    colorDot: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
     },
     randomButton: {
         paddingHorizontal: 18,

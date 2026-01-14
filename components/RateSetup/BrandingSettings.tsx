@@ -17,6 +17,7 @@ interface ShopBrandingCardProps {
     logoSize: number;
     logoPlacement: "header" | "card";
     logoOpacity: number;
+    brandAlignment: "left" | "center" | "right";
     onShopNameChange: (text: string) => void;
     onShopNameBlur: () => void;
     onPickLogo: () => void;
@@ -31,6 +32,7 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
     logoBase64,
     logoSize,
     logoPlacement,
+    brandAlignment,
     onShopNameChange,
     onShopNameBlur,
     onPickLogo,
@@ -45,24 +47,29 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
             </View>
 
             <View style={brandingStyles.formContent}>
-                <Text style={brandingStyles.label}>Shop Name *</Text>
                 <View style={brandingStyles.shopNameRow}>
-                    <View style={brandingStyles.inputWrapper}>
-                        <TextInput
-                            placeholder="Enter shop name"
-                            placeholderTextColor="#A3A3A3"
-                            style={brandingStyles.textInput}
-                            value={shopName}
-                            onChangeText={onShopNameChange}
-                            onBlur={onShopNameBlur}
-                        />
+                    <View style={{ flex: 1 }}>
+                        <Text style={brandingStyles.label}>Shop Name *</Text>
+                        <View style={brandingStyles.inputWrapper}>
+                            <TextInput
+                                placeholder="Enter shop name"
+                                placeholderTextColor="#A3A3A3"
+                                style={brandingStyles.textInput}
+                                value={shopName}
+                                onChangeText={onShopNameChange}
+                                onBlur={onShopNameBlur}
+                            />
+                        </View>
                     </View>
-                    <TouchableOpacity style={brandingStyles.uploadButton} onPress={onPickLogo}>
-                        <MaterialCommunityIcons name="upload" size={18} color="#000" />
-                        <Text style={brandingStyles.uploadButtonText}>
-                            {logoBase64 ? "Change Logo" : "Upload Logo"}
-                        </Text>
-                    </TouchableOpacity>
+                    <View style={{ width: 140 }}>
+                        <Text style={brandingStyles.label}>Logo</Text>
+                        <TouchableOpacity style={brandingStyles.uploadButton} onPress={onPickLogo}>
+                            <MaterialCommunityIcons name="upload" size={18} color="#000" />
+                            <Text style={brandingStyles.uploadButtonText} numberOfLines={1}>
+                                {logoBase64 ? "Change" : "Upload"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <View style={brandingStyles.gridRow}>
@@ -94,6 +101,25 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
                                 value={phone}
                                 onChangeText={(val) => onUpdate({ shopPhone: val })}
                             />
+                        </View>
+                    </View>
+                </View>
+
+                <View style={brandingStyles.controlRow}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={brandingStyles.label}>Brand Alignment</Text>
+                        <View style={brandingStyles.toggleContainer}>
+                            {(["left", "center", "right"] as const).map((align) => (
+                                <TouchableOpacity
+                                    key={align}
+                                    onPress={() => onUpdate({ brandAlignment: align })}
+                                    style={[brandingStyles.toggleButton, brandAlignment === align && brandingStyles.activeToggle]}
+                                >
+                                    <Text style={[brandingStyles.toggleText, brandAlignment === align && brandingStyles.activeToggleText]}>
+                                        {align.charAt(0).toUpperCase() + align.slice(1)}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
                         </View>
                     </View>
                 </View>
@@ -343,7 +369,7 @@ const brandingStyles = StyleSheet.create({
         gap: 16,
     },
     label: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: "600",
         color: "#1A1A1A",
         marginBottom: 8,
@@ -354,9 +380,9 @@ const brandingStyles = StyleSheet.create({
         gap: 4,
     },
     shopNameRow: {
-        flexDirection: "column",
+        flexDirection: "row",
         gap: 12,
-        marginBottom: 8,
+        alignItems: "flex-start",
     },
     inputWrapper: {
         flex: 1,
@@ -386,12 +412,12 @@ const brandingStyles = StyleSheet.create({
         gap: 6,
     },
     uploadButtonText: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: "600",
         color: "#1A1A1A",
     },
     gridRow: {
-        flexDirection: "column",
+        flexDirection: "row",
         gap: 12,
     },
     gridItem: {
@@ -404,8 +430,9 @@ const brandingStyles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: "#EEE",
         flexDirection: "row",
+        flexWrap: "wrap",
         gap: 20,
-        alignItems: 'center',
+        alignItems: 'flex-start',
     },
     logoWrapper: {
         width: 80,
@@ -430,17 +457,18 @@ const brandingStyles = StyleSheet.create({
     },
     logoControls: {
         flex: 1,
-        gap: 12,
+        minWidth: 200,
+        gap: 16,
     },
     controlRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 8,
     },
     controlLabel: {
-        fontSize: 13,
+        fontSize: 14,
         color: "#666",
-        fontWeight: "500",
+        fontWeight: "600",
     },
     sizeOptions: {
         flexDirection: "row",
@@ -468,21 +496,26 @@ const brandingStyles = StyleSheet.create({
     },
     toggleContainer: {
         flexDirection: "row",
-        backgroundColor: "#F9F9F9",
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
-        overflow: "hidden",
+        flexWrap: "wrap",
+        gap: 8,
+        marginTop: 4,
     },
     toggleButton: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#E0E0E0",
+        backgroundColor: "#F9F9F9",
+        minWidth: 80,
+        alignItems: "center",
     },
     activeToggle: {
         backgroundColor: GOLD,
+        borderColor: GOLD,
     },
     toggleText: {
-        fontSize: 11,
+        fontSize: 14,
         fontWeight: "600",
         color: "#666",
     },

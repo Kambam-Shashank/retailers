@@ -20,8 +20,13 @@ interface PurityLabelsCardProps {
     gold22kLabel: string;
     silver999Label: string;
     silver925Label: string;
+    showGold24k: boolean;
+    showGold22k: boolean;
+    showSilver999: boolean;
+    showSilver925: boolean;
     isDesktop: boolean;
     onLabelChange: (key: string, value: string) => void;
+    onUpdate: (key: string, value: boolean) => void;
     onLabelsBlur: () => void;
 }
 
@@ -30,20 +35,40 @@ export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
     gold22kLabel,
     silver999Label,
     silver925Label,
+    showGold24k,
+    showGold22k,
+    showSilver999,
+    showSilver925,
     isDesktop,
     onLabelChange,
+    onUpdate,
     onLabelsBlur,
 }) => {
+    const renderToggle = (key: string, value: boolean) => (
+        <TouchableOpacity
+            style={[mcStyles.switchTrack, value && mcStyles.switchTrackOn, { width: 40, height: 22 }]}
+            onPress={() => onUpdate(key, !value)}
+            activeOpacity={0.8}
+        >
+            <View style={[mcStyles.switchThumb, value && mcStyles.switchThumbOn, { width: 16, height: 16, borderRadius: 8 }]} />
+        </TouchableOpacity>
+    );
+
     return (
         <View style={rateStyles.card}>
-            <Text style={rateStyles.cardTitle}>Custom Purity Labels</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <Text style={rateStyles.cardTitle}>Custom Purity Labels</Text>
+            </View>
             <Text style={rateStyles.cardSubtitle}>
-                Customize how each metal category is displayed
+                Customize how each metal category is displayed and decide visibility
             </Text>
 
             <View style={[rateStyles.purityRow, isDesktop && rateStyles.rowDesktop]}>
                 <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <Text style={rateStyles.labelRowTitle}>24K Gold (999)</Text>
+                    <View style={rateStyles.fieldHeader}>
+                        <Text style={rateStyles.labelRowTitle}>24K Gold (999)</Text>
+                        {renderToggle("showGold24k", showGold24k)}
+                    </View>
                     <View style={rateStyles.inputWrapper}>
                         <TextInput
                             placeholder={DEFAULT_LABELS.gold24k}
@@ -57,7 +82,10 @@ export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
                 </View>
 
                 <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <Text style={rateStyles.labelRowTitle}>22K Gold (916)</Text>
+                    <View style={rateStyles.fieldHeader}>
+                        <Text style={rateStyles.labelRowTitle}>22K Gold (916)</Text>
+                        {renderToggle("showGold22k", showGold22k)}
+                    </View>
                     <View style={rateStyles.inputWrapper}>
                         <TextInput
                             placeholder={DEFAULT_LABELS.gold22k}
@@ -73,7 +101,10 @@ export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
 
             <View style={[rateStyles.purityRow, isDesktop && rateStyles.rowDesktop]}>
                 <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <Text style={rateStyles.labelRowTitle}>Silver (999)</Text>
+                    <View style={rateStyles.fieldHeader}>
+                        <Text style={rateStyles.labelRowTitle}>Silver (999)</Text>
+                        {renderToggle("showSilver999", showSilver999)}
+                    </View>
                     <View style={rateStyles.inputWrapper}>
                         <TextInput
                             placeholder={DEFAULT_LABELS.silver999}
@@ -87,7 +118,10 @@ export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
                 </View>
 
                 <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <Text style={rateStyles.labelRowTitle}>Silver (925)</Text>
+                    <View style={rateStyles.fieldHeader}>
+                        <Text style={rateStyles.labelRowTitle}>Silver (925)</Text>
+                        {renderToggle("showSilver925", showSilver925)}
+                    </View>
                     <View style={rateStyles.inputWrapper}>
                         <TextInput
                             placeholder={DEFAULT_LABELS.silver925}
@@ -428,9 +462,14 @@ const rateStyles = StyleSheet.create({
         fontSize: 13,
         color: "#666",
         fontWeight: "600",
-        marginBottom: 8,
         textTransform: "uppercase",
         letterSpacing: 0.5,
+    },
+    fieldHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
     },
     inputWrapper: {
         borderWidth: 1,

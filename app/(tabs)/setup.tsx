@@ -16,7 +16,6 @@ import {
     CardStyleCard,
     ColorCustomizationCard,
     DisplayCustomizationCard,
-    ThemeCard
 } from "@/components/RateSetup/VisualSettings";
 
 import { useRateSetupBranding } from "@/customHooks/useRateSetupBranding";
@@ -134,7 +133,6 @@ export default function RateSetupScreen(): ReactElement {
                     </TouchableOpacity>
                     <View>
                         <Text style={styles.title}>Rate Setup</Text>
-                        <Text style={styles.subtitle}>Configure your rate display</Text>
                     </View>
                 </View>
 
@@ -187,6 +185,7 @@ export default function RateSetupScreen(): ReactElement {
                             logoSize={localConfig.logoSize}
                             logoPlacement={localConfig.logoPlacement}
                             logoOpacity={localConfig.logoOpacity}
+                            brandAlignment={localConfig.brandAlignment}
                             onShopNameChange={handleShopNameChange}
                             onShopNameBlur={onShopNameBlur}
                             onPickLogo={handlePickLogo}
@@ -200,35 +199,8 @@ export default function RateSetupScreen(): ReactElement {
                             }}
                         />
 
+                        <NotificationsCard config={localConfig} onUpdate={handleLocalUpdate} />
                         <RateStatusCard config={localConfig} onUpdate={handleLocalUpdate} />
-
-                        {/* Brand Alignment logic - showing it here as requested */}
-                        <View style={styles.alignmentCard}>
-                            <Text style={styles.cardTitleInternal}>Branding Alignment</Text>
-                            <View style={styles.row}>
-                                {(["left", "center", "right"] as const).map((align) => (
-                                    <TouchableOpacity
-                                        key={align}
-                                        style={[
-                                            styles.optionButton,
-                                            localConfig.brandAlignment === align &&
-                                            styles.optionButtonActive,
-                                        ]}
-                                        onPress={() => handleLocalUpdate({ brandAlignment: align })}
-                                    >
-                                        <Text
-                                            style={[
-                                                styles.optionText,
-                                                localConfig.brandAlignment === align &&
-                                                styles.optionTextActive,
-                                            ]}
-                                        >
-                                            {align.charAt(0).toUpperCase() + align.slice(1)}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </View>
                     </>
                 )}
 
@@ -241,8 +213,13 @@ export default function RateSetupScreen(): ReactElement {
                             gold22kLabel={gold22kLabel}
                             silver999Label={silver999Label}
                             silver925Label={silver925Label}
+                            showGold24k={localConfig.showGold24k}
+                            showGold22k={localConfig.showGold22k}
+                            showSilver999={localConfig.showSilver999}
+                            showSilver925={localConfig.showSilver925}
                             isDesktop={isDesktop}
                             onLabelChange={(key, val) => updateLabels({ [key]: val })}
+                            onUpdate={(key, val) => handleLocalUpdate({ [key]: val })}
                             onLabelsBlur={onLabelsBlur}
                         />
 
@@ -261,7 +238,7 @@ export default function RateSetupScreen(): ReactElement {
                             onUpdate={handleLocalUpdate}
                         />
 
-                        <NotificationsCard
+                        <MakingChargesCard
                             config={localConfig}
                             onUpdate={handleLocalUpdate}
                         />
@@ -272,11 +249,6 @@ export default function RateSetupScreen(): ReactElement {
                     <>
                         <LivePreview config={localConfig} />
 
-                        <ThemeCard
-                            theme={localConfig.theme}
-                            layoutDensity={localConfig.layoutDensity}
-                            onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
-                        />
 
                         <DisplayCustomizationCard
                             fontTheme={localConfig.fontTheme}
@@ -368,8 +340,8 @@ const styles = StyleSheet.create({
         width: "100%",
         borderBottomWidth: 1,
         borderBottomColor: "#EEEEEE",
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
         paddingTop: Platform.OS === 'android' ? 40 : 60,
         backgroundColor: "#FFFFFF",
         justifyContent: "space-between",
@@ -382,15 +354,15 @@ const styles = StyleSheet.create({
         maxWidth: 1200,
     },
     title: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: "800",
         color: GOLD,
         letterSpacing: 0.5,
     },
     subtitle: {
-        fontSize: 15,
+        fontSize: 13,
         color: TEXT_MUTED,
-        marginTop: 6,
+        marginTop: 2,
         letterSpacing: 0.2,
     },
     buttonRow: {

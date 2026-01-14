@@ -1,7 +1,7 @@
 import { RateDisplayContent } from "@/components/RateDisplay/RateDisplayContent";
 import { RateConfig } from "@/contexts/RateConfigContext";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 // Mock data for preview
 const MOCK_RATES = {
@@ -29,38 +29,37 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ config }) => {
 
     return (
         <View style={styles.previewContainer}>
-            <View style={styles.previewHeader}>
-                <Text style={styles.previewTitle}>✨ Live Preview</Text>
-                <Text style={styles.previewSubtitle}>Changes update instantly</Text>
+            <View style={styles.outerHeader}>
+                <View style={styles.outerDot} />
+                <Text style={styles.outerTitle}>Live Preview</Text>
             </View>
 
             <View style={styles.previewContent}>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
+                <View style={styles.innerHeader}>
+                    <View style={styles.innerDot} />
+                    <Text style={styles.innerTitle}>LIVE PREVIEW</Text>
+                </View>
+
+                <View
+                    style={[
+                        styles.previewWrapper,
+                        { backgroundColor: config.backgroundColor || "#FFFFFF" }
+                    ]}
                 >
-                    <View
-                        style={[
-                            styles.previewWrapper,
-                            { backgroundColor: config.backgroundColor || "#FFFFFF" }
-                        ]}
-                    >
-                        <RateDisplayContent
-                            config={config}
-                            calculatedRates={MOCK_RATES}
-                            currentTime={new Date()}
-                            viewOnly={true}
-                            withGST={withGST}
-                            onToggleGST={() => setWithGST(!withGST)}
-                            onShare={() => { }}
-                            gold999Change={MOCK_PRICE_CHANGE}
-                            gold916Change={MOCK_PRICE_CHANGE}
-                            silver999Change={MOCK_PRICE_CHANGE}
-                            silver925Change={MOCK_PRICE_CHANGE}
-                        />
-                    </View>
-                </ScrollView>
+                    <RateDisplayContent
+                        config={config}
+                        calculatedRates={MOCK_RATES}
+                        currentTime={new Date()}
+                        viewOnly={true}
+                        withGST={withGST}
+                        onToggleGST={() => setWithGST(!withGST)}
+                        onShare={() => { }}
+                        gold999Change={MOCK_PRICE_CHANGE}
+                        gold916Change={MOCK_PRICE_CHANGE}
+                        silver999Change={MOCK_PRICE_CHANGE}
+                        silver925Change={MOCK_PRICE_CHANGE}
+                    />
+                </View>
             </View>
         </View>
     );
@@ -68,49 +67,69 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ config }) => {
 
 const styles = StyleSheet.create({
     previewContainer: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 16,
+        backgroundColor: "#F8FAF8",
+        borderRadius: 20,
         borderWidth: 1,
-        borderColor: "#EEEEEE",
+        borderColor: "#E2E8E2",
         marginHorizontal: 16,
         marginTop: 20,
         marginBottom: 10,
+        padding: 16,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
+        shadowRadius: 10,
+        elevation: 3,
     },
-    previewHeader: {
-        padding: 12,
-        backgroundColor: "#F9F9F9",
-        borderBottomWidth: 1,
-        borderBottomColor: "#EEEEEE",
+    outerHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
     },
-    previewTitle: {
-        fontSize: 14,
-        fontWeight: "700",
-        color: "#D4AF37",
-        marginBottom: 2,
+    outerDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#22C55E',
+        marginRight: 8,
     },
-    previewSubtitle: {
-        fontSize: 11,
-        color: "#666",
+    outerTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#1A1A1A',
     },
     previewContent: {
-        backgroundColor: "#F5F5F5",
-        height: 300,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 16,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
     },
-    scrollContent: {
-        paddingVertical: 16,
-        paddingHorizontal: 4,
+    innerHeader: {
+        backgroundColor: '#E2E8CE',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#D1D8BE',
+    },
+    innerDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#22C55E',
+        marginRight: 8,
+    },
+    innerTitle: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#1A1A1A',
+        letterSpacing: 0.5,
     },
     previewWrapper: {
-        borderRadius: 12,
-        overflow: "hidden",
-        borderWidth: 2,
-        borderColor: "#E0E0E0",
         width: "100%",
-        maxWidth: 380,
+        minHeight: 380,
+        overflow: "hidden",
     },
 });

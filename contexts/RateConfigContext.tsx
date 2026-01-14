@@ -74,6 +74,7 @@ export interface RateConfig {
   cardBorderRadius: number;
   cardBorderWidth: number;
   cardBorderColor: string;
+  cardBackgroundColor: string;
   // Logo customization
   logoSize: number;
   logoPlacement: "header" | "card";
@@ -85,15 +86,15 @@ interface RateConfigProviderProps {
 }
 
 const DEFAULT_CONFIG: RateConfig = {
-  shopName: "",
+  shopName: "karatpay",
   shopAddress: "",
   shopPhone: "",
   shopEmail: "",
   logoBase64: null,
-  gold24kLabel: "24K Gold (999)",
-  gold22kLabel: "22K Gold (916)",
-  silver999Label: "Silver (999)",
-  silver925Label: "Silver (925)",
+  gold24kLabel: "24K Gold",
+  gold22kLabel: "22K Gold",
+  silver999Label: "Pure Silver",
+  silver925Label: "925 Silver",
   gold24kMargin: 0,
   gold22kMargin: 0,
   silver999Margin: 0,
@@ -118,26 +119,27 @@ const DEFAULT_CONFIG: RateConfig = {
   ],
   ratesFrozen: false,
   frozenAt: null,
-  backgroundColor: "#FFFFFF",
-  textColor: "#1A1A1A",
+  backgroundColor: "#FFFDF5",
+  textColor: "#5D4037",
   priceColor: "#000000",
   theme: "modern",
   layoutDensity: "normal",
   fontTheme: "modern",
   cardStyle: "boxed",
-  showTime: true,
-  showDate: true,
+  showTime: false,
+  showDate: false,
   showShopName: true,
-  brandAlignment: "center",
+  brandAlignment: "left",
   showGold24k: true,
   showGold22k: true,
   showSilver999: true,
-  showSilver925: false,
+  showSilver925: true,
   priceDecimalPlaces: 0,
 
-  cardBorderRadius: 16,
-  cardBorderWidth: 1,
-  cardBorderColor: "#EEEEEE",
+  cardBorderRadius: 24,
+  cardBorderWidth: 0,
+  cardBorderColor: "transparent",
+  cardBackgroundColor: "#FFFFFF",
 
   logoSize: 80,
   logoPlacement: "header",
@@ -294,6 +296,7 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
         updates.cardBorderRadius = freshConfig.cardBorderRadius;
         updates.cardBorderWidth = freshConfig.cardBorderWidth;
         updates.cardBorderColor = freshConfig.cardBorderColor;
+        updates.cardBackgroundColor = freshConfig.cardBackgroundColor;
       }
 
       await updateConfig(updates);
