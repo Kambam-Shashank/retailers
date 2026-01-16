@@ -107,16 +107,6 @@ export const useRateCalculations = (
 
     const gold916Base = gold916FromWS || (gold999Base * 0.916);
 
-    console.log(
-      "Rate calculations - Gold 999 base:",
-      gold999Base,
-      "Gold 995 base:",
-      gold995Base,
-      "Gold 916 base:",
-      gold916Base
-    );
-    console.log("WebSocket data:", wsData);
-    console.log("External gold price:", externalGoldPrice);
 
     const silver999Base = externalSilverPrice || 0;
     const silver925Base = externalSilverPrice ? externalSilverPrice * 0.925 : 0;

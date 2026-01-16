@@ -13,7 +13,7 @@ import {
     View,
 } from "react-native";
 
-const GOLD = "#97773D"; // Requested color
+const GOLD = "#D4AF37"; // Bright Yellow/Gold
 
 export default function LoginScreen() {
     const [email, setEmail] = useState("");
@@ -73,7 +73,7 @@ export default function LoginScreen() {
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <ActivityIndicator color="#fff" />
+                        <ActivityIndicator color="#000" />
                     ) : (
                         <Text style={styles.buttonText}>Sign In</Text>
                     )}
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     buttonText: {
-        color: "#fff",
+        color: "#000",
         fontSize: 16,
         fontWeight: "bold",
     },

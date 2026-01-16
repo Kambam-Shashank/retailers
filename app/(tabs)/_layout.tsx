@@ -15,16 +15,18 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "#fff",
-          borderTopColor: "#333333",
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          borderTopWidth: 1,
+          borderTopColor: "#EEEEEE",
+          height: 65,
+          paddingBottom: 10,
+          paddingTop: 5,
         },
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: inactiveColor,
         tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "600",
+          fontSize: 11,
+          fontWeight: "700",
+          marginTop: -4,
         },
       }}
     >
@@ -32,8 +34,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Display",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="monitor-dashboard" color={color} size={size} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="monitor-dashboard" color={color} size={20} />
           ),
         }}
       />
@@ -41,8 +43,8 @@ export default function TabLayout() {
         name="setup"
         options={{
           title: "Setup",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cog" color={color} size={size} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="cog" color={color} size={20} />
           ),
         }}
       />

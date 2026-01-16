@@ -13,9 +13,7 @@ import {
 import { RateSetupTabs, TabType } from "@/components/RateSetup/SetupCore";
 import { ResetConfirmationModal, SaveSuccessModal } from "@/components/RateSetup/SetupModals";
 import {
-    CardStyleCard,
-    ColorCustomizationCard,
-    DisplayCustomizationCard,
+    ColorCustomizationCard
 } from "@/components/RateSetup/VisualSettings";
 
 import { useRateSetupBranding } from "@/customHooks/useRateSetupBranding";
@@ -237,11 +235,6 @@ export default function RateSetupScreen(): ReactElement {
                             config={localConfig}
                             onUpdate={handleLocalUpdate}
                         />
-
-                        <MakingChargesCard
-                            config={localConfig}
-                            onUpdate={handleLocalUpdate}
-                        />
                     </>
                 )}
 
@@ -249,33 +242,11 @@ export default function RateSetupScreen(): ReactElement {
                     <>
                         <LivePreview config={localConfig} />
 
-
-                        <DisplayCustomizationCard
-                            fontTheme={localConfig.fontTheme}
-                            cardStyle={localConfig.cardStyle}
-                            showTime={localConfig.showTime}
-                            showShopName={localConfig.showShopName}
-                            showDate={localConfig.showDate}
-                            brandAlignment={localConfig.brandAlignment}
-                            showGold24k={localConfig.showGold24k}
-                            showGold22k={localConfig.showGold22k}
-                            showSilver999={localConfig.showSilver999}
-                            showSilver925={localConfig.showSilver925}
-                            priceDecimalPlaces={localConfig.priceDecimalPlaces}
-                            onUpdate={(key, value) => handleLocalUpdate({ [key]: value })}
-                        />
-
                         <ColorCustomizationCard
                             backgroundColor={localConfig.backgroundColor}
                             textColor={localConfig.textColor}
                             priceColor={localConfig.priceColor}
                             onColorChange={handleColorChange}
-                        />
-
-                        <CardStyleCard
-                            cardBorderRadius={localConfig.cardBorderRadius}
-                            cardBorderColor={localConfig.cardBorderColor}
-                            onUpdate={handleLocalUpdate}
                         />
                     </>
                 )}

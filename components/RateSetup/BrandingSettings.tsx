@@ -1,44 +1,41 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { memo } from "react";
 import { Image, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { RateConfig } from "../../contexts/RateConfigContext";
+import { NotificationConfig, RateConfig } from "../../contexts/RateConfigContext";
 import { useRateSetupNotifications } from "../../customHooks/useRateSetupNotifications";
-import { NotificationConfig } from "../../types/type";
 
 const GOLD = "#D4AF37";
 const TEXT_MUTED = "#666666";
 
-// ====== ShopBrandingCard ======
 interface ShopBrandingCardProps {
-    shopName: string;
-    address?: string;
-    phone?: string;
-    logoBase64: string | null;
-    logoSize: number;
-    logoPlacement: "header" | "card";
-    logoOpacity: number;
-    brandAlignment: "left" | "center" | "right";
-    onShopNameChange: (text: string) => void;
-    onShopNameBlur: () => void;
-    onPickLogo: () => void;
-    onDeleteLogo: () => void;
-    onUpdate: (updates: Partial<any>) => void;
+    shopName: string,
+    address?: string,
+    phone?: string,
+    logoBase64: string | null,
+    logoSize: number,
+    logoPlacement?: "header" | "card",
+    logoOpacity?: number,
+    brandAlignment: "left" | "center" | "right",
+    onShopNameChange: (text: string) => void,
+    onShopNameBlur: () => void,
+    onPickLogo: () => void,
+    onDeleteLogo: () => void,
+    onUpdate: (updates: Partial<RateConfig>) => void,
 }
 
-export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
+export const ShopBrandingCard = ({
     shopName,
     address = "",
     phone = "",
     logoBase64,
     logoSize,
-    logoPlacement,
     brandAlignment,
     onShopNameChange,
     onShopNameBlur,
     onPickLogo,
     onDeleteLogo,
     onUpdate,
-}) => {
+}: ShopBrandingCardProps) => {
     return (
         <View style={brandingStyles.card}>
             <View style={brandingStyles.cardHeader}>
@@ -150,24 +147,6 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
                                     ))}
                                 </View>
                             </View>
-
-                            <View style={brandingStyles.controlRow}>
-                                <Text style={brandingStyles.controlLabel}>Placement</Text>
-                                <View style={brandingStyles.toggleContainer}>
-                                    <TouchableOpacity
-                                        onPress={() => onUpdate({ logoPlacement: "header" })}
-                                        style={[brandingStyles.toggleButton, logoPlacement === "header" && brandingStyles.activeToggle]}
-                                    >
-                                        <Text style={[brandingStyles.toggleText, logoPlacement === "header" && brandingStyles.activeToggleText]}>Header</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        onPress={() => onUpdate({ logoPlacement: "card" })}
-                                        style={[brandingStyles.toggleButton, logoPlacement === "card" && brandingStyles.activeToggle]}
-                                    >
-                                        <Text style={[brandingStyles.toggleText, logoPlacement === "card" && brandingStyles.activeToggleText]}>Inside Card</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
                         </View>
                     </View>
                 )}
@@ -176,15 +155,14 @@ export const ShopBrandingCard: React.FC<ShopBrandingCardProps> = ({
     );
 };
 
-// ====== BrandingPreviewModal ======
 interface BrandingPreviewModalProps {
     visible: boolean;
     onClose: () => void;
     shopName: string;
     logoBase64: string | null;
     logoSize: number;
-    logoPlacement: "header" | "card";
     logoOpacity: number;
+    logoPlacement?: "top" | "side";
 }
 
 export const BrandingPreviewModal: React.FC<BrandingPreviewModalProps> = ({
@@ -193,8 +171,8 @@ export const BrandingPreviewModal: React.FC<BrandingPreviewModalProps> = ({
     shopName,
     logoBase64,
     logoSize,
-    logoPlacement,
     logoOpacity,
+    logoPlacement,
 }) => {
     return (
         <Modal
@@ -213,38 +191,16 @@ export const BrandingPreviewModal: React.FC<BrandingPreviewModalProps> = ({
                     </View>
 
                     <View style={modalStyles.previewBox}>
-                        {logoPlacement === 'header' && (
-                            <View style={modalStyles.headerPreview}>
-                                {logoBase64 && (
-                                    <Image
-                                        source={{ uri: logoBase64 }}
-                                        style={{ width: logoSize, height: logoSize }}
-                                        resizeMode="contain"
-                                    />
-                                )}
-                                <Text style={modalStyles.previewShopNameHeader}>{shopName || "Karatpay"}</Text>
-                            </View>
-                        )}
-
-                        {logoPlacement === 'card' && (
-                            <View style={modalStyles.cardPreview}>
-                                {logoBase64 && (
-                                    <Image
-                                        source={{ uri: logoBase64 }}
-                                        style={{
-                                            width: logoSize * 1.5,
-                                            height: logoSize * 1.5,
-                                            opacity: logoOpacity,
-                                            marginBottom: 10
-                                        }}
-                                        resizeMode="contain"
-                                    />
-                                )}
-                                <Text style={modalStyles.previewShopNameCard}>{shopName || "Karatpay"}</Text>
-                                <View style={modalStyles.previewContentLine} />
-                                <View style={modalStyles.previewContentLine} />
-                            </View>
-                        )}
+                        <View style={modalStyles.headerPreview}>
+                            {logoBase64 && (
+                                <Image
+                                    source={{ uri: logoBase64 }}
+                                    style={{ width: logoSize, height: logoSize, opacity: logoOpacity }}
+                                    resizeMode="contain"
+                                />
+                            )}
+                            <Text style={modalStyles.previewShopNameHeader}>{shopName || "Karatpay"}</Text>
+                        </View>
                     </View>
 
                     <Text style={modalStyles.previewHint}>This is a scaled-down demo of your actual branding</Text>
@@ -338,7 +294,6 @@ export const NotificationsCard: React.FC<NotificationsCardProps> = ({ config, on
     );
 };
 
-// ====== Styles ======
 const brandingStyles = StyleSheet.create({
     card: {
         backgroundColor: "#FFFFFF",
@@ -578,37 +533,10 @@ const modalStyles = StyleSheet.create({
         alignItems: "center",
         gap: 15,
     },
-    cardPreview: {
-        width: "100%",
-        alignItems: "center",
-        backgroundColor: "#FFFFFF",
-        padding: 25,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#EEEEEE",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 3,
-    },
     previewShopNameHeader: {
         color: "#1A1A1A",
         fontSize: 28,
         fontWeight: "bold",
-    },
-    previewShopNameCard: {
-        color: "#1A1A1A",
-        fontSize: 22,
-        fontWeight: "bold",
-        marginBottom: 15,
-    },
-    previewContentLine: {
-        width: "100%",
-        height: 10,
-        backgroundColor: "#F0F0F0",
-        borderRadius: 5,
-        marginVertical: 6,
     },
     previewHint: {
         fontSize: 13,

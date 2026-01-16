@@ -13,7 +13,7 @@ import {
     View,
 } from "react-native";
 
-const GOLD = "#97773D"; // Requested color
+const GOLD = "#D4AF37"; // Bright Yellow/Gold
 
 export default function SignupScreen() {
     const [email, setEmail] = useState("");
@@ -88,7 +88,7 @@ export default function SignupScreen() {
                     disabled={isLoading}
                 >
                     {isLoading ? (
-                        <ActivityIndicator color="#fff" />
+                        <ActivityIndicator color="#000" />
                     ) : (
                         <Text style={styles.buttonText}>Sign Up</Text>
                     )}
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     buttonText: {
-        color: "#fff",
+        color: "#000",
         fontSize: 16,
         fontWeight: "bold",
     },

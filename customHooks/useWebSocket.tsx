@@ -39,16 +39,11 @@ export default function useWebSocket(uri: string) {
 
       ws.onopen = () => {
         setIsConnected(true);
-        // console.log("connected to karatpay");
       };
 
       ws.onmessage = (event) => {
         try {
           const parsedData = JSON.parse(event.data);
-          console.log("=== WEBSOCKET DATA FROM live.karatpay.in ===> ", {
-            raw: parsedData,
-            timestamp: new Date().toISOString(),
-          });
 
           if (parsedData && typeof parsedData === "object") {
             let validData: GoldPriceData | null = null;
@@ -70,7 +65,6 @@ export default function useWebSocket(uri: string) {
             }
 
             if (validData) {
-              console.log(validData)
               setData(validData);
               setLastValidData(validData);
             }
@@ -79,7 +73,6 @@ export default function useWebSocket(uri: string) {
           }
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
-          console.log("Raw message data:", event.data);
         }
       };
       ws.onerror = () => {
@@ -87,7 +80,6 @@ export default function useWebSocket(uri: string) {
       };
       ws.onclose = () => {
         setIsConnected(false);
-        // console.log("karatpay connection closed, attempting to reconnect...");
         setTimeout(connect, 3000);
       };
     } catch (error) {

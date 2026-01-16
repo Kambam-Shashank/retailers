@@ -77,9 +77,10 @@ export interface RateConfig {
   cardBackgroundColor: string;
   // Logo customization
   logoSize: number;
-  logoPlacement: "header" | "card";
   logoOpacity: number;
+  logoPlacement: "header" | "card";
 }
+
 
 interface RateConfigProviderProps {
   children: ReactNode;
@@ -142,8 +143,8 @@ const DEFAULT_CONFIG: RateConfig = {
   cardBackgroundColor: "#FFFFFF",
 
   logoSize: 80,
-  logoPlacement: "header",
   logoOpacity: 1,
+  logoPlacement: "header",
 };
 
 interface RateConfigContextType {
@@ -249,7 +250,6 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
         updates.shopEmail = freshConfig.shopEmail;
         updates.logoBase64 = freshConfig.logoBase64;
         updates.logoSize = freshConfig.logoSize;
-        updates.logoPlacement = freshConfig.logoPlacement;
         updates.logoOpacity = freshConfig.logoOpacity;
         updates.brandAlignment = freshConfig.brandAlignment;
         updates.notifications = freshConfig.notifications;

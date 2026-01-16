@@ -69,9 +69,10 @@ const DEFAULT_CONFIG: RateConfig = {
     cardBorderRadius: 16,
     cardBorderWidth: 1,
     cardBorderColor: "#EEEEEE",
+    cardBackgroundColor: "#FFFFFF",
     logoSize: 80,
-    logoPlacement: "header",
     logoOpacity: 1,
+    logoPlacement: "header",
 };
 
 export default function SharedRateView() {

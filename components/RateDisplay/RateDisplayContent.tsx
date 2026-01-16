@@ -89,21 +89,65 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 {config.brandAlignment === 'right' ? (
                     <>
                         {/* Action Buttons on the Left */}
-                        <View style={styles.headerRight}>
-                            <TouchableOpacity onPress={onShare} style={styles.iconButton}>
-                                <Feather name="share-2" size={20} color="#5D4037" />
-                            </TouchableOpacity>
-                            {!viewOnly && onSetupPress && (
-                                <TouchableOpacity onPress={onSetupPress} style={styles.iconButton}>
-                                    <Feather name="settings" size={20} color="#5D4037" />
+                        <View style={[styles.actionColumn, { alignItems: 'flex-start' }]}>
+                            <View style={styles.headerRight}>
+                                <TouchableOpacity onPress={onShare} style={styles.iconButton}>
+                                    <Feather name="share-2" size={20} color="#5D4037" />
                                 </TouchableOpacity>
-                            )}
+                                {!viewOnly && onSetupPress && (
+                                    <TouchableOpacity onPress={onSetupPress} style={styles.iconButton}>
+                                        <Feather name="settings" size={20} color="#5D4037" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                            <View style={[styles.gstToggleRow, { alignSelf: 'flex-start' }]}>
+                                <TouchableOpacity
+                                    onPress={onToggleGST}
+                                    activeOpacity={0.8}
+                                    style={[
+                                        styles.switchTrack,
+                                        {
+                                            backgroundColor: withGST ? (config.priceColor || '#E6A119') : '#EEEEEE',
+                                            borderColor: withGST ? (config.priceColor || '#E6A119') : '#E0E0E0'
+                                        }
+                                    ]}
+                                >
+                                    <View style={[styles.switchThumb, withGST && styles.switchThumbOn]} />
+                                </TouchableOpacity>
+                                <View
+                                    style={[
+                                        styles.gstToggle,
+                                        {
+                                            backgroundColor: withGST ? (config.priceColor || '#E6A119') : (config.cardBackgroundColor || '#FFFFFF'),
+                                            borderColor: withGST ? (config.priceColor || '#E6A119') : '#E0E0E0'
+                                        }
+                                    ]}
+                                >
+                                    <Text style={[
+                                        styles.gstToggleText,
+                                        { color: withGST ? '#FFFFFF' : (config.textColor || '#5D4037') }
+                                    ]}>
+                                        {withGST ? "With GST" : "Without GST"}
+                                    </Text>
+                                </View>
+                            </View>
                         </View>
 
                         <View style={{ flex: 1 }} />
 
                         {/* Branding on the Right */}
                         <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+                            {config.logoBase64 && (
+                                <Image
+                                    source={{ uri: config.logoBase64 }}
+                                    style={{
+                                        width: Math.min(config.logoSize * 1.5, width * 0.4),
+                                        height: Math.min(config.logoSize, 80),
+                                        opacity: config.logoOpacity || 1
+                                    }}
+                                    resizeMode="contain"
+                                />
+                            )}
                             <Text
                                 style={[
                                     styles.brandName,
@@ -116,17 +160,6 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                             >
                                 {config.shopName || "karatpay"}
                             </Text>
-                            {config.logoBase64 && (
-                                <Image
-                                    source={{ uri: config.logoBase64 }}
-                                    style={{
-                                        width: Math.min(config.logoSize * 1.5, width * 0.4),
-                                        height: Math.min(config.logoSize, 80),
-                                        opacity: config.logoOpacity || 1
-                                    }}
-                                    resizeMode="contain"
-                                />
-                            )}
                         </View>
                     </>
                 ) : (
@@ -168,15 +201,48 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                         {config.brandAlignment !== 'center' && <View style={{ flex: 1 }} />}
 
                         {/* Action Buttons on the Right */}
-                        <View style={styles.headerRight}>
-                            <TouchableOpacity onPress={onShare} style={styles.iconButton}>
-                                <Feather name="share-2" size={20} color="#5D4037" />
-                            </TouchableOpacity>
-                            {!viewOnly && onSetupPress && (
-                                <TouchableOpacity onPress={onSetupPress} style={styles.iconButton}>
-                                    <Feather name="settings" size={20} color="#5D4037" />
+                        <View style={[styles.actionColumn, { alignItems: 'flex-end' }]}>
+                            <View style={styles.headerRight}>
+                                <TouchableOpacity onPress={onShare} style={styles.iconButton}>
+                                    <Feather name="share-2" size={20} color="#5D4037" />
                                 </TouchableOpacity>
-                            )}
+                                {!viewOnly && onSetupPress && (
+                                    <TouchableOpacity onPress={onSetupPress} style={styles.iconButton}>
+                                        <Feather name="settings" size={20} color="#5D4037" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                            <View style={[styles.gstToggleRow, { alignSelf: 'flex-end' }]}>
+                                <TouchableOpacity
+                                    onPress={onToggleGST}
+                                    activeOpacity={0.8}
+                                    style={[
+                                        styles.switchTrack,
+                                        {
+                                            backgroundColor: withGST ? (config.priceColor || '#E6A119') : '#EEEEEE',
+                                            borderColor: withGST ? (config.priceColor || '#E6A119') : '#E0E0E0'
+                                        }
+                                    ]}
+                                >
+                                    <View style={[styles.switchThumb, withGST && styles.switchThumbOn]} />
+                                </TouchableOpacity>
+                                <View
+                                    style={[
+                                        styles.gstToggle,
+                                        {
+                                            backgroundColor: withGST ? (config.priceColor || '#E6A119') : (config.cardBackgroundColor || '#FFFFFF'),
+                                            borderColor: withGST ? (config.priceColor || '#E6A119') : '#E0E0E0'
+                                        }
+                                    ]}
+                                >
+                                    <Text style={[
+                                        styles.gstToggleText,
+                                        { color: withGST ? '#FFFFFF' : (config.textColor || '#5D4037') }
+                                    ]}>
+                                        {withGST ? "With GST" : "Without GST"}
+                                    </Text>
+                                </View>
+                            </View>
                         </View>
                     </>
                 )}
@@ -290,6 +356,59 @@ const styles = StyleSheet.create({
     headerRight: {
         flexDirection: 'row',
         gap: 12,
+    },
+    actionColumn: {
+        flexDirection: 'column',
+        gap: 8,
+    },
+    gstToggle: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    gstToggleText: {
+        fontSize: 10,
+        fontWeight: '800',
+        color: '#5D4037',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    gstToggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    switchTrack: {
+        width: 32,
+        height: 18,
+        borderRadius: 9,
+        backgroundColor: '#EEEEEE',
+        padding: 2,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+    },
+    switchThumb: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    switchThumbOn: {
+        alignSelf: 'flex-end',
     },
     brandName: {
         fontWeight: '800',

@@ -22,15 +22,6 @@ const Index = () => {
   const { config } = useRateConfig();
   const { data: aaravRates } = useAaravRates();
 
-  // Console log Aarav API data
-  useEffect(() => {
-    console.log("=== AARAV API DATA ===>", {
-      silver: aaravRates.silver,
-      gold: aaravRates.gold,
-      silverWithGST: aaravRates.silverWithGST,
-      goldWithGST: aaravRates.goldWithGST,
-    });
-  }, [aaravRates]);
 
   const calculatedRates = useRateCalculations(
     cachedWsData,
@@ -73,23 +64,9 @@ const Index = () => {
     }
   }, [wsData, cachedWsData]);
 
-  // Console log calculated rates when they change
-  useEffect(() => {
-    console.log("=== CALCULATED RATES ===> ", {
-      withGST,
-      gold999: calculatedRates.gold999,
-      gold916: calculatedRates.gold916,
-      silver999: calculatedRates.silver999,
-      silver925: calculatedRates.silver925,
-    });
-  }, [calculatedRates, withGST]);
 
   const onToggleGST = () => {
     const newGSTState = !withGST;
-    console.log("=== GST TOGGLE PRESSED ===> ", {
-      previousState: withGST,
-      newState: newGSTState,
-    });
     setWithGST(newGSTState);
   };
 

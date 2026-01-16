@@ -54,14 +54,6 @@ export const useAaravRates = () => {
 
       if (newData.silver || newData.gold) {
         fetchCountRef.current += 1;
-        console.log('=== AARAV API PARSED DATA ===> ', {
-          fetchCount: fetchCountRef.current,
-          silverPrice: newData.silver,
-          goldPrice: newData.gold,
-          silverWithGST: newData.silverWithGST,
-          goldWithGST: newData.goldWithGST,
-          timestamp: new Date().toISOString(),
-        });
         setLastValidData(newData);
       }
       setParsedError(null);
@@ -72,13 +64,10 @@ export const useAaravRates = () => {
   }, [rawData]);
 
   useEffect(() => {
-    console.log('=== AARAV API INTERVAL STARTED ===> Fetching every 10 seconds');
     const interval = setInterval(() => {
-      console.log('=== AARAV API REFETCH TRIGGERED ===> ', new Date().toISOString());
       refetch();
     }, 10000);
     return () => {
-      console.log('=== AARAV API INTERVAL CLEARED ===>');
       clearInterval(interval);
     };
   }, [refetch]);
