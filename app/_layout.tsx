@@ -8,6 +8,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
 import { RateConfigProvider } from "../contexts/RateConfigContext";
 

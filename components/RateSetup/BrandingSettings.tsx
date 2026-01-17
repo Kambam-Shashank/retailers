@@ -92,11 +92,17 @@ export const ShopBrandingCard = ({
                         </View>
                         <View style={brandingStyles.inputWrapper}>
                             <TextInput
-                                placeholder="+91 98765 43210"
+                                placeholder="9876543210"
                                 placeholderTextColor="#A3A3A3"
                                 style={brandingStyles.textInput}
                                 value={phone}
-                                onChangeText={(val) => onUpdate({ shopPhone: val })}
+                                keyboardType="numeric"
+                                onChangeText={(val) => {
+                                    // Only allow numbers
+                                    const filtered = val.replace(/[^0-9]/g, '');
+                                    onUpdate({ shopPhone: filtered });
+                                }}
+                                maxLength={10}
                             />
                         </View>
                     </View>
@@ -131,20 +137,37 @@ export const ShopBrandingCard = ({
                         </View>
 
                         <View style={brandingStyles.logoControls}>
-                            <View style={brandingStyles.controlRow}>
-                                <Text style={brandingStyles.controlLabel}>Logo Size</Text>
-                                <View style={brandingStyles.sizeOptions}>
-                                    {[60, 80, 100, 140].map((size) => (
+                            <View style={brandingStyles.sliderSection}>
+                                <Text style={brandingStyles.label}>Logo Size</Text>
+                                <View style={brandingStyles.sliderWrapper}>
+                                    <View style={brandingStyles.sliderTrack}>
+                                        <View style={[brandingStyles.sliderFill, { width: logoSize === 60 ? '0%' : logoSize === 80 ? '50%' : logoSize === 100 ? '100%' : '100%' }]} />
+                                    </View>
+                                    <View style={brandingStyles.sliderKnobsRow}>
                                         <TouchableOpacity
-                                            key={size}
-                                            onPress={() => onUpdate({ logoSize: size })}
-                                            style={[brandingStyles.sizeBadge, logoSize === size && brandingStyles.activeBadge]}
+                                            onPress={() => onUpdate({ logoSize: 60 })}
+                                            style={[brandingStyles.knobContainer, logoSize === 60 && brandingStyles.activeKnobContainer]}
                                         >
-                                            <Text style={[brandingStyles.badgeText, logoSize === size && brandingStyles.activeBadgeText]}>
-                                                {size === 60 ? "S" : size === 80 ? "M" : size === 100 ? "L" : "XL"}
-                                            </Text>
+                                            <View style={[brandingStyles.sliderKnob, logoSize === 60 && brandingStyles.activeKnob]} />
+                                            <Text style={[brandingStyles.knobLabel, logoSize === 60 && brandingStyles.activeKnobLabel]}>Small</Text>
                                         </TouchableOpacity>
-                                    ))}
+
+                                        <TouchableOpacity
+                                            onPress={() => onUpdate({ logoSize: 80 })}
+                                            style={[brandingStyles.knobContainer, logoSize === 80 && brandingStyles.activeKnobContainer]}
+                                        >
+                                            <View style={[brandingStyles.sliderKnob, logoSize === 80 && brandingStyles.activeKnob]} />
+                                            <Text style={[brandingStyles.knobLabel, logoSize === 80 && brandingStyles.activeKnobLabel]}>Medium</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            onPress={() => onUpdate({ logoSize: 100 })}
+                                            style={[brandingStyles.knobContainer, logoSize === 100 && brandingStyles.activeKnobContainer]}
+                                        >
+                                            <View style={[brandingStyles.sliderKnob, logoSize === 100 && brandingStyles.activeKnob]} />
+                                            <Text style={[brandingStyles.knobLabel, logoSize === 100 && brandingStyles.activeKnobLabel]}>Large</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -162,7 +185,7 @@ interface BrandingPreviewModalProps {
     logoBase64: string | null;
     logoSize: number;
     logoOpacity: number;
-    logoPlacement?: "top" | "side";
+    logoPlacement?: "header" | "card";
 }
 
 export const BrandingPreviewModal: React.FC<BrandingPreviewModalProps> = ({
@@ -425,29 +448,63 @@ const brandingStyles = StyleSheet.create({
         color: "#666",
         fontWeight: "600",
     },
-    sizeOptions: {
-        flexDirection: "row",
-        gap: 6,
+    sliderSection: {
+        marginTop: 10,
+        width: '100%',
     },
-    sizeBadge: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
-        backgroundColor: "#F9F9F9",
+    sliderWrapper: {
+        marginTop: 20,
+        height: 60,
+        justifyContent: 'center',
     },
-    activeBadge: {
+    sliderTrack: {
+        height: 8,
+        backgroundColor: '#E2E8F0',
+        borderRadius: 4,
+        position: 'absolute',
+        left: 20,
+        right: 20,
+        top: 6,
+    },
+    sliderFill: {
+        height: '100%',
         backgroundColor: GOLD,
+        borderRadius: 4,
+    },
+    sliderKnobsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 0,
+        zIndex: 2,
+    },
+    knobContainer: {
+        alignItems: 'center',
+        width: 80,
+    },
+    activeKnobContainer: {
+        // Optional: add any style for active container if needed
+    },
+    sliderKnob: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: '#FFF',
+        borderWidth: 2,
+        borderColor: '#E2E8F0',
+        marginBottom: 8,
+    },
+    activeKnob: {
         borderColor: GOLD,
+        borderWidth: 6,
     },
-    badgeText: {
-        fontSize: 11,
-        fontWeight: "600",
-        color: "#666",
+    knobLabel: {
+        fontSize: 12,
+        color: '#64748B',
+        fontWeight: '500',
     },
-    activeBadgeText: {
-        color: "#000",
+    activeKnobLabel: {
+        color: GOLD,
+        fontWeight: '700',
     },
     toggleContainer: {
         flexDirection: "row",

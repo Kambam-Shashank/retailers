@@ -4,6 +4,7 @@ import { useRateSetupMakingCharges } from "@/customHooks/useRateSetupMakingCharg
 import React from "react";
 import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+
 const GOLD = "#D4AF37";
 const TEXT_MUTED = "#A1A1A1";
 
@@ -11,6 +12,9 @@ const TEXT_MUTED = "#A1A1A1";
 const DEFAULT_LABELS = {
     gold24k: "24K Gold (999)",
     gold22k: "22K Gold (916)",
+    gold20k: "20K Gold (833)",
+    gold18k: "18K Gold (750)",
+    gold14k: "14K Gold (583)",
     silver999: "Silver (999)",
     silver925: "Silver (925)",
 };
@@ -18,31 +22,55 @@ const DEFAULT_LABELS = {
 interface PurityLabelsCardProps {
     gold24kLabel: string;
     gold22kLabel: string;
+    gold20kLabel: string;
+    gold18kLabel: string;
+    gold14kLabel: string;
     silver999Label: string;
     silver925Label: string;
     showGold24k: boolean;
     showGold22k: boolean;
+    showGold20k: boolean;
+    showGold18k: boolean;
+    showGold14k: boolean;
     showSilver999: boolean;
     showSilver925: boolean;
     isDesktop: boolean;
     onLabelChange: (key: string, value: string) => void;
-    onUpdate: (key: string, value: boolean) => void;
     onLabelsBlur: () => void;
+    onUpdate: (key: string, value: boolean) => void;
+    purityOrder: string[];
+    onOrderChange: (newOrder: string[]) => void;
+}
+
+// Type for purity item data
+interface PurityItemData {
+    key: string;
+    label: string;
+    visible: boolean;
+    toggleKey: string;
 }
 
 export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
     gold24kLabel,
     gold22kLabel,
+    gold20kLabel,
+    gold18kLabel,
+    gold14kLabel,
     silver999Label,
     silver925Label,
     showGold24k,
     showGold22k,
+    showGold20k,
+    showGold18k,
+    showGold14k,
     showSilver999,
     showSilver925,
     isDesktop,
     onLabelChange,
     onUpdate,
     onLabelsBlur,
+    purityOrder,
+    onOrderChange,
 }) => {
     const renderToggle = (key: string, value: boolean) => (
         <TouchableOpacity
@@ -54,85 +82,111 @@ export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
         </TouchableOpacity>
     );
 
+    // Prepare data for draggable list
+    const data: PurityItemData[] = purityOrder.map((key) => {
+        const getLabelAndToggleKey = (k: string) => {
+            const labelMap: Record<string, string> = {
+                gold24k: gold24kLabel,
+                gold22k: gold22kLabel,
+                gold20k: gold20kLabel,
+                gold18k: gold18kLabel,
+                gold14k: gold14kLabel,
+                silver999: silver999Label,
+                silver925: silver925Label,
+            };
+            const visibilityMap: Record<string, boolean> = {
+                gold24k: showGold24k,
+                gold22k: showGold22k,
+                gold20k: showGold20k,
+                gold18k: showGold18k,
+                gold14k: showGold14k,
+                silver999: showSilver999,
+                silver925: showSilver925,
+            };
+            const toggleKeyMap: Record<string, string> = {
+                gold24k: 'showGold24k',
+                gold22k: 'showGold22k',
+                gold20k: 'showGold20k',
+                gold18k: 'showGold18k',
+                gold14k: 'showGold14k',
+                silver999: 'showSilver999',
+                silver925: 'showSilver925',
+            };
+            return {
+                label: labelMap[k] || '',
+                visible: visibilityMap[k] || false,
+                toggleKey: toggleKeyMap[k] || '',
+            };
+        };
+
+        const info = getLabelAndToggleKey(key);
+        return {
+            key,
+            label: info.label,
+            visible: info.visible,
+            toggleKey: info.toggleKey,
+        };
+    });
+
+    // Arrow move handler
+    const handleMove = (index: number, direction: 'up' | 'down') => {
+        const newOrder = [...purityOrder];
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+        if (newIndex >= 0 && newIndex < newOrder.length) {
+            [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
+            onOrderChange(newOrder);
+        }
+    };
+
     return (
         <View style={rateStyles.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                 <Text style={rateStyles.cardTitle}>Custom Purity Labels</Text>
             </View>
             <Text style={rateStyles.cardSubtitle}>
-                Customize how each metal category is displayed and decide visibility
+                Use arrows to reorder, toggle visibility, and customize labels
             </Text>
 
-            <View style={[rateStyles.purityRow, isDesktop && rateStyles.rowDesktop]}>
-                <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <View style={rateStyles.fieldHeader}>
-                        <Text style={rateStyles.labelRowTitle}>24K Gold (999)</Text>
-                        {renderToggle("showGold24k", showGold24k)}
-                    </View>
-                    <View style={rateStyles.inputWrapper}>
-                        <TextInput
-                            placeholder={DEFAULT_LABELS.gold24k}
-                            placeholderTextColor="#A3A3A3"
-                            style={[rateStyles.textInput, { outlineStyle: "none" } as any]}
-                            value={gold24kLabel}
-                            onChangeText={(text) => onLabelChange("gold24kLabel", text)}
-                            onBlur={onLabelsBlur}
-                        />
-                    </View>
-                </View>
+            <View style={{ gap: 12 }}>
+                {data.map((item, index) => (
+                    <View key={item.key} style={rateStyles.purityItemContainer}>
+                        {/* Reorder Arrows */}
+                        <View style={rateStyles.reorderControls}>
+                            <TouchableOpacity
+                                style={[rateStyles.reorderBtn, index === 0 && { opacity: 0.3 }]}
+                                onPress={() => handleMove(index, 'up')}
+                                disabled={index === 0}
+                            >
+                                <View style={rateStyles.arrowUp} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[rateStyles.reorderBtn, index === data.length - 1 && { opacity: 0.3 }]}
+                                onPress={() => handleMove(index, 'down')}
+                                disabled={index === data.length - 1}
+                            >
+                                <View style={rateStyles.arrowDown} />
+                            </TouchableOpacity>
+                        </View>
 
-                <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <View style={rateStyles.fieldHeader}>
-                        <Text style={rateStyles.labelRowTitle}>22K Gold (916)</Text>
-                        {renderToggle("showGold22k", showGold22k)}
+                        <View style={[rateStyles.purityField, { flex: 1, marginBottom: 0 }]}>
+                            <View style={rateStyles.fieldHeader}>
+                                <Text style={rateStyles.labelRowTitle}>{DEFAULT_LABELS[item.key as keyof typeof DEFAULT_LABELS]}</Text>
+                                {renderToggle(item.toggleKey, item.visible)}
+                            </View>
+                            <View style={rateStyles.inputWrapper}>
+                                <TextInput
+                                    placeholder={DEFAULT_LABELS[item.key as keyof typeof DEFAULT_LABELS]}
+                                    placeholderTextColor="#A3A3A3"
+                                    style={[rateStyles.textInput, { outlineStyle: "none" } as any]}
+                                    value={item.label}
+                                    onChangeText={(text) => onLabelChange(`${item.key}Label`, text)}
+                                    onBlur={onLabelsBlur}
+                                />
+                            </View>
+                        </View>
                     </View>
-                    <View style={rateStyles.inputWrapper}>
-                        <TextInput
-                            placeholder={DEFAULT_LABELS.gold22k}
-                            placeholderTextColor="#A3A3A3"
-                            style={[rateStyles.textInput, { outlineStyle: "none" } as any]}
-                            value={gold22kLabel}
-                            onChangeText={(text) => onLabelChange("gold22kLabel", text)}
-                            onBlur={onLabelsBlur}
-                        />
-                    </View>
-                </View>
-            </View>
-
-            <View style={[rateStyles.purityRow, isDesktop && rateStyles.rowDesktop]}>
-                <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <View style={rateStyles.fieldHeader}>
-                        <Text style={rateStyles.labelRowTitle}>Silver (999)</Text>
-                        {renderToggle("showSilver999", showSilver999)}
-                    </View>
-                    <View style={rateStyles.inputWrapper}>
-                        <TextInput
-                            placeholder={DEFAULT_LABELS.silver999}
-                            placeholderTextColor="#A3A3A3"
-                            style={[rateStyles.textInput, { outlineStyle: "none" } as any]}
-                            value={silver999Label}
-                            onChangeText={(text) => onLabelChange("silver999Label", text)}
-                            onBlur={onLabelsBlur}
-                        />
-                    </View>
-                </View>
-
-                <View style={[rateStyles.purityField, isDesktop && rateStyles.fieldDesktop]}>
-                    <View style={rateStyles.fieldHeader}>
-                        <Text style={rateStyles.labelRowTitle}>Silver (925)</Text>
-                        {renderToggle("showSilver925", showSilver925)}
-                    </View>
-                    <View style={rateStyles.inputWrapper}>
-                        <TextInput
-                            placeholder={DEFAULT_LABELS.silver925}
-                            placeholderTextColor="#A3A3A3"
-                            style={[rateStyles.textInput, { outlineStyle: "none" } as any]}
-                            value={silver925Label}
-                            onChangeText={(text) => onLabelChange("silver925Label", text)}
-                            onBlur={onLabelsBlur}
-                        />
-                    </View>
-                </View>
+                ))}
             </View>
         </View>
     );
@@ -142,6 +196,9 @@ export const PurityLabelsCard: React.FC<PurityLabelsCardProps> = ({
 interface MarginsCardProps {
     gold24kMargin: number;
     gold22kMargin: number;
+    gold20kMargin: number;
+    gold18kMargin: number;
+    gold14kMargin: number;
     silver999Margin: number;
     silver925Margin: number;
     isDesktop: boolean;
@@ -152,6 +209,9 @@ interface MarginsCardProps {
 export const MarginsCard: React.FC<MarginsCardProps> = ({
     gold24kMargin,
     gold22kMargin,
+    gold20kMargin,
+    gold18kMargin,
+    gold14kMargin,
     silver999Margin,
     silver925Margin,
     isDesktop,
@@ -228,6 +288,98 @@ export const MarginsCard: React.FC<MarginsCardProps> = ({
 
             <View style={[marginStyles.marginRow, isDesktop && marginStyles.rowDesktop]}>
                 <View style={[marginStyles.marginField, isDesktop && marginStyles.fieldDesktop]}>
+                    <Text style={marginStyles.labelRowTitle}>20K Gold (833)</Text>
+                    <View style={marginStyles.marginControlRow}>
+                        <TouchableOpacity
+                            style={marginStyles.adjustButton}
+                            onPress={() => onMarginUpdate("gold20kMargin", gold20kMargin - 50)}
+                        >
+                            <Text style={marginStyles.adjustButtonText}>−</Text>
+                        </TouchableOpacity>
+
+                        <View style={marginStyles.marginValueBox}>
+                            <Text style={marginStyles.currencySymbol}>₹</Text>
+                            <TextInput
+                                style={[marginStyles.marginValueText, { outlineStyle: "none" } as any]}
+                                keyboardType="numeric"
+                                value={String(gold20kMargin)}
+                                onChangeText={(t) => onMarginInputChange("gold20kMargin", t)}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={marginStyles.adjustButton}
+                            onPress={() => onMarginUpdate("gold20kMargin", gold20kMargin + 50)}
+                        >
+                            <Text style={marginStyles.adjustButtonText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={marginStyles.unitText}>per 10g</Text>
+                </View>
+
+                <View style={[marginStyles.marginField, isDesktop && marginStyles.fieldDesktop]}>
+                    <Text style={marginStyles.labelRowTitle}>18K Gold (750)</Text>
+                    <View style={marginStyles.marginControlRow}>
+                        <TouchableOpacity
+                            style={marginStyles.adjustButton}
+                            onPress={() => onMarginUpdate("gold18kMargin", gold18kMargin - 50)}
+                        >
+                            <Text style={marginStyles.adjustButtonText}>−</Text>
+                        </TouchableOpacity>
+
+                        <View style={marginStyles.marginValueBox}>
+                            <Text style={marginStyles.currencySymbol}>₹</Text>
+                            <TextInput
+                                style={[marginStyles.marginValueText, { outlineStyle: "none" } as any]}
+                                keyboardType="numeric"
+                                value={String(gold18kMargin)}
+                                onChangeText={(t) => onMarginInputChange("gold18kMargin", t)}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={marginStyles.adjustButton}
+                            onPress={() => onMarginUpdate("gold18kMargin", gold18kMargin + 50)}
+                        >
+                            <Text style={marginStyles.adjustButtonText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={marginStyles.unitText}>per 10g</Text>
+                </View>
+            </View>
+
+            <View style={[marginStyles.marginRow, isDesktop && marginStyles.rowDesktop]}>
+                <View style={[marginStyles.marginField, isDesktop && marginStyles.fieldDesktop]}>
+                    <Text style={marginStyles.labelRowTitle}>14K Gold (583)</Text>
+                    <View style={marginStyles.marginControlRow}>
+                        <TouchableOpacity
+                            style={marginStyles.adjustButton}
+                            onPress={() => onMarginUpdate("gold14kMargin", gold14kMargin - 50)}
+                        >
+                            <Text style={marginStyles.adjustButtonText}>−</Text>
+                        </TouchableOpacity>
+
+                        <View style={marginStyles.marginValueBox}>
+                            <Text style={marginStyles.currencySymbol}>₹</Text>
+                            <TextInput
+                                style={[marginStyles.marginValueText, { outlineStyle: "none" } as any]}
+                                keyboardType="numeric"
+                                value={String(gold14kMargin)}
+                                onChangeText={(t) => onMarginInputChange("gold14kMargin", t)}
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            style={marginStyles.adjustButton}
+                            onPress={() => onMarginUpdate("gold14kMargin", gold14kMargin + 50)}
+                        >
+                            <Text style={marginStyles.adjustButtonText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={marginStyles.unitText}>per 10g</Text>
+                </View>
+
+                <View style={[marginStyles.marginField, isDesktop && marginStyles.fieldDesktop]}>
                     <Text style={marginStyles.labelRowTitle}>Silver (999)</Text>
                     <View style={marginStyles.marginControlRow}>
                         <TouchableOpacity
@@ -256,7 +408,9 @@ export const MarginsCard: React.FC<MarginsCardProps> = ({
                     </View>
                     <Text style={marginStyles.unitText}>per gram</Text>
                 </View>
+            </View>
 
+            <View style={[marginStyles.marginRow, isDesktop && marginStyles.rowDesktop]}>
                 <View style={[marginStyles.marginField, isDesktop && marginStyles.fieldDesktop]}>
                     <Text style={marginStyles.labelRowTitle}>Silver (925)</Text>
                     <View style={marginStyles.marginControlRow}>
@@ -286,8 +440,9 @@ export const MarginsCard: React.FC<MarginsCardProps> = ({
                     </View>
                     <Text style={marginStyles.unitText}>per gram</Text>
                 </View>
+                <View style={[marginStyles.marginField, isDesktop && marginStyles.fieldDesktop]} />
             </View>
-        </View>
+        </View >
     );
 };
 
@@ -308,7 +463,7 @@ export const MakingChargesCard: React.FC<MakingChargesCardProps> = ({ config: gl
     } = useRateSetupMakingCharges(globalConfig, onUpdate);
 
     const renderPuritySection = (
-        key: "24k" | "22k" | "999" | "925",
+        key: "24k" | "22k" | "20k" | "18k" | "14k" | "999" | "925",
         label: string,
         color: string
     ) => {
@@ -399,6 +554,9 @@ export const MakingChargesCard: React.FC<MakingChargesCardProps> = ({ config: gl
                 <View style={mcStyles.purityContainer}>
                     {renderPuritySection("24k", "24K Gold", GOLD)}
                     {renderPuritySection("22k", "22K Gold", GOLD)}
+                    {renderPuritySection("20k", "20K Gold", GOLD)}
+                    {renderPuritySection("18k", "18K Gold", GOLD)}
+                    {renderPuritySection("14k", "14K Gold", GOLD)}
                     {renderPuritySection("999", "999 Silver", "#C0C0C0")}
                     {renderPuritySection("925", "925 Silver", "#C0C0C0")}
                 </View>
@@ -483,6 +641,69 @@ const rateStyles = StyleSheet.create({
         color: "#1A1A1A",
         fontSize: 15,
         paddingVertical: 10,
+        ...Platform.select({
+            web: { outlineStyle: 'none' } as any
+        })
+    },
+    purityItemContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    reorderControls: {
+        flexDirection: 'column',
+        gap: 4,
+    },
+    reorderBtn: {
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        backgroundColor: '#F5F5F5',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    arrowUp: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 5,
+        borderRightWidth: 5,
+        borderBottomWidth: 7,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: GOLD,
+    },
+    arrowDown: {
+        width: 0,
+        height: 0,
+        borderLeftWidth: 5,
+        borderRightWidth: 5,
+        borderTopWidth: 7,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderTopColor: GOLD,
+    },
+    dragHandle: {
+        width: 40,
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...Platform.select({
+            web: { cursor: 'grab' as any }
+        }),
+    },
+    dragDots: {
+        flexDirection: 'row',
+        gap: 3,
+        marginBottom: 2,
+    },
+    dragDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: '#C0C0C0',
     },
 });
 

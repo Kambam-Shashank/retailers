@@ -27,6 +27,27 @@ export interface CalculatedRates {
     makingCharges?: number;
     finalPrice: number;
   };
+  gold20k: {
+    basePrice: number;
+    priceWithMargin: number;
+    priceWithGST: number;
+    makingCharges?: number;
+    finalPrice: number;
+  };
+  gold18k: {
+    basePrice: number;
+    priceWithMargin: number;
+    priceWithGST: number;
+    makingCharges?: number;
+    finalPrice: number;
+  };
+  gold14k: {
+    basePrice: number;
+    priceWithMargin: number;
+    priceWithGST: number;
+    makingCharges?: number;
+    finalPrice: number;
+  };
   silver999: {
     basePrice: number;
     priceWithMargin: number;
@@ -75,6 +96,9 @@ export const useRateCalculations = (
           makingCharges: config.makingChargesEnabled ? 0 : undefined,
           finalPrice: 0,
         },
+        gold20k: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
+        gold18k: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
+        gold14k: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
         silver999: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
         silver925: { basePrice: 0, priceWithMargin: 0, priceWithGST: 0, makingCharges: config.makingChargesEnabled ? 0 : undefined, finalPrice: 0 },
       } as CalculatedRates;
@@ -106,6 +130,9 @@ export const useRateCalculations = (
       wsData?.price_916;
 
     const gold916Base = gold916FromWS || (gold999Base * 0.916);
+    const gold20kBase = gold999Base * (20 / 24);
+    const gold18kBase = gold999Base * (18 / 24);
+    const gold14kBase = gold999Base * (14 / 24);
 
 
     const silver999Base = externalSilverPrice || 0;
@@ -114,6 +141,9 @@ export const useRateCalculations = (
     const gold999MarginPerGram = config.gold24kMargin;
     const gold995MarginPerGram = config.gold22kMargin;
     const gold916MarginPerGram = config.gold22kMargin;
+    const gold20kMarginPerGram = config.gold20kMargin;
+    const gold18kMarginPerGram = config.gold18kMargin;
+    const gold14kMarginPerGram = config.gold14kMargin;
 
     // Rounding helper
     const roundTo = (num: number, multiple: number) => {
@@ -125,6 +155,9 @@ export const useRateCalculations = (
     const gold999WithMargin = roundTo(gold999Base + gold999MarginPerGram, 50);
     const gold995WithMargin = roundTo(gold995Base + gold995MarginPerGram, 50);
     const gold916WithMargin = roundTo(gold916Base + gold916MarginPerGram, 50);
+    const gold20kWithMargin = roundTo(gold20kBase + gold20kMarginPerGram, 50);
+    const gold18kWithMargin = roundTo(gold18kBase + gold18kMarginPerGram, 50);
+    const gold14kWithMargin = roundTo(gold14kBase + gold14kMarginPerGram, 50);
     const silver999WithMargin = roundTo(silver999Base + config.silver999Margin, 10);
     const silver925WithMargin = roundTo(silver925Base + config.silver925Margin, 10);
 
@@ -149,6 +182,9 @@ export const useRateCalculations = (
     const gold999WithGST = calculateFinalGSTPrice(gold999WithMargin, externalGoldIncludesGST);
     const gold995WithGST = calculateFinalGSTPrice(gold995WithMargin, externalGoldIncludesGST);
     const gold916WithGST = calculateFinalGSTPrice(gold916WithMargin, externalGoldIncludesGST);
+    const gold20kWithGST = calculateFinalGSTPrice(gold20kWithMargin, externalGoldIncludesGST);
+    const gold18kWithGST = calculateFinalGSTPrice(gold18kWithMargin, externalGoldIncludesGST);
+    const gold14kWithGST = calculateFinalGSTPrice(gold14kWithMargin, externalGoldIncludesGST);
 
     const silver999WithGST = calculateFinalGSTPrice(silver999WithMargin, externalSilverIncludesGST);
     const silver925WithGST = calculateFinalGSTPrice(silver925WithMargin, externalSilverIncludesGST);
@@ -156,6 +192,9 @@ export const useRateCalculations = (
     let gold999MakingCharges = 0;
     let gold995MakingCharges = 0;
     let gold916MakingCharges = 0;
+    let gold20kMakingCharges = 0;
+    let gold18kMakingCharges = 0;
+    let gold14kMakingCharges = 0;
     let silver999MakingCharges = 0;
     let silver925MakingCharges = 0;
 
@@ -177,6 +216,27 @@ export const useRateCalculations = (
         gold916MakingCharges = config.makingCharges22kValue;
       }
 
+      // 20K
+      if (config.makingCharges20kType === "percentage") {
+        gold20kMakingCharges = gold20kWithGST * (config.makingCharges20kValue / 100);
+      } else {
+        gold20kMakingCharges = config.makingCharges20kValue;
+      }
+
+      // 18K
+      if (config.makingCharges18kType === "percentage") {
+        gold18kMakingCharges = gold18kWithGST * (config.makingCharges18kValue / 100);
+      } else {
+        gold18kMakingCharges = config.makingCharges18kValue;
+      }
+
+      // 14K
+      if (config.makingCharges14kType === "percentage") {
+        gold14kMakingCharges = gold14kWithGST * (config.makingCharges14kValue / 100);
+      } else {
+        gold14kMakingCharges = config.makingCharges14kValue;
+      }
+
       // Silver 999
       if (config.makingCharges999Type === "percentage") {
         silver999MakingCharges = silver999WithGST * (config.makingCharges999Value / 100);
@@ -195,6 +255,9 @@ export const useRateCalculations = (
     const gold999Final = gold999WithGST + gold999MakingCharges;
     const gold995Final = gold995WithGST + gold995MakingCharges;
     const gold916Final = gold916WithGST + gold916MakingCharges;
+    const gold20kFinal = gold20kWithGST + gold20kMakingCharges;
+    const gold18kFinal = gold18kWithGST + gold18kMakingCharges;
+    const gold14kFinal = gold14kWithGST + gold14kMakingCharges;
     const silver999Final = silver999WithGST + silver999MakingCharges;
     const silver925Final = silver925WithGST + silver925MakingCharges;
 
@@ -225,6 +288,33 @@ export const useRateCalculations = (
           ? gold916MakingCharges
           : undefined,
         finalPrice: gold916Final,
+      },
+      gold20k: {
+        basePrice: gold20kBase,
+        priceWithMargin: gold20kWithMargin,
+        priceWithGST: gold20kWithGST,
+        makingCharges: config.makingChargesEnabled
+          ? gold20kMakingCharges
+          : undefined,
+        finalPrice: gold20kFinal,
+      },
+      gold18k: {
+        basePrice: gold18kBase,
+        priceWithMargin: gold18kWithMargin,
+        priceWithGST: gold18kWithGST,
+        makingCharges: config.makingChargesEnabled
+          ? gold18kMakingCharges
+          : undefined,
+        finalPrice: gold18kFinal,
+      },
+      gold14k: {
+        basePrice: gold14kBase,
+        priceWithMargin: gold14kWithMargin,
+        priceWithGST: gold14kWithGST,
+        makingCharges: config.makingChargesEnabled
+          ? gold14kMakingCharges
+          : undefined,
+        finalPrice: gold14kFinal,
       },
       silver999: {
         basePrice: silver999Base,

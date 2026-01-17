@@ -28,10 +28,16 @@ export interface RateConfig {
   logoBase64: string | null;
   gold24kLabel: string;
   gold22kLabel: string;
+  gold20kLabel: string;
+  gold18kLabel: string;
+  gold14kLabel: string;
   silver999Label: string;
   silver925Label: string;
   gold24kMargin: number;
   gold22kMargin: number;
+  gold20kMargin: number;
+  gold18kMargin: number;
+  gold14kMargin: number;
   silver999Margin: number;
   silver925Margin: number;
   makingChargesEnabled: boolean;
@@ -41,6 +47,15 @@ export interface RateConfig {
   makingCharges22kType: MakingChargesType;
   makingCharges22kValue: number;
   makingCharges22kTitle: string;
+  makingCharges20kType: MakingChargesType;
+  makingCharges20kValue: number;
+  makingCharges20kTitle: string;
+  makingCharges18kType: MakingChargesType;
+  makingCharges18kValue: number;
+  makingCharges18kTitle: string;
+  makingCharges14kType: MakingChargesType;
+  makingCharges14kValue: number;
+  makingCharges14kTitle: string;
   makingCharges999Type: MakingChargesType;
   makingCharges999Value: number;
   makingCharges999Title: string;
@@ -66,6 +81,9 @@ export interface RateConfig {
   // Row visibility controls
   showGold24k: boolean;
   showGold22k: boolean;
+  showGold20k: boolean;
+  showGold18k: boolean;
+  showGold14k: boolean;
   showSilver999: boolean;
   showSilver925: boolean;
   // Price formatting
@@ -79,6 +97,7 @@ export interface RateConfig {
   logoSize: number;
   logoOpacity: number;
   logoPlacement: "header" | "card";
+  purityOrder: string[];
 }
 
 
@@ -94,10 +113,16 @@ const DEFAULT_CONFIG: RateConfig = {
   logoBase64: null,
   gold24kLabel: "24K Gold",
   gold22kLabel: "22K Gold",
+  gold20kLabel: "20K Gold",
+  gold18kLabel: "18K Gold",
+  gold14kLabel: "14K Gold",
   silver999Label: "Pure Silver",
   silver925Label: "925 Silver",
   gold24kMargin: 0,
   gold22kMargin: 0,
+  gold20kMargin: 0,
+  gold18kMargin: 0,
+  gold14kMargin: 0,
   silver999Margin: 0,
   silver925Margin: 0,
   makingChargesEnabled: false,
@@ -107,6 +132,15 @@ const DEFAULT_CONFIG: RateConfig = {
   makingCharges22kType: "percentage",
   makingCharges22kValue: 0,
   makingCharges22kTitle: "MC",
+  makingCharges20kType: "percentage",
+  makingCharges20kValue: 0,
+  makingCharges20kTitle: "MC",
+  makingCharges18kType: "percentage",
+  makingCharges18kValue: 0,
+  makingCharges18kTitle: "MC",
+  makingCharges14kType: "percentage",
+  makingCharges14kValue: 0,
+  makingCharges14kTitle: "MC",
   makingCharges999Type: "percentage",
   makingCharges999Value: 0,
   makingCharges999Title: "MC",
@@ -133,6 +167,9 @@ const DEFAULT_CONFIG: RateConfig = {
   brandAlignment: "left",
   showGold24k: true,
   showGold22k: true,
+  showGold20k: false,
+  showGold18k: false,
+  showGold14k: false,
   showSilver999: true,
   showSilver925: true,
   priceDecimalPlaces: 0,
@@ -145,6 +182,7 @@ const DEFAULT_CONFIG: RateConfig = {
   logoSize: 80,
   logoOpacity: 1,
   logoPlacement: "header",
+  purityOrder: ["gold24k", "gold22k", "gold20k", "gold18k", "gold14k", "silver999", "silver925"],
 };
 
 interface RateConfigContextType {
@@ -256,10 +294,16 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
       } else if (tab === "rates") {
         updates.gold24kLabel = freshConfig.gold24kLabel;
         updates.gold22kLabel = freshConfig.gold22kLabel;
+        updates.gold20kLabel = freshConfig.gold20kLabel;
+        updates.gold18kLabel = freshConfig.gold18kLabel;
+        updates.gold14kLabel = freshConfig.gold14kLabel;
         updates.silver999Label = freshConfig.silver999Label;
         updates.silver925Label = freshConfig.silver925Label;
         updates.gold24kMargin = freshConfig.gold24kMargin;
         updates.gold22kMargin = freshConfig.gold22kMargin;
+        updates.gold20kMargin = freshConfig.gold20kMargin;
+        updates.gold18kMargin = freshConfig.gold18kMargin;
+        updates.gold14kMargin = freshConfig.gold14kMargin;
         updates.silver999Margin = freshConfig.silver999Margin;
         updates.silver925Margin = freshConfig.silver925Margin;
         updates.makingChargesEnabled = freshConfig.makingChargesEnabled;
@@ -269,6 +313,15 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
         updates.makingCharges22kType = freshConfig.makingCharges22kType;
         updates.makingCharges22kValue = freshConfig.makingCharges22kValue;
         updates.makingCharges22kTitle = freshConfig.makingCharges22kTitle;
+        updates.makingCharges20kType = freshConfig.makingCharges20kType;
+        updates.makingCharges20kValue = freshConfig.makingCharges20kValue;
+        updates.makingCharges20kTitle = freshConfig.makingCharges20kTitle;
+        updates.makingCharges18kType = freshConfig.makingCharges18kType;
+        updates.makingCharges18kValue = freshConfig.makingCharges18kValue;
+        updates.makingCharges18kTitle = freshConfig.makingCharges18kTitle;
+        updates.makingCharges14kType = freshConfig.makingCharges14kType;
+        updates.makingCharges14kValue = freshConfig.makingCharges14kValue;
+        updates.makingCharges14kTitle = freshConfig.makingCharges14kTitle;
         updates.makingCharges999Type = freshConfig.makingCharges999Type;
         updates.makingCharges999Value = freshConfig.makingCharges999Value;
         updates.makingCharges999Title = freshConfig.makingCharges999Title;
@@ -290,6 +343,9 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
         updates.showShopName = freshConfig.showShopName;
         updates.showGold24k = freshConfig.showGold24k;
         updates.showGold22k = freshConfig.showGold22k;
+        updates.showGold20k = freshConfig.showGold20k;
+        updates.showGold18k = freshConfig.showGold18k;
+        updates.showGold14k = freshConfig.showGold14k;
         updates.showSilver999 = freshConfig.showSilver999;
         updates.showSilver925 = freshConfig.showSilver925;
         updates.priceDecimalPlaces = freshConfig.priceDecimalPlaces;

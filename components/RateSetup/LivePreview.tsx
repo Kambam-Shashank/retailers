@@ -7,6 +7,9 @@ import { StyleSheet, Text, View } from "react-native";
 const MOCK_RATES = {
     gold999: { basePrice: 138255, finalPrice: 138255, priceWithGST: 142422, priceWithMargin: 138255 },
     gold916: { basePrice: 126650, finalPrice: 126650, priceWithGST: 130409, priceWithMargin: 126650 },
+    gold20k: { basePrice: 115212, finalPrice: 115212, priceWithGST: 118668, priceWithMargin: 115212 },
+    gold18k: { basePrice: 103691, finalPrice: 103691, priceWithGST: 106801, priceWithMargin: 103691 },
+    gold14k: { basePrice: 80602, finalPrice: 80602, priceWithGST: 83020, priceWithMargin: 80602 },
     silver999: { basePrice: 2370, finalPrice: 2370, priceWithGST: 2441, priceWithMargin: 2370, makingCharges: 0 },
     silver925: { basePrice: 2192, finalPrice: 2192, priceWithGST: 2257, priceWithMargin: 2192, makingCharges: 0 },
 };

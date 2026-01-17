@@ -1,5 +1,6 @@
 import React from "react";
 import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 const GOLD = "#D4AF37";
 const GOLD_SOFT = "rgba(212, 175, 55, 0.15)";
@@ -21,6 +22,7 @@ interface ColorCustomizationCardProps {
     backgroundColor: string;
     textColor: string;
     priceColor: string;
+    cardBackgroundColor: string;
     onColorChange: (key: string, value: string) => void;
 }
 
@@ -28,6 +30,7 @@ export const ColorCustomizationCard: React.FC<ColorCustomizationCardProps> = ({
     backgroundColor,
     textColor,
     priceColor,
+    cardBackgroundColor,
     onColorChange,
 }) => {
     const handleRandomize = () => {
@@ -111,6 +114,26 @@ export const ColorCustomizationCard: React.FC<ColorCustomizationCardProps> = ({
                 </View>
             </View>
 
+            <View style={colorStyles.colorRow}>
+                <View style={colorStyles.colorInfo}>
+                    <Text style={colorStyles.label}>Card Background</Text>
+                    <View style={colorStyles.inputRow}>
+                        <View style={colorStyles.inputWrapper}>
+                            <TextInput
+                                placeholder="#FFFFFF"
+                                placeholderTextColor="#A3A3A3"
+                                style={[colorStyles.textInput, { outlineStyle: "none" } as any]}
+                                value={cardBackgroundColor}
+                                onChangeText={(text) => onColorChange("cardBackgroundColor", text)}
+                                maxLength={7}
+                                autoCapitalize="none"
+                            />
+                        </View>
+                        <View style={[colorStyles.colorPreview, { backgroundColor: cardBackgroundColor }]} />
+                    </View>
+                </View>
+            </View>
+
             <View style={colorStyles.presetsSection}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                     <Text style={{ fontSize: 24, marginRight: 8 }}>🎨</Text>
@@ -119,14 +142,13 @@ export const ColorCustomizationCard: React.FC<ColorCustomizationCardProps> = ({
                 <Text style={colorStyles.presetsSubtitle}>Choose a preset theme for your display</Text>
 
                 <View style={colorStyles.presetsGrid}>
-                    {THEME_PRESETS.map((p) => {
+                    {THEME_PRESETS.map((p, index) => {
                         const isActive = backgroundColor === p.bg && textColor === p.text && priceColor === p.price;
                         return (
                             <TouchableOpacity
                                 key={p.name}
                                 style={[
                                     colorStyles.presetCard,
-                                    { backgroundColor: p.bg },
                                     isActive && { borderColor: GOLD, borderWidth: 2 }
                                 ]}
                                 onPress={() => {
@@ -136,6 +158,24 @@ export const ColorCustomizationCard: React.FC<ColorCustomizationCardProps> = ({
                                     onColorChange("cardBackgroundColor", p.cardBg);
                                 }}
                             >
+                                <View style={StyleSheet.absoluteFill}>
+                                    <Svg height="100%" width="100%">
+                                        <Defs>
+                                            <RadialGradient
+                                                id={`grad-${index}`}
+                                                cx="50%"
+                                                cy="50%"
+                                                rx="100%"
+                                                ry="100%"
+                                            >
+                                                <Stop offset="0" stopColor="black" stopOpacity="0.25" />
+                                                <Stop offset="1" stopColor="white" stopOpacity="0" />
+                                            </RadialGradient>
+                                        </Defs>
+                                        <Rect x="0" y="0" width="100%" height="100%" fill={p.bg} />
+                                        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#grad-${index})`} />
+                                    </Svg>
+                                </View>
                                 <Text style={[colorStyles.presetCardName, { color: p.text }]}>{p.name}</Text>
                                 <View style={colorStyles.colorDotsRow}>
                                     <View style={[colorStyles.colorDot, { backgroundColor: p.text }]} />
@@ -257,6 +297,7 @@ const colorStyles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         aspectRatio: 1.6,
+        overflow: 'hidden',
     },
     presetCardName: {
         fontSize: 15,

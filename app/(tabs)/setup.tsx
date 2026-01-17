@@ -70,6 +70,9 @@ export default function RateSetupScreen(): ReactElement {
     const {
         gold24kLabel,
         gold22kLabel,
+        gold20kLabel,
+        gold18kLabel,
+        gold14kLabel,
         silver999Label,
         silver925Label,
         DEFAULT_LABELS,
@@ -79,6 +82,9 @@ export default function RateSetupScreen(): ReactElement {
     const {
         gold24kMargin,
         gold22kMargin,
+        gold20kMargin,
+        gold18kMargin,
+        gold14kMargin,
         silver999Margin,
         silver925Margin,
         updateMargin,
@@ -107,6 +113,9 @@ export default function RateSetupScreen(): ReactElement {
         updateLabels({
             gold24kLabel: gold24kLabel.trim() || DEFAULT_LABELS.gold24k,
             gold22kLabel: gold22kLabel.trim() || DEFAULT_LABELS.gold22k,
+            gold20kLabel: gold20kLabel.trim() || DEFAULT_LABELS.gold20k,
+            gold18kLabel: gold18kLabel.trim() || DEFAULT_LABELS.gold18k,
+            gold14kLabel: gold14kLabel.trim() || DEFAULT_LABELS.gold14k,
             silver999Label: silver999Label.trim() || DEFAULT_LABELS.silver999,
             silver925Label: silver925Label.trim() || DEFAULT_LABELS.silver925,
         });
@@ -209,21 +218,32 @@ export default function RateSetupScreen(): ReactElement {
                         <PurityLabelsCard
                             gold24kLabel={gold24kLabel}
                             gold22kLabel={gold22kLabel}
+                            gold20kLabel={gold20kLabel}
+                            gold18kLabel={gold18kLabel}
+                            gold14kLabel={gold14kLabel}
                             silver999Label={silver999Label}
                             silver925Label={silver925Label}
                             showGold24k={localConfig.showGold24k}
                             showGold22k={localConfig.showGold22k}
+                            showGold20k={localConfig.showGold20k}
+                            showGold18k={localConfig.showGold18k}
+                            showGold14k={localConfig.showGold14k}
                             showSilver999={localConfig.showSilver999}
                             showSilver925={localConfig.showSilver925}
                             isDesktop={isDesktop}
                             onLabelChange={(key, val) => updateLabels({ [key]: val })}
                             onUpdate={(key, val) => handleLocalUpdate({ [key]: val })}
                             onLabelsBlur={onLabelsBlur}
+                            purityOrder={localConfig.purityOrder || ["gold24k", "gold22k", "gold20k", "gold18k", "gold14k", "silver999", "silver925"]}
+                            onOrderChange={(newOrder) => handleLocalUpdate({ purityOrder: newOrder })}
                         />
 
                         <MarginsCard
                             gold24kMargin={gold24kMargin}
                             gold22kMargin={gold22kMargin}
+                            gold20kMargin={gold20kMargin}
+                            gold18kMargin={gold18kMargin}
+                            gold14kMargin={gold14kMargin}
                             silver999Margin={silver999Margin}
                             silver925Margin={silver925Margin}
                             isDesktop={isDesktop}
@@ -246,6 +266,7 @@ export default function RateSetupScreen(): ReactElement {
                             backgroundColor={localConfig.backgroundColor}
                             textColor={localConfig.textColor}
                             priceColor={localConfig.priceColor}
+                            cardBackgroundColor={localConfig.cardBackgroundColor}
                             onColorChange={handleColorChange}
                         />
                     </>

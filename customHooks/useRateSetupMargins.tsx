@@ -22,6 +22,9 @@ export const useRateSetupMargins = (
   return {
     gold24kMargin: activeConfig.gold24kMargin,
     gold22kMargin: activeConfig.gold22kMargin,
+    gold20kMargin: activeConfig.gold20kMargin,
+    gold18kMargin: activeConfig.gold18kMargin,
+    gold14kMargin: activeConfig.gold14kMargin,
     silver999Margin: activeConfig.silver999Margin,
     silver925Margin: activeConfig.silver925Margin,
     updateMargin,
