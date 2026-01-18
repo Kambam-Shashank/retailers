@@ -3,7 +3,14 @@ import { WEBSOCKET_URL } from "@/config/api";
 import { formatPricePerGram } from "@/utils/formatters";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Platform, ScrollView, Share, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRateConfig } from "../../contexts/RateConfigContext";
 import { useAaravRates } from "../../customHooks/useAaravRates";
@@ -120,6 +127,25 @@ ${shareUrl}`;
     }
   };
 
+  const isRatesReady = calculatedRates.gold999.basePrice > 0;
+
+  if (!isRatesReady) {
+    return (
+      <View
+        style={[
+          styles.container,
+          {
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: config.backgroundColor || "#fff",
+          },
+        ]}
+      >
+        <ActivityIndicator size="large" color={config.priceColor || "#D4AF37"} />
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={[
@@ -140,7 +166,6 @@ ${shareUrl}`;
         gold916Change={gold916Change}
         silver999Change={silver999Change}
         silver925Change={silver925Change}
-
       />
     </ScrollView>
   );

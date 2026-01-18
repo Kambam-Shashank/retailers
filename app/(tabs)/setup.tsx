@@ -1,20 +1,21 @@
 import {
-    BrandingPreviewModal,
-    NotificationsCard,
-    ShopBrandingCard
+  BrandingPreviewModal,
+  NotificationsCard,
+  ShopBrandingCard,
 } from "@/components/RateSetup/BrandingSettings";
 import { LivePreview } from "@/components/RateSetup/LivePreview";
 import {
-    MakingChargesCard,
-    MarginsCard,
-    PurityLabelsCard,
-    RateStatusCard
+  MakingChargesCard,
+  MarginsCard,
+  PurityLabelsCard,
+  RateStatusCard,
 } from "@/components/RateSetup/RateSettings";
 import { RateSetupTabs, TabType } from "@/components/RateSetup/SetupCore";
-import { ResetConfirmationModal, SaveSuccessModal } from "@/components/RateSetup/SetupModals";
 import {
-    ColorCustomizationCard
-} from "@/components/RateSetup/VisualSettings";
+  ResetConfirmationModal,
+  SaveSuccessModal,
+} from "@/components/RateSetup/SetupModals";
+import { ColorCustomizationCard } from "@/components/RateSetup/VisualSettings";
 
 import { useRateSetupBranding } from "@/customHooks/useRateSetupBranding";
 import { useRateSetupLabels } from "@/customHooks/useRateSetupLabels";
@@ -22,12 +23,13 @@ import { useRateSetupMargins } from "@/customHooks/useRateSetupMargins";
 import { useRouter } from "expo-router";
 import React, { ReactElement, useEffect, useState } from "react";
 import {
-    Platform, ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { RateConfig, useRateConfig } from "../../contexts/RateConfigContext";
 
@@ -37,464 +39,518 @@ const TEXT_MUTED = "#666"; // Darker muted text for readability on white backgro
 
 // ====== Main Component ======
 export default function RateSetupScreen(): ReactElement {
-    const router = useRouter();
-    const { width } = useWindowDimensions();
-    const isDesktop = width > 768;
+  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isDesktop = width > 768;
+  const isMobile = width < 420;
+  const isSmallMobile = width < 360;
 
-    const { config, updateConfig, resetConfigByTab } = useRateConfig();
-    const [localConfig, setLocalConfig] = useState<RateConfig>(config);
-    const [showResetConfirm, setShowResetConfirm] = useState(false);
-    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-    const [showBrandingPreview, setShowBrandingPreview] = useState(false);
-    const [activeTab, setActiveTab] = useState<TabType>("profile");
+  const { config, updateConfig, resetConfigByTab } = useRateConfig();
+  const [localConfig, setLocalConfig] = useState<RateConfig>(config);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [showBrandingPreview, setShowBrandingPreview] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("profile");
 
-    useEffect(() => {
-        setLocalConfig(config);
-    }, [config]);
+  useEffect(() => {
+    setLocalConfig(config);
+  }, [config]);
 
-    const handleLocalUpdate = (updates: Partial<RateConfig>) => {
-        setLocalConfig((prev) => ({ ...prev, ...updates }));
-    };
+  const handleLocalUpdate = (updates: Partial<RateConfig>) => {
+    setLocalConfig((prev) => ({ ...prev, ...updates }));
+  };
 
-    const isDirty = JSON.stringify(config) !== JSON.stringify(localConfig);
+  const isDirty = JSON.stringify(config) !== JSON.stringify(localConfig);
 
-    // Custom Hooks with Local State
-    const {
-        shopName,
-        logoBase64,
-        handlePickLogo,
-        handleDeleteLogo,
-        handleShopNameChange,
-    } = useRateSetupBranding(localConfig, handleLocalUpdate);
+  // Custom Hooks with Local State
+  const {
+    shopName,
+    logoBase64,
+    handlePickLogo,
+    handleDeleteLogo,
+    handleShopNameChange,
+  } = useRateSetupBranding(localConfig, handleLocalUpdate);
 
-    const {
-        gold24kLabel,
-        gold22kLabel,
-        gold20kLabel,
-        gold18kLabel,
-        gold14kLabel,
-        silver999Label,
-        silver925Label,
-        DEFAULT_LABELS,
-        updateLabels,
-    } = useRateSetupLabels(localConfig, handleLocalUpdate);
+  const {
+    gold24kLabel,
+    gold22kLabel,
+    gold20kLabel,
+    gold18kLabel,
+    gold14kLabel,
+    silver999Label,
+    silver925Label,
+    DEFAULT_LABELS,
+    updateLabels,
+  } = useRateSetupLabels(localConfig, handleLocalUpdate);
 
-    const {
-        gold24kMargin,
-        gold22kMargin,
-        gold20kMargin,
-        gold18kMargin,
-        gold14kMargin,
-        silver999Margin,
-        silver925Margin,
-        updateMargin,
-        handleMarginInputChange,
-    } = useRateSetupMargins(localConfig, handleLocalUpdate);
+  const {
+    gold24kMargin,
+    gold22kMargin,
+    gold20kMargin,
+    gold18kMargin,
+    gold14kMargin,
+    silver999Margin,
+    silver925Margin,
+    updateMargin,
+    handleMarginInputChange,
+  } = useRateSetupMargins(localConfig, handleLocalUpdate);
 
-    // Color handlers
-    const handleColorChange = (key: string, value: string) => {
-        handleLocalUpdate({ [key]: value });
-    };
+  // Color handlers
+  const handleColorChange = (key: string, value: string) => {
+    handleLocalUpdate({ [key]: value });
+  };
 
-    const handleSave = async () => {
-        if (!isDirty) return;
-        await updateConfig(localConfig);
-        setShowSaveSuccess(true);
-    };
+  const handleSave = async () => {
+    if (!isDirty) return;
+    await updateConfig(localConfig);
+    setShowSaveSuccess(true);
+  };
 
-    // Setup handlers for onBlur behavior
-    const onShopNameBlur = () => {
-        if (shopName) {
-            handleShopNameChange(shopName.trim());
-        }
-    };
+  // Setup handlers for onBlur behavior
+  const onShopNameBlur = () => {
+    if (shopName) {
+      handleShopNameChange(shopName.trim());
+    }
+  };
 
-    const onLabelsBlur = () => {
-        updateLabels({
-            gold24kLabel: gold24kLabel.trim() || DEFAULT_LABELS.gold24k,
-            gold22kLabel: gold22kLabel.trim() || DEFAULT_LABELS.gold22k,
-            gold20kLabel: gold20kLabel.trim() || DEFAULT_LABELS.gold20k,
-            gold18kLabel: gold18kLabel.trim() || DEFAULT_LABELS.gold18k,
-            gold14kLabel: gold14kLabel.trim() || DEFAULT_LABELS.gold14k,
-            silver999Label: silver999Label.trim() || DEFAULT_LABELS.silver999,
-            silver925Label: silver925Label.trim() || DEFAULT_LABELS.silver925,
-        });
-    };
+  const onLabelsBlur = () => {
+    updateLabels({
+      gold24kLabel: gold24kLabel.trim() || DEFAULT_LABELS.gold24k,
+      gold22kLabel: gold22kLabel.trim() || DEFAULT_LABELS.gold22k,
+      gold20kLabel: gold20kLabel.trim() || DEFAULT_LABELS.gold20k,
+      gold18kLabel: gold18kLabel.trim() || DEFAULT_LABELS.gold18k,
+      gold14kLabel: gold14kLabel.trim() || DEFAULT_LABELS.gold14k,
+      silver999Label: silver999Label.trim() || DEFAULT_LABELS.silver999,
+      silver925Label: silver925Label.trim() || DEFAULT_LABELS.silver925,
+    });
+  };
 
-    const performReset = () => {
-        resetConfigByTab(activeTab);
-        setShowResetConfirm(false);
-    };
+  const performReset = () => {
+    resetConfigByTab(activeTab);
+    setShowResetConfirm(false);
+  };
 
-    return (
-        <View style={styles.screen}>
-            <View
-                style={[styles.headerWrapper, isDesktop && styles.headerWrapperDesktop]}
+  return (
+    <View style={styles.screen}>
+      <View
+        style={[styles.headerWrapper, isDesktop && styles.headerWrapperDesktop]}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{ marginRight: 15, padding: 5 }}
+          >
+            <Text
+              style={{
+                fontSize: isSmallMobile ? 20 : isMobile ? 22 : 24,
+                color: "#000",
+              }}
             >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        style={{ marginRight: 15, padding: 5 }}
-                    >
-                        <Text style={{ fontSize: 24, color: "#000" }}>←</Text>
-                    </TouchableOpacity>
-                    <View>
-                        <Text style={styles.title}>Rate Setup</Text>
-                    </View>
-                </View>
-
-                <View style={styles.buttonRow}>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => router.push("/")}
-                    >
-                        <Text style={styles.buttonText}>Preview</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.saveButtonSmall, !isDirty && styles.disabledButton]}
-                        onPress={handleSave}
-                        disabled={!isDirty}
-                    >
-                        <Text
-                            style={[
-                                styles.saveButtonTextSmall,
-                                !isDirty && styles.disabledButtonText,
-                            ]}
-                        >
-                            Save
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            <RateSetupTabs
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-            />
-
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={[
-                    styles.scrollContent,
-                    isDesktop && styles.scrollContentDesktop,
-                ]}
+              ←
+            </Text>
+          </TouchableOpacity>
+          <View>
+            <Text
+              style={[
+                styles.title,
+                isMobile && { fontSize: isSmallMobile ? 18 : 20 },
+              ]}
             >
-                {activeTab === "profile" && (
-                    <>
-                        <LivePreview config={localConfig} />
-
-                        <ShopBrandingCard
-                            shopName={shopName}
-                            address={localConfig.shopAddress}
-                            phone={localConfig.shopPhone}
-                            logoBase64={logoBase64}
-                            logoSize={localConfig.logoSize}
-                            logoPlacement={localConfig.logoPlacement}
-                            logoOpacity={localConfig.logoOpacity}
-                            brandAlignment={localConfig.brandAlignment}
-                            onShopNameChange={handleShopNameChange}
-                            onShopNameBlur={onShopNameBlur}
-                            onPickLogo={handlePickLogo}
-                            onDeleteLogo={handleDeleteLogo}
-                            onUpdate={(u) => {
-                                if ("showBrandingPreview" in u) {
-                                    setShowBrandingPreview(true);
-                                } else {
-                                    handleLocalUpdate(u);
-                                }
-                            }}
-                        />
-
-                        <NotificationsCard config={localConfig} onUpdate={handleLocalUpdate} />
-                        <RateStatusCard config={localConfig} onUpdate={handleLocalUpdate} />
-                    </>
-                )}
-
-                {activeTab === "rates" && (
-                    <>
-                        <LivePreview config={localConfig} />
-
-                        <PurityLabelsCard
-                            gold24kLabel={gold24kLabel}
-                            gold22kLabel={gold22kLabel}
-                            gold20kLabel={gold20kLabel}
-                            gold18kLabel={gold18kLabel}
-                            gold14kLabel={gold14kLabel}
-                            silver999Label={silver999Label}
-                            silver925Label={silver925Label}
-                            showGold24k={localConfig.showGold24k}
-                            showGold22k={localConfig.showGold22k}
-                            showGold20k={localConfig.showGold20k}
-                            showGold18k={localConfig.showGold18k}
-                            showGold14k={localConfig.showGold14k}
-                            showSilver999={localConfig.showSilver999}
-                            showSilver925={localConfig.showSilver925}
-                            isDesktop={isDesktop}
-                            onLabelChange={(key, val) => updateLabels({ [key]: val })}
-                            onUpdate={(key, val) => handleLocalUpdate({ [key]: val })}
-                            onLabelsBlur={onLabelsBlur}
-                            purityOrder={localConfig.purityOrder || ["gold24k", "gold22k", "gold20k", "gold18k", "gold14k", "silver999", "silver925"]}
-                            onOrderChange={(newOrder) => handleLocalUpdate({ purityOrder: newOrder })}
-                        />
-
-                        <MarginsCard
-                            gold24kMargin={gold24kMargin}
-                            gold22kMargin={gold22kMargin}
-                            gold20kMargin={gold20kMargin}
-                            gold18kMargin={gold18kMargin}
-                            gold14kMargin={gold14kMargin}
-                            silver999Margin={silver999Margin}
-                            silver925Margin={silver925Margin}
-                            isDesktop={isDesktop}
-                            onMarginUpdate={(key, val) => updateMargin(key as any, val)}
-                            onMarginInputChange={handleMarginInputChange}
-                        />
-
-                        <MakingChargesCard
-                            config={localConfig}
-                            onUpdate={handleLocalUpdate}
-                        />
-                    </>
-                )}
-
-                {activeTab === "visual" && (
-                    <>
-                        <LivePreview config={localConfig} />
-
-                        <ColorCustomizationCard
-                            backgroundColor={localConfig.backgroundColor}
-                            textColor={localConfig.textColor}
-                            priceColor={localConfig.priceColor}
-                            cardBackgroundColor={localConfig.cardBackgroundColor}
-                            onColorChange={handleColorChange}
-                        />
-                    </>
-                )}
-
-                <View style={styles.footerActions}>
-                    <View style={{ flex: 1 }} />
-                    <TouchableOpacity
-                        style={[styles.saveButton, !isDirty && styles.disabledButton]}
-                        onPress={handleSave}
-                        disabled={!isDirty}
-                    >
-                        <Text
-                            style={[
-                                styles.saveButtonText,
-                                !isDirty && styles.disabledButtonText,
-                            ]}
-                        >
-                            Save Configuration
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.resetButton}
-                        onPress={() => setShowResetConfirm(true)}
-                    >
-                        <Text style={styles.resetText}>⟲ Reset Defaults</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-
-            <ResetConfirmationModal
-                visible={showResetConfirm}
-                onClose={() => setShowResetConfirm(false)}
-                onConfirm={performReset}
-            />
-
-            <SaveSuccessModal
-                visible={showSaveSuccess}
-                onClose={() => setShowSaveSuccess(false)}
-            />
-
-            <BrandingPreviewModal
-                visible={showBrandingPreview}
-                onClose={() => setShowBrandingPreview(false)}
-                shopName={shopName}
-                logoBase64={logoBase64}
-                logoSize={localConfig.logoSize}
-                logoPlacement={localConfig.logoPlacement}
-                logoOpacity={localConfig.logoOpacity}
-            />
+              Rate Setup
+            </Text>
+          </View>
         </View>
-    );
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("/")}
+          >
+            <Text style={[styles.buttonText, isMobile && { fontSize: 13 }]}>
+              Preview
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.saveButtonSmall, !isDirty && styles.disabledButton]}
+            onPress={handleSave}
+            disabled={!isDirty}
+          >
+            <Text
+              style={[
+                styles.saveButtonTextSmall,
+                isMobile && { fontSize: 13 },
+                !isDirty && styles.disabledButtonText,
+              ]}
+            >
+              Save
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isDesktop && styles.scrollContentDesktop,
+        ]}
+      >
+        {activeTab === "profile" && (
+          <>
+            <LivePreview config={localConfig} />
+
+            <ShopBrandingCard
+              shopName={shopName}
+              address={localConfig.shopAddress}
+              phone={localConfig.shopPhone}
+              logoBase64={logoBase64}
+              logoSize={localConfig.logoSize}
+              logoPlacement={localConfig.logoPlacement}
+              logoOpacity={localConfig.logoOpacity}
+              brandAlignment={localConfig.brandAlignment}
+              onShopNameChange={handleShopNameChange}
+              onShopNameBlur={onShopNameBlur}
+              onPickLogo={handlePickLogo}
+              onDeleteLogo={handleDeleteLogo}
+              onUpdate={(u) => {
+                if ("showBrandingPreview" in u) {
+                  setShowBrandingPreview(true);
+                } else {
+                  handleLocalUpdate(u);
+                }
+              }}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+
+            <NotificationsCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+            <RateStatusCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+          </>
+        )}
+
+        {activeTab === "rates" && (
+          <>
+            <LivePreview config={localConfig} />
+
+            <PurityLabelsCard
+              gold24kLabel={gold24kLabel}
+              gold22kLabel={gold22kLabel}
+              gold20kLabel={gold20kLabel}
+              gold18kLabel={gold18kLabel}
+              gold14kLabel={gold14kLabel}
+              silver999Label={silver999Label}
+              silver925Label={silver925Label}
+              showGold24k={localConfig.showGold24k}
+              showGold22k={localConfig.showGold22k}
+              showGold20k={localConfig.showGold20k}
+              showGold18k={localConfig.showGold18k}
+              showGold14k={localConfig.showGold14k}
+              showSilver999={localConfig.showSilver999}
+              showSilver925={localConfig.showSilver925}
+              isDesktop={isDesktop}
+              onLabelChange={(key, val) => updateLabels({ [key]: val })}
+              onUpdate={(key, val) => handleLocalUpdate({ [key]: val })}
+              onLabelsBlur={onLabelsBlur}
+              purityOrder={
+                localConfig.purityOrder || [
+                  "gold24k",
+                  "gold22k",
+                  "gold20k",
+                  "gold18k",
+                  "gold14k",
+                  "silver999",
+                  "silver925",
+                ]
+              }
+              onOrderChange={(newOrder) =>
+                handleLocalUpdate({ purityOrder: newOrder })
+              }
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+
+            <MarginsCard
+              gold24kMargin={gold24kMargin}
+              gold22kMargin={gold22kMargin}
+              gold20kMargin={gold20kMargin}
+              gold18kMargin={gold18kMargin}
+              gold14kMargin={gold14kMargin}
+              silver999Margin={silver999Margin}
+              silver925Margin={silver925Margin}
+              isDesktop={isDesktop}
+              onMarginUpdate={(key, val) => updateMargin(key as any, val)}
+              onMarginInputChange={handleMarginInputChange}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+
+            <MakingChargesCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+          </>
+        )}
+
+        {activeTab === "visual" && (
+          <>
+            <LivePreview config={localConfig} />
+
+            <ColorCustomizationCard
+              backgroundColor={localConfig.backgroundColor}
+              textColor={localConfig.textColor}
+              priceColor={localConfig.priceColor}
+              cardBackgroundColor={localConfig.cardBackgroundColor}
+              onColorChange={handleColorChange}
+            />
+          </>
+        )}
+
+        <View style={styles.footerActions}>
+          <View style={{ flex: 1 }} />
+          <TouchableOpacity
+            style={[styles.saveButton, !isDirty && styles.disabledButton]}
+            onPress={handleSave}
+            disabled={!isDirty}
+          >
+            <Text
+              style={[
+                styles.saveButtonText,
+                isMobile && { fontSize: isSmallMobile ? 13 : 14 },
+                !isDirty && styles.disabledButtonText,
+              ]}
+            >
+              Save Configuration
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.resetButton}
+            onPress={() => setShowResetConfirm(true)}
+          >
+            <Text
+              style={[
+                styles.resetText,
+                isMobile && { fontSize: isSmallMobile ? 12 : 13 },
+              ]}
+            >
+              ⟲ Reset Defaults
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <ResetConfirmationModal
+        visible={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={performReset}
+      />
+
+      <SaveSuccessModal
+        visible={showSaveSuccess}
+        onClose={() => setShowSaveSuccess(false)}
+      />
+
+      <BrandingPreviewModal
+        visible={showBrandingPreview}
+        onClose={() => setShowBrandingPreview(false)}
+        shopName={shopName}
+        logoBase64={logoBase64}
+        logoSize={localConfig.logoSize}
+        logoPlacement={localConfig.logoPlacement}
+        logoOpacity={localConfig.logoOpacity}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        backgroundColor: BG_LIGHT,
-        alignItems: "center",
-    },
-    headerWrapper: {
-        width: "100%",
-        borderBottomWidth: 1,
-        borderBottomColor: "#EEEEEE",
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        paddingTop: Platform.OS === 'android' ? 40 : 60,
-        backgroundColor: "#FFFFFF",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexDirection: "row",
-        zIndex: 10,
-    },
-    headerWrapperDesktop: {
-        paddingHorizontal: 32,
-        maxWidth: 1200,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "800",
-        color: GOLD,
-        letterSpacing: 0.5,
-    },
-    subtitle: {
-        fontSize: 13,
-        color: TEXT_MUTED,
-        marginTop: 2,
-        letterSpacing: 0.2,
-    },
-    buttonRow: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    button: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        backgroundColor: "#FFFFFF",
-        borderRadius: 8,
-        marginLeft: 12,
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
-    },
-    buttonText: {
-        color: "#1A1A1A",
-        fontSize: 14,
-        fontWeight: "600",
-    },
-    scroll: {
-        flex: 1,
-        width: "100%",
-    },
-    scrollContent: {
-        paddingBottom: 100,
-        width: "100%",
-    },
-    scrollContentDesktop: {
-        width: "90%",
-        maxWidth: 1000,
-        alignSelf: "center",
-        paddingVertical: 24,
-    },
-    footerActions: {
-        marginHorizontal: 16,
-        marginTop: 24,
-        marginBottom: 16,
-        flexDirection: "column",
-        alignItems: "stretch",
-        gap: 12,
-    },
-    resetButton: {
-        paddingVertical: 14,
-        paddingHorizontal: 20,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
-        backgroundColor: "#FFFFFF",
-        alignItems: "center",
-    },
-    resetText: {
-        color: "#EF4444", // Red text for reset
-        fontWeight: "600",
-        fontSize: 15,
-    },
-    saveButton: {
-        flex: 1,
-        backgroundColor: GOLD,
-        paddingVertical: 14,
-        paddingHorizontal: 20,
-        borderRadius: 12,
-        alignItems: "center",
-        shadowColor: GOLD,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
-        elevation: 2,
-    },
-    saveButtonText: {
-        color: "#000",
-        fontWeight: "700",
-        fontSize: 16,
-    },
-    saveButtonSmall: {
-        backgroundColor: GOLD,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        marginLeft: 12,
-    },
-    saveButtonTextSmall: {
-        color: "#000",
-        fontWeight: "600",
-        fontSize: 14,
-    },
-    disabledButton: {
-        backgroundColor: "#F5F5F5",
-        shadowOpacity: 0,
-        elevation: 0,
-        borderColor: "#E0E0E0",
-        borderWidth: 1,
-    },
-    disabledButtonText: {
-        color: "#A1A1A1",
-    },
-    alignmentCard: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: "#EEEEEE",
-        marginHorizontal: 16,
-        marginTop: 20,
-        padding: 24,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
-    },
-    cardTitleInternal: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: GOLD,
-        marginBottom: 16,
-    },
-    row: {
-        flexDirection: "row",
-        gap: 12,
-    },
-    optionButton: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 12,
-        backgroundColor: "#F9F9F9",
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
-        alignItems: "center",
-    },
-    optionButtonActive: {
-        backgroundColor: GOLD,
-        borderColor: GOLD,
-    },
-    optionText: {
-        color: "#666",
-        fontSize: 14,
-        fontWeight: "500",
-    },
-    optionTextActive: {
-        color: "#000",
-        fontWeight: "600",
-    },
+  screen: {
+    flex: 1,
+    backgroundColor: BG_LIGHT,
+    alignItems: "center",
+  },
+  headerWrapper: {
+    width: "100%",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexDirection: "row",
+    zIndex: 10,
+  },
+  headerWrapperDesktop: {
+    paddingHorizontal: 32,
+    maxWidth: 1200,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: GOLD,
+    letterSpacing: 0.5,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    marginTop: 2,
+    letterSpacing: 0.2,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    marginLeft: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  buttonText: {
+    color: "#1A1A1A",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  scroll: {
+    flex: 1,
+    width: "100%",
+  },
+  scrollContent: {
+    paddingBottom: 100,
+    width: "100%",
+  },
+  scrollContentDesktop: {
+    width: "90%",
+    maxWidth: 1000,
+    alignSelf: "center",
+    paddingVertical: 24,
+  },
+  footerActions: {
+    marginHorizontal: 16,
+    marginTop: 24,
+    marginBottom: 16,
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 12,
+  },
+  resetButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+  },
+  resetText: {
+    color: "#EF4444", // Red text for reset
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: GOLD,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: GOLD,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  saveButtonText: {
+    color: "#000",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  saveButtonSmall: {
+    backgroundColor: GOLD,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 12,
+  },
+  saveButtonTextSmall: {
+    color: "#000",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  disabledButton: {
+    backgroundColor: "#F5F5F5",
+    shadowOpacity: 0,
+    elevation: 0,
+    borderColor: "#E0E0E0",
+    borderWidth: 1,
+  },
+  disabledButtonText: {
+    color: "#A1A1A1",
+  },
+  alignmentCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+    marginHorizontal: 16,
+    marginTop: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardTitleInternal: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: GOLD,
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  optionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#F9F9F9",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    alignItems: "center",
+  },
+  optionButtonActive: {
+    backgroundColor: GOLD,
+    borderColor: GOLD,
+  },
+  optionText: {
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  optionTextActive: {
+    color: "#000",
+    fontWeight: "600",
+  },
 });

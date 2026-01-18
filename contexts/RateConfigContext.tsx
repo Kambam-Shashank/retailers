@@ -72,7 +72,7 @@ export interface RateConfig {
   // New visual options
   theme: "modern" | "classic" | "dark" | "glass";
   layoutDensity: "compact" | "normal" | "spacious";
-  fontTheme: "modern" | "classic" | "serif";
+  fontTheme: "modern" | "classic" | "serif" | "minimal";
   cardStyle: "boxed" | "minimal";
   showTime: boolean;
   showDate: boolean;
@@ -159,7 +159,7 @@ const DEFAULT_CONFIG: RateConfig = {
   priceColor: "#000000",
   theme: "modern",
   layoutDensity: "normal",
-  fontTheme: "modern",
+  fontTheme: "minimal",
   cardStyle: "boxed",
   showTime: false,
   showDate: false,

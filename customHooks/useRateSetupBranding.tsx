@@ -1,9 +1,6 @@
+import * as ImageManipulator from "expo-image-manipulator";
+import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
-import {
-  Asset,
-  ImageLibraryOptions,
-  launchImageLibrary,
-} from "react-native-image-picker";
 import { RateConfig, useRateConfig } from "../contexts/RateConfigContext";
 
 export const useRateSetupBranding = (
@@ -15,36 +12,46 @@ export const useRateSetupBranding = (
   const activeUpdate = externalUpdate || ((u) => updateConfig(u));
 
   const handlePickLogo = async () => {
-    const options: ImageLibraryOptions = {
-      mediaType: "photo",
-      selectionLimit: 1,
-      includeBase64: true,
-      quality: 0.8,
-    };
+    try {
+      // 1. Pick Image (No native editing, No initial base64)
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false, // Fixes "missing checkmark" on some Androids
+        quality: 1,
+      });
 
-    const result = await launchImageLibrary(options);
+      if (result.canceled) return;
 
-    if (result.didCancel) return;
-    if (result.errorCode) {
-      Alert.alert("Error", result.errorMessage || "Image picker error");
-      return;
+      const asset = result.assets[0];
+
+      // 2. Resize & Compress
+      const manipResult = await ImageManipulator.manipulateAsync(
+        asset.uri,
+        [{ resize: { width: 600 } }], // Resize to reasonable width for logo
+        {
+          compress: 0.7,
+          format: ImageManipulator.SaveFormat.JPEG,
+          base64: true,
+        }
+      );
+
+      if (!manipResult.base64) {
+        Alert.alert("Error", "Unable to process image data.");
+        return;
+      }
+
+      const base64SizeKB = (manipResult.base64.length * 3) / 4 / 1024;
+      if (base64SizeKB > 1000) {
+        Alert.alert("Too Large", "Image is too large even after compression.");
+        return;
+      }
+
+      const base = "data:image/jpeg;base64," + manipResult.base64;
+      activeUpdate({ logoBase64: base });
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to pick image");
     }
-
-    const asset: Asset | undefined = result.assets?.[0];
-    if (!asset || !asset.base64) {
-      Alert.alert("Error", "Unable to read image data.");
-      return;
-    }
-
-    const base64SizeKB = (asset.base64.length * 3) / 4 / 1024;
-    if (base64SizeKB > 500) {
-      Alert.alert("Too Large", "Logo must be less than 500KB.");
-      return;
-    }
-
-    const base =
-      "data:" + (asset.type || "image/jpeg") + ";base64," + asset.base64;
-    activeUpdate({ logoBase64: base });
   };
 
   const handleDeleteLogo = () => {

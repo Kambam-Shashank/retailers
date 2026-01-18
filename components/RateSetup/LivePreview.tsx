@@ -31,11 +31,11 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ config }) => {
     const [withGST, setWithGST] = useState(true);
 
     return (
-        <View style={styles.previewContainer}>
-            <View style={styles.outerHeader}>
-                <View style={styles.outerDot} />
-                <Text style={styles.outerTitle}>Live Preview</Text>
-            </View>
+        // <View style={styles.previewContainer}>
+        //     <View style={styles.outerHeader}>
+        //         <View style={styles.outerDot} />
+        //         <Text style={styles.outerTitle}>Live Preview</Text>
+        //     </View>
 
             <View style={styles.previewContent}>
                 <View style={styles.innerHeader}>
@@ -64,54 +64,51 @@ export const LivePreview: React.FC<LivePreviewProps> = ({ config }) => {
                     />
                 </View>
             </View>
-        </View>
+        // </View>
     );
 };
 
 const styles = StyleSheet.create({
-    previewContainer: {
-        backgroundColor: "#F8FAF8",
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: "#E2E8E2",
-        marginHorizontal: 16,
-        marginTop: 20,
-        marginBottom: 10,
-        padding: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 3,
-    },
-    outerHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    outerDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#22C55E',
-        marginRight: 8,
-    },
-    outerTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#1A1A1A',
-    },
+    // previewContainer: {
+    //     backgroundColor: "#F8FAF8",
+    //     borderRadius: 20,
+    //     borderWidth: 1,
+    //     borderColor: "#E2E8E2",
+    //     marginHorizontal: 16,
+    //     marginTop: 20,
+    //     marginBottom: 10,
+    //     padding: 6,
+    //     elevation: 3,
+    // },
+    // outerHeader: {
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    //     marginBottom: 16,
+    // },
+    // outerDot: {
+    //     width: 8,
+    //     height: 8,
+    //     borderRadius: 4,
+    //     backgroundColor: '#22C55E',
+    //     marginRight: 8,
+    // },
+    // outerTitle: {
+    //     fontSize: 16,
+    //     fontWeight: '700',
+    //     color: '#1A1A1A',
+    // },
     previewContent: {
         backgroundColor: "#FFFFFF",
         borderRadius: 16,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#E2E8F0',
+        margin:12,
     },
     innerHeader: {
         backgroundColor: '#E2E8CE',
         paddingVertical: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 10,
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: 1,
