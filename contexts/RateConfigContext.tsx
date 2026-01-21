@@ -98,6 +98,7 @@ export interface RateConfig {
   logoOpacity: number;
   logoPlacement: "header" | "card";
   purityOrder: string[];
+  defaultGSTEnabled: boolean;
 }
 
 
@@ -105,7 +106,7 @@ interface RateConfigProviderProps {
   children: ReactNode;
 }
 
-const DEFAULT_CONFIG: RateConfig = {
+export const DEFAULT_CONFIG: RateConfig = {
   shopName: "karatpay",
   shopAddress: "",
   shopPhone: "",
@@ -183,6 +184,7 @@ const DEFAULT_CONFIG: RateConfig = {
   logoOpacity: 1,
   logoPlacement: "header",
   purityOrder: ["gold24k", "gold22k", "gold20k", "gold18k", "gold14k", "silver999", "silver925"],
+  defaultGSTEnabled: true,
 };
 
 interface RateConfigContextType {

@@ -23,10 +23,10 @@ const Index = () => {
   const router = useRouter();
   const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [withGST, setWithGST] = useState(true);
+  const { config } = useRateConfig();
+  const [withGST, setWithGST] = useState(config.defaultGSTEnabled);
   const [cachedWsData, setCachedWsData] = useState<GoldPriceData | null>(null);
 
-  const { config } = useRateConfig();
   const { data: aaravRates } = useAaravRates();
 
 
@@ -94,10 +94,10 @@ const Index = () => {
 
       const message = `Gold & Silver Live Rates
 
-Gold 999 (per gram): ${formatPricePerGram(
+Gold 999: ${formatPricePerGram(
         calculatedRates.gold999.finalPrice
       )}
-Silver 999 (per gram): ${formatPricePerGram(
+Silver 999: ${formatPricePerGram(
         calculatedRates.silver999.finalPrice
       )}
 

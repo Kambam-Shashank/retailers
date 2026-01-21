@@ -1,6 +1,6 @@
 import { RateDisplayContent } from "@/components/RateDisplay/RateDisplayContent";
 import { WEBSOCKET_URL } from "@/config/api";
-import { RateConfig } from "@/contexts/RateConfigContext";
+import { DEFAULT_CONFIG, RateConfig } from "@/contexts/RateConfigContext";
 import { useAaravRates } from "@/customHooks/useAaravRates";
 import { usePriceChange } from "@/customHooks/usePriceChange";
 import { useRateCalculations } from "@/customHooks/useRateCalculations";
@@ -18,62 +18,6 @@ import {
     StyleSheet,
     View,
 } from "react-native";
-
-// Default config fallback
-const DEFAULT_CONFIG: RateConfig = {
-    shopName: "",
-    shopAddress: "",
-    shopPhone: "",
-    shopEmail: "",
-    logoBase64: null,
-    gold24kLabel: "24K Gold (999)",
-    gold22kLabel: "22K Gold (916)",
-    silver999Label: "Silver (999)",
-    silver925Label: "Silver (925)",
-    gold24kMargin: 0,
-    gold22kMargin: 0,
-    silver999Margin: 0,
-    silver925Margin: 0,
-    makingChargesEnabled: false,
-    makingCharges24kType: "percentage",
-    makingCharges24kValue: 0,
-    makingCharges24kTitle: "MC",
-    makingCharges22kType: "percentage",
-    makingCharges22kValue: 0,
-    makingCharges22kTitle: "MC",
-    makingCharges999Type: "percentage",
-    makingCharges999Value: 0,
-    makingCharges999Title: "MC",
-    makingCharges925Type: "percentage",
-    makingCharges925Value: 0,
-    makingCharges925Title: "MC",
-    notifications: [],
-    ratesFrozen: false,
-    frozenAt: null,
-    backgroundColor: "#FFFFFF",
-    textColor: "#1A1A1A",
-    priceColor: "#000000",
-    theme: "modern",
-    layoutDensity: "normal",
-    fontTheme: "modern",
-    cardStyle: "boxed",
-    showTime: true,
-    showDate: true,
-    showShopName: true,
-    brandAlignment: "center",
-    showGold24k: true,
-    showGold22k: true,
-    showSilver999: true,
-    showSilver925: false,
-    priceDecimalPlaces: 0,
-    cardBorderRadius: 16,
-    cardBorderWidth: 1,
-    cardBorderColor: "#EEEEEE",
-    cardBackgroundColor: "#FFFFFF",
-    logoSize: 80,
-    logoOpacity: 1,
-    logoPlacement: "header",
-};
 
 export default function SharedRateView() {
     const { retailerId } = useLocalSearchParams();

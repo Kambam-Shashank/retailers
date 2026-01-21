@@ -329,3 +329,4 @@ const colorStyles = StyleSheet.create({
         fontWeight: "600",
     },
 });
+

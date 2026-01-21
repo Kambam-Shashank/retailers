@@ -1,22 +1,20 @@
+import { NotificationsCard, ShopBrandingCard } from "@/components/RateSetup/BrandingSettings";
 import {
-  BrandingPreviewModal,
-  NotificationsCard,
-  ShopBrandingCard,
-} from "@/components/RateSetup/BrandingSettings";
-import { LivePreview } from "@/components/RateSetup/LivePreview";
-import {
+  GSTSettingsCard,
   MakingChargesCard,
   MarginsCard,
   PurityLabelsCard,
   RateStatusCard,
 } from "@/components/RateSetup/RateSettings";
-import { RateSetupTabs, TabType } from "@/components/RateSetup/SetupCore";
+import { LivePreview, RateSetupTabs, TabType } from "@/components/RateSetup/SetupBase";
 import {
+  BrandingPreviewModal,
   ResetConfirmationModal,
   SaveSuccessModal,
 } from "@/components/RateSetup/SetupModals";
 import { ColorCustomizationCard } from "@/components/RateSetup/VisualSettings";
 
+import { RateConfig, useRateConfig } from "@/contexts/RateConfigContext";
 import { useRateSetupBranding } from "@/customHooks/useRateSetupBranding";
 import { useRateSetupLabels } from "@/customHooks/useRateSetupLabels";
 import { useRateSetupMargins } from "@/customHooks/useRateSetupMargins";
@@ -31,17 +29,14 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { RateConfig, useRateConfig } from "../../contexts/RateConfigContext";
 
 const GOLD = "#D4AF37";
 const BG_LIGHT = "#FFFFFF";
-const TEXT_MUTED = "#666"; // Darker muted text for readability on white background
+const TEXT_MUTED = "#666";
 
-// ====== Main Component ======
 export default function RateSetupScreen(): ReactElement {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const isDesktop = width > 768;
   const isMobile = width < 420;
   const isSmallMobile = width < 360;
 
@@ -62,7 +57,6 @@ export default function RateSetupScreen(): ReactElement {
 
   const isDirty = JSON.stringify(config) !== JSON.stringify(localConfig);
 
-  // Custom Hooks with Local State
   const {
     shopName,
     logoBase64,
@@ -95,7 +89,6 @@ export default function RateSetupScreen(): ReactElement {
     handleMarginInputChange,
   } = useRateSetupMargins(localConfig, handleLocalUpdate);
 
-  // Color handlers
   const handleColorChange = (key: string, value: string) => {
     handleLocalUpdate({ [key]: value });
   };
@@ -106,7 +99,6 @@ export default function RateSetupScreen(): ReactElement {
     setShowSaveSuccess(true);
   };
 
-  // Setup handlers for onBlur behavior
   const onShopNameBlur = () => {
     if (shopName) {
       handleShopNameChange(shopName.trim());
@@ -132,70 +124,59 @@ export default function RateSetupScreen(): ReactElement {
 
   return (
     <View style={styles.screen}>
-      <View
-        style={[styles.headerWrapper, isDesktop && styles.headerWrapperDesktop]}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ marginRight: 15, padding: 5 }}
-          >
-            <Text
-              style={{
-                fontSize: isSmallMobile ? 20 : isMobile ? 22 : 24,
-                color: "#000",
-              }}
+      <View style={styles.headerWrapper}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
             >
-              ←
-            </Text>
-          </TouchableOpacity>
-          <View>
-            <Text
-              style={[
-                styles.title,
-                isMobile && { fontSize: isSmallMobile ? 18 : 20 },
-              ]}
-            >
-              Rate Setup
-            </Text>
+              <Text style={styles.backIcon}>←</Text>
+            </TouchableOpacity>
+            <View>
+              <Text style={[styles.headerTitle, isMobile && { fontSize: isSmallMobile ? 18 : 20 }]}>
+                Rate Setup
+              </Text>
+              <Text style={styles.headerSubtitle}>Configure your display</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push("/")}
-          >
-            <Text style={[styles.buttonText, isMobile && { fontSize: 13 }]}>
-              Preview
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.saveButtonSmall, !isDirty && styles.disabledButton]}
-            onPress={handleSave}
-            disabled={!isDirty}
-          >
-            <Text
-              style={[
-                styles.saveButtonTextSmall,
-                isMobile && { fontSize: 13 },
-                !isDirty && styles.disabledButtonText,
-              ]}
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={styles.previewButton}
+              onPress={() => router.push("/")}
             >
-              Save
-            </Text>
-          </TouchableOpacity>
+              <Text style={[styles.previewButtonText, isMobile && { fontSize: 13 }]}>
+                Preview
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.saveButtonTop, !isDirty && styles.disabledButton]}
+              onPress={handleSave}
+              disabled={!isDirty}
+            >
+              <Text
+                style={[
+                  styles.saveButtonTextTop,
+                  isMobile && { fontSize: 13 },
+                  !isDirty && styles.disabledButtonText,
+                ]}
+              >
+                Save
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
-      <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} isMobile={isMobile} />
 
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
           styles.scrollContent,
-          isDesktop && styles.scrollContentDesktop,
+          { paddingBottom: 100 },
         ]}
       >
         {activeTab === "profile" && (
@@ -210,12 +191,11 @@ export default function RateSetupScreen(): ReactElement {
               logoSize={localConfig.logoSize}
               logoPlacement={localConfig.logoPlacement}
               logoOpacity={localConfig.logoOpacity}
-              brandAlignment={localConfig.brandAlignment}
               onShopNameChange={handleShopNameChange}
               onShopNameBlur={onShopNameBlur}
               onPickLogo={handlePickLogo}
               onDeleteLogo={handleDeleteLogo}
-              onUpdate={(u) => {
+              onUpdate={(u: Partial<RateConfig>) => {
                 if ("showBrandingPreview" in u) {
                   setShowBrandingPreview(true);
                 } else {
@@ -260,7 +240,7 @@ export default function RateSetupScreen(): ReactElement {
               showGold14k={localConfig.showGold14k}
               showSilver999={localConfig.showSilver999}
               showSilver925={localConfig.showSilver925}
-              isDesktop={isDesktop}
+
               onLabelChange={(key, val) => updateLabels({ [key]: val })}
               onUpdate={(key, val) => handleLocalUpdate({ [key]: val })}
               onLabelsBlur={onLabelsBlur}
@@ -290,7 +270,7 @@ export default function RateSetupScreen(): ReactElement {
               gold14kMargin={gold14kMargin}
               silver999Margin={silver999Margin}
               silver925Margin={silver925Margin}
-              isDesktop={isDesktop}
+
               onMarginUpdate={(key, val) => updateMargin(key as any, val)}
               onMarginInputChange={handleMarginInputChange}
               isMobile={isMobile}
@@ -298,6 +278,13 @@ export default function RateSetupScreen(): ReactElement {
             />
 
             <MakingChargesCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
+
+            <GSTSettingsCard
               config={localConfig}
               onUpdate={handleLocalUpdate}
               isMobile={isMobile}
@@ -358,6 +345,7 @@ export default function RateSetupScreen(): ReactElement {
         visible={showResetConfirm}
         onClose={() => setShowResetConfirm(false)}
         onConfirm={performReset}
+        tabName={activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
       />
 
       <SaveSuccessModal
@@ -371,8 +359,6 @@ export default function RateSetupScreen(): ReactElement {
         shopName={shopName}
         logoBase64={logoBase64}
         logoSize={localConfig.logoSize}
-        logoPlacement={localConfig.logoPlacement}
-        logoOpacity={localConfig.logoOpacity}
       />
     </View>
   );
@@ -382,68 +368,79 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: BG_LIGHT,
-    alignItems: "center",
   },
   headerWrapper: {
-    width: "100%",
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingBottom: 15,
+    backgroundColor: BG_LIGHT,
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    paddingTop: Platform.OS === "android" ? 40 : 60,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "space-between",
-    alignItems: "center",
+    width: "100%",
+  },
+  headerContent: {
     flexDirection: "row",
-    zIndex: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
   },
-  headerWrapperDesktop: {
-    paddingHorizontal: 32,
-    maxWidth: 1200,
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  title: {
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  backIcon: {
     fontSize: 24,
+    color: "#000",
+  },
+  headerTitle: {
+    fontSize: 22,
     fontWeight: "800",
     color: GOLD,
     letterSpacing: 0.5,
   },
-  subtitle: {
-    fontSize: 13,
+  headerSubtitle: {
+    fontSize: 12,
     color: TEXT_MUTED,
-    marginTop: 2,
-    letterSpacing: 0.2,
+    marginTop: -2,
   },
-  buttonRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+  previewButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
-    marginLeft: 12,
     borderWidth: 1,
     borderColor: "#E0E0E0",
   },
-  buttonText: {
+  previewButtonText: {
     color: "#1A1A1A",
     fontSize: 14,
     fontWeight: "600",
+  },
+  saveButtonTop: {
+    backgroundColor: GOLD,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  saveButtonTextTop: {
+    color: "#000",
+    fontWeight: "600",
+    fontSize: 14,
   },
   scroll: {
     flex: 1,
     width: "100%",
   },
   scrollContent: {
-    paddingBottom: 100,
-    width: "100%",
-  },
-  scrollContentDesktop: {
-    width: "90%",
-    maxWidth: 1000,
-    alignSelf: "center",
-    paddingVertical: 24,
+    paddingVertical: 12,
   },
   footerActions: {
     marginHorizontal: 16,
@@ -463,12 +460,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resetText: {
-    color: "#EF4444", // Red text for reset
+    color: "#EF4444",
     fontWeight: "600",
     fontSize: 15,
   },
   saveButton: {
-    flex: 1,
     backgroundColor: GOLD,
     paddingVertical: 14,
     paddingHorizontal: 20,
@@ -484,18 +480,6 @@ const styles = StyleSheet.create({
     color: "#000",
     fontWeight: "700",
     fontSize: 16,
-  },
-  saveButtonSmall: {
-    backgroundColor: GOLD,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginLeft: 12,
-  },
-  saveButtonTextSmall: {
-    color: "#000",
-    fontWeight: "600",
-    fontSize: 14,
   },
   disabledButton: {
     backgroundColor: "#F5F5F5",

@@ -1,18 +1,17 @@
 import { RateConfig } from "@/contexts/RateConfigContext";
 import { usePriceChange } from "@/customHooks/usePriceChange";
-import { formatPricePerGram, formatTime } from "@/utils/formatters";
+import { formatPricePerGram } from "@/utils/formatters";
 import { Marquee } from "@animatereactnative/marquee";
 import {
   Feather,
   FontAwesome,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   Image,
   Linking,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,13 +21,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Shadow } from "react-native-shadow-2";
-import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 interface RateDisplayContentProps {
   config: RateConfig;
   calculatedRates: any;
   currentTime: Date;
   viewOnly?: boolean;
+  previewMode?: boolean; // New prop for live preview
   withGST: boolean;
   onToggleGST: () => void;
   onShare: () => void;
@@ -42,48 +41,42 @@ interface RateDisplayContentProps {
 const RateCard = ({
   label,
   price,
-  subtext,
   priceColor,
   isGold,
   config,
   isMobile,
   isSmallMobile,
+  previewMode = false,
 }: {
   label: string;
   price: string;
-  subtext: string;
   priceColor: string;
   isGold?: boolean;
   config: RateConfig;
   isMobile: boolean;
   isSmallMobile: boolean;
+  previewMode?: boolean;
 }) => {
-  const gradientColors = isGold
-    ? ["#FFD700", "#FF8C00"]
-    : ["#E2E8F0", "#CBD5E0"];
+  const gradientColors: [string, string] = isGold
+    ? ["#FFD700", "#F59E0B"]
+    : ["#E2E8F0", "#94A3B8"];
 
   const labelFontSize = isSmallMobile ? 15 : isMobile ? 16 : 18;
   const priceFontSize = isSmallMobile ? 24 : isMobile ? 26 : 28;
-  const subtextFontSize = isSmallMobile ? 10 : 11;
 
   const isMinimal = config.fontTheme === "minimal";
-  const labelWeight = isMinimal ? "600" : "800";
-  const priceWeight = isMinimal ? "400" : "600";
-  const labelLetterSpacing = isMinimal ? 0.5 : 0.2;
-  const priceLetterSpacing = isMinimal ? -0.2 : -0.5;
-  const subtextWeight = isMinimal ? "600" : "800";
+  const labelWeight = isMinimal ? "600" : "700";
+  const priceWeight = isMinimal ? "400" : "700";
 
   return (
-    <View
-      style={[styles.animatedCardContainer, { marginBottom: 4 }]}
-    >
+    <View style={[styles.animatedCardContainer, { marginBottom: 14 }]}>
       <Shadow
-        distance={12}
-        startColor={"rgba(0, 0, 0, 0.1)"}
-        offset={[0, 6]}
+        distance={6}
+        startColor={"rgba(0, 0, 0, 0.05)"}
+        offset={[0, 4]}
         style={{
           width: "100%",
-          borderRadius: config.cardBorderRadius || 24,
+          borderRadius: 16,
         }}
         containerStyle={{ width: "100%" }}
       >
@@ -91,118 +84,49 @@ const RateCard = ({
           style={[
             styles.card,
             {
-              borderRadius: config.cardBorderRadius || 24,
+              borderRadius: 16,
+              backgroundColor: "#FFFFFF",
               overflow: "hidden",
+              flexDirection: "row",
             },
           ]}
         >
-          {Platform.OS !== "web" ? (
-            <BlurView
-              intensity={30}
-              style={StyleSheet.absoluteFill}
-            />
-          ) : (
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                {
-                  backgroundColor: "rgba(255, 255, 255, 0.4)",
-                  ...Platform.select({
-                    web: {
-                      backdropFilter: "blur(12px)",
-                      WebkitBackdropFilter: "blur(12px)",
-                    } as any,
-                  }),
-                },
-              ]}
-            />
-          )}
-          <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Defs>
-              <LinearGradient
-                id="cardGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <Stop offset="0%" stopColor={gradientColors[0]} stopOpacity="0.4" />
-                <Stop offset="100%" stopColor={gradientColors[1]} stopOpacity="0.2" />
-              </LinearGradient>
-            </Defs>
-            <Rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="url(#cardGradient)"
-            />
-          </Svg>
-
-          <View
-            style={[
-              styles.cardGlow,
-              {
-                backgroundColor: isGold
-                  ? "rgba(255, 215, 0, 0.1)"
-                  : "rgba(192, 192, 192, 0.1)",
-                transform: [{ rotate: "45deg" }],
-              },
-            ]}
+          <LinearGradient
+            colors={gradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ width: 6, height: "100%" }}
           />
 
-          <View style={[styles.cardContent, { paddingHorizontal: 16, paddingVertical: 22 }]}>
-            <View>
+          <View style={styles.cardContent}>
+            <View style={{ gap: 2 }}>
               <Text
                 style={[
                   styles.cardLabel,
                   {
-                    color: config.textColor || (isGold ? "#5D4037" : "#2D3748"),
+                    color: "#1E293B", // Dark slate for better readability
                     fontSize: labelFontSize,
-                    marginBottom: 4,
+                    marginBottom: 0,
                     fontWeight: labelWeight,
-                    letterSpacing: labelLetterSpacing,
                   },
                 ]}
               >
                 {label}
               </Text>
-              <View
-                style={[
-                  styles.subtextContainer,
-                  {
-                    backgroundColor: isGold
-                      ? "rgba(230, 161, 25, 0.2)"
-                      : "rgba(74, 85, 104, 0.2)",
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.cardSubtext,
-                    {
-                      color: isGold ? "#8B6914" : "#4A5568",
-                      fontSize: subtextFontSize,
-                      fontWeight: subtextWeight,
-                    },
-                  ]}
-                >
-                  {subtext}
+              {!previewMode && (
+                <Text style={{ fontSize: 12, color: "#64748B", fontWeight: "500" }}>
+                  per gram
                 </Text>
-              </View>
+              )}
             </View>
             <View style={styles.priceContainer}>
               <Text
                 style={[
                   styles.cardPrice,
                   {
-                    color: priceColor,
+                    color: isGold ? "#D97706" : "#475569",
                     fontSize: priceFontSize,
-                    textShadowColor: "rgba(0, 0, 0, 0.1)",
-                    textShadowOffset: { width: 0, height: 1 },
-                    textShadowRadius: 2,
-                    fontWeight: priceWeight,
-                    letterSpacing: priceLetterSpacing,
+                    fontWeight: "900", // Increased boldness
                   },
                 ]}
               >
@@ -221,6 +145,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   calculatedRates,
   currentTime,
   viewOnly = false,
+  previewMode = false,
   withGST,
   onToggleGST,
   onShare,
@@ -238,7 +163,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
     (n) => n.enabled
   );
 
-  const rateSubtext = withGST ? "per gram (incl. GST)" : "per gram";
+
 
   const rateItemsByKey: Record<
     string,
@@ -302,7 +227,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
     },
   };
 
-  const orderedRateItems = (
+  let orderedRateItems = (
     config.purityOrder?.length
       ? config.purityOrder
       : [
@@ -324,6 +249,13 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
       isGold: boolean;
     }>;
 
+  // In preview mode, limit to 2 gold and 2 silver cards
+  if (previewMode) {
+    const goldItems = orderedRateItems.filter(item => item.isGold).slice(0, 2);
+    const silverItems = orderedRateItems.filter(item => !item.isGold).slice(0, 2);
+    orderedRateItems = [...goldItems, ...silverItems];
+  }
+
   const headerDirection =
     config.brandAlignment === "right" ? "row-reverse" : "row";
   const contentAlignItems =
@@ -342,126 +274,88 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const SafeContainer = viewOnly ? View : SafeAreaView;
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[config.backgroundColor, config.backgroundColor]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={styles.container}
+    >
       <SafeContainer style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={[styles.header, { flexDirection: headerDirection }]}>
-            <View style={{ flex: 1, alignItems: contentAlignItems }}>
-              <View
-                style={{
-                  flexDirection:
-                    config.brandAlignment === "right" ? "row-reverse" : "row",
-                  alignItems: "center",
-                  gap: 12,
-                }}
+        <View style={styles.headerContainer}>
+          {/* Top row with buttons */}
+          <View style={styles.topButtonRow}>
+            <TouchableOpacity style={styles.iconButton} onPress={onShare}>
+              <Feather
+                name="share-2"
+                size={20}
+                color={config.textColor || "#2D3748"}
+              />
+            </TouchableOpacity>
+
+            {!viewOnly && onSetupPress && (
+              <TouchableOpacity
+                style={[styles.iconButton, { marginLeft: 8 }]}
+                onPress={onSetupPress}
               >
-                {config.logoBase64 && (
-                  <Image
-                    source={{ uri: config.logoBase64 }}
-                    style={{
-                      width: config.logoSize || 80,
-                      height: config.logoSize || 80,
-                      opacity: config.logoOpacity ?? 1,
-                    }}
-                    resizeMode="contain"
-                  />
-                )}
-                <View style={{ alignItems: contentAlignItems }}>
-                  {config.showShopName && (
-                    <Text
-                      style={[
-                        styles.brandName,
-                        {
-                          color: config.textColor || "#2D3748",
-                          fontSize: 18,
-                          textAlign: textAlign,
-                        },
-                      ]}
-                    >
-                      {config.shopName}
-                    </Text>
-                  )}
+                <Feather
+                  name="settings"
+                  size={20}
+                  color={config.textColor || "#2D3748"}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
 
-                  {(config.showDate || config.showTime) && (
-                    <Text
-                      style={{
-                        marginTop: 2,
-                        fontSize: 12,
-                        color: config.textColor || "#2D3748",
-                        opacity: 0.75,
-                        textAlign: textAlign,
-                      }}
-                    >
-                      {(config.showDate
-                        ? currentTime.toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                        : "") +
-                        (config.showDate && config.showTime ? " • " : "") +
-                        (config.showTime ? formatTime(currentTime) : "")}
-                    </Text>
-                  )}
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.headerRight}>
-              <View
+          {/* Center content with logo and brand name */}
+          <View style={styles.centerContent}>
+            {config.logoBase64 && (
+              <Image
+                source={{ uri: config.logoBase64 }}
+                style={{
+                  width: config.logoSize || 80,
+                  height: config.logoSize || 80,
+                  opacity: config.logoOpacity ?? 1,
+                  marginBottom: 8,
+                }}
+                resizeMode="contain"
+              />
+            )}
+            {config.showShopName && (
+              <Text
                 style={[
-                  styles.buttonRow,
+                  styles.brandName,
                   {
-                    flexDirection:
-                      headerDirection === "row-reverse" ? "row-reverse" : "row",
+                    color: config.textColor || "#2D3748",
+                    fontSize: 26,
+                    textAlign: "center",
+                    textShadowColor: "rgba(0, 0, 0, 0.1)",
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 2,
                   },
                 ]}
               >
-                {!viewOnly && onSetupPress && (
-                  <TouchableOpacity
-                    style={[styles.iconButton, { marginRight: 0 }]}
-                    onPress={onSetupPress}
-                  >
-                    <Feather
-                      name="settings"
-                      size={20}
-                      color={config.textColor || "#2D3748"}
-                    />
-                  </TouchableOpacity>
-                )}
-
-                <TouchableOpacity style={styles.iconButton} onPress={onShare}>
-                  <Feather
-                    name="share-2"
-                    size={20}
-                    color={config.textColor || "#2D3748"}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <TouchableOpacity style={styles.gstToggle} onPress={onToggleGST}>
-                <View style={styles.gstToggleRow}>
-                  <Text style={styles.gstToggleText}>GST</Text>
-                  <View style={styles.switchTrack}>
-                    <View
-                      style={[
-                        styles.switchThumb,
-                        withGST && styles.switchThumbOn,
-                      ]}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
+                {config.shopName}
+              </Text>
+            )}
           </View>
-
+        </View>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            orderedRateItems.length <= 3 && {
+              flexGrow: 1,
+              justifyContent: 'center', // Center content vertically
+              paddingTop: 40 // Add space between header and cards
+            }
+          ]}
+        >
           <View style={[styles.grid, { marginHorizontal: 0 }]}>
             {orderedRateItems.map((item) => (
-              <View key={item.key} style={[styles.gridItem, { paddingHorizontal: 0, marginBottom: 12 }]}>
+              <View key={item.key} style={[styles.gridItem, { paddingHorizontal: 0, marginBottom: 0 }]}>
                 <RateCard
                   label={item.label}
                   price={formatPricePerGram(item.price)}
-                  subtext={rateSubtext}
+
                   priceColor={
                     config.priceColor || (item.isGold ? "#E6A119" : "#2D3748")
                   }
@@ -469,18 +363,60 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                   config={config}
                   isMobile={isMobile}
                   isSmallMobile={isSmallMobile}
+                  previewMode={previewMode}
                 />
               </View>
             ))}
           </View>
 
-          {(config.notifications?.some((n) => n.enabled) ||
+          {/* Show mock announcements in preview mode */}
+          {previewMode && (
+            <View style={styles.announcementsSection}>
+              <View style={styles.announcementsHeader}>
+                <MaterialCommunityIcons
+                  name="bullhorn-outline"
+                  size={16}
+                  color={config.textColor || "#2D3748"}
+                />
+                <Text
+                  style={[
+                    styles.announcementsTitle,
+                    { color: config.textColor || "#2D3748" },
+                  ]}
+                >
+                  ANNOUNCEMENTS
+                </Text>
+              </View>
+              <View style={styles.marqueeViewport}>
+                <Marquee spacing={0} speed={0.3}>
+                  <View style={[styles.notificationsRow, { paddingRight: width }]}>
+                    <View style={styles.notificationPill}>
+                      <View
+                        style={[
+                          styles.notificationDot,
+                          { backgroundColor: config.priceColor || "#2D3748" },
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.notificationText,
+                          { color: config.textColor || "#2D3748" },
+                        ]}
+                      >
+                        Special discount on gold today!
+                      </Text>
+                    </View>
+                  </View>
+                </Marquee>
+              </View>
+            </View>
+          )}
+
+          {!viewOnly && (config.notifications?.some((n) => n.enabled) ||
             config.shopAddress ||
             config.shopPhone ||
             config.shopEmail) && (
               <View style={styles.notificationFooter}>
-                {/* ... */}
-
                 {!!enabledNotifications.length && (
                   <View style={styles.announcementsContainer}>
                     <View style={styles.announcementsHeader}>
@@ -541,7 +477,15 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 {(config.shopAddress || config.shopPhone || config.shopEmail) && (
                   <View style={styles.contactCenter}>
                     {config.shopAddress && (
-                      <View style={styles.contactRowCenter}>
+                      <TouchableOpacity
+                        style={styles.contactRowCenter}
+                        onPress={() => {
+                          const query = encodeURIComponent(config.shopAddress);
+                          Linking.openURL(
+                            `https://www.google.com/maps/search/?api=1&query=${query}`
+                          );
+                        }}
+                      >
                         <Feather
                           name="map-pin"
                           size={18}
@@ -555,7 +499,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                         >
                           {config.shopAddress}
                         </Text>
-                      </View>
+                      </TouchableOpacity>
                     )}
                     {config.shopPhone && (
                       <View style={styles.contactRowCenter}>
@@ -622,7 +566,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
             )}
         </ScrollView>
       </SafeContainer>
-    </View>
+    </LinearGradient>
   );
 };
 
@@ -630,7 +574,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
-    // overflow: 'hidden',
+
   },
   backgroundDecoration: {
     position: "absolute",
@@ -640,6 +584,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 0,
   },
+  logo: {
+    marginRight: 10,
+  },
   glowBlob: {
     position: "absolute",
     width: 300,
@@ -647,34 +594,29 @@ const styles = StyleSheet.create({
     borderRadius: 150,
     opacity: 0.5,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 6,
-    paddingVertical: 10,
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 16,
     width: "100%",
-    gap: 16,
   },
-  headerRight: {
-    flexDirection: "column",
-    alignItems: "stretch",
-    gap: 6,
-    minWidth: 96,
-  },
-  buttonRow: {
+  topButtonRow: {
     flexDirection: "row",
-    gap: 0,
-    justifyContent: "space-between",
-  },
-  actionColumn: {
-    flexDirection: "column",
-    gap: 8,
+    justifyContent: "flex-end",
     alignItems: "center",
+    marginBottom: 16,
+  },
+  centerContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  gstToggleContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   gstToggle: {
-    width: "100%",
-    paddingHorizontal: 6,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 24,
     backgroundColor: "rgba(255, 255, 255, 0.6)",
@@ -693,6 +635,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#5D4037",
     textTransform: "uppercase",
+    paddingHorizontal: 6,
     letterSpacing: 0.5,
   },
   gstToggleRow: {
@@ -738,7 +681,6 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.4)",
-    marginRight: 10,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -752,15 +694,13 @@ const styles = StyleSheet.create({
   gridItem: {
     width: "100%",
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingVertical: 0,
   },
   animatedCardContainer: {
     width: "100%",
     backgroundColor: "transparent",
-    transform: [{ translateY: 0 }],
   },
   card: {
-    // height: 100, 
     position: "relative",
     overflow: "hidden",
   },
@@ -791,27 +731,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     letterSpacing: 0.2,
   },
-  subtextContainer: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: "flex-start",
-  },
-  cardSubtext: {
-    fontSize: 11,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    opacity: 0.9,
-  },
+
   cardPrice: {
     fontSize: 28,
-    fontWeight: "900",
+    fontWeight: "900", // Increased from previous value
     letterSpacing: -0.5,
     opacity: 0.95,
   },
   notificationFooter: {
-    marginTop: 40,
+    marginTop: 10,
     paddingBottom: 20,
     alignItems: "center",
     width: "100%",
@@ -902,28 +830,71 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   poweredByLabel: {
-    fontSize: 12,
-    color: "#A0AEC0",
-    fontWeight: "500",
+    fontSize: 10,
+    color: "#94A3B8",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   karatpayBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    backgroundColor: "#1E293B",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    gap: 6,
   },
   karatpayIconBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    backgroundColor: "#1B3030",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#D97706",
     justifyContent: "center",
     alignItems: "center",
   },
   karatpayText: {
-    fontSize: 16,
+    color: "#F8FAFC",
+    fontSize: 12,
     fontWeight: "700",
-    color: "#1B3030",
     letterSpacing: 0.5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 80,
+    paddingRight: 16,
+  },
+  announcementsSection: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  menuContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    paddingVertical: 6,
+    minWidth: 180,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 14,
+  },
+  menuText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#334155',
   },
   separator: {
     height: 1,
