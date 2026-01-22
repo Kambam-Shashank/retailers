@@ -13,10 +13,9 @@ import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Platform,
-    ScrollView,
     Share,
     StyleSheet,
-    View,
+    View
 } from "react-native";
 
 export default function SharedRateView() {
@@ -139,26 +138,19 @@ View live: ${shareUrl}`;
     }
 
     return (
-        <ScrollView
-            style={[
-                styles.container,
-                { backgroundColor: config.backgroundColor || "#fff" },
-            ]}
-        >
-            <RateDisplayContent
-                config={config}
-                calculatedRates={calculatedRates}
-                currentTime={currentTime}
-                viewOnly={true}
-                withGST={withGST}
-                onToggleGST={onToggleGST}
-                onShare={onShare}
-                gold999Change={gold999Change}
-                gold916Change={gold916Change}
-                silver999Change={silver999Change}
-                silver925Change={silver925Change}
-            />
-        </ScrollView>
+        <RateDisplayContent
+            config={config}
+            calculatedRates={calculatedRates}
+            currentTime={currentTime}
+            viewOnly={true}
+            withGST={withGST}
+            onToggleGST={onToggleGST}
+            onShare={onShare}
+            gold999Change={gold999Change}
+            gold916Change={gold916Change}
+            silver999Change={silver999Change}
+            silver925Change={silver925Change}
+        />
     );
 }
 

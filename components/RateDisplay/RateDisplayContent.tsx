@@ -271,7 +271,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
         ? "right"
         : "left";
 
-  const SafeContainer = viewOnly ? View : SafeAreaView;
+  const SafeContainer = previewMode ? View : SafeAreaView;
 
   return (
     <LinearGradient
@@ -412,7 +412,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
             </View>
           )}
 
-          {!viewOnly && (config.notifications?.some((n) => n.enabled) ||
+          {(config.notifications?.some((n) => n.enabled) ||
             config.shopAddress ||
             config.shopPhone ||
             config.shopEmail) && (
@@ -747,12 +747,8 @@ const styles = StyleSheet.create({
   announcementsContainer: {
     width: "100%",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingVertical: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.06)",
-    backgroundColor: "rgba(255,255,255,0.35)",
     overflow: "hidden",
   },
   announcementsHeader: {
@@ -801,9 +797,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
     width: "100%",
-    paddingTop: 32,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.05)",
+    paddingTop: 16,
   },
   contactRowCenter: {
     flexDirection: "row",
@@ -839,10 +833,8 @@ const styles = StyleSheet.create({
   karatpayBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1E293B",
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 12,
     gap: 6,
   },
   karatpayIconBox: {
@@ -854,7 +846,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   karatpayText: {
-    color: "#F8FAFC",
+    color: "#64748B",
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 0.5,

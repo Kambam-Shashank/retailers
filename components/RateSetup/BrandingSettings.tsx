@@ -146,7 +146,7 @@ const brandingStyles = StyleSheet.create({
     uploadText: { fontSize: 15, fontWeight: "600" },
     grid: { flexDirection: "row", gap: 12 },
     logoSection: { marginTop: 15, paddingTop: 15, borderTopWidth: 1, borderTopColor: "#EEE", flexDirection: "row", gap: 15, alignItems: "center" },
-    logoContainer: { width: 70, height: 70, borderRadius: 8, backgroundColor: "#F5F5F5", padding: 8, position: "relative" },
+    logoContainer: { width: 70, height: 70, borderRadius: 8, position: "relative" },
     logoPreview: { width: "100%", height: "100%" },
     deleteBadge: { position: "absolute", top: -5, right: -5, backgroundColor: "#FF5252", borderRadius: 10, padding: 3 },
     sizeRow: { flexDirection: "row", gap: 8 },
