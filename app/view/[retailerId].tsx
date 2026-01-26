@@ -7,7 +7,7 @@ import { useRateCalculations } from "@/customHooks/useRateCalculations";
 import useWebSocket, { GoldPriceData } from "@/customHooks/useWebSocket";
 import { db } from "@/Firebaseconfig";
 import { formatPricePerGram } from "@/utils/formatters";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -131,26 +131,33 @@ View live: ${shareUrl}`;
 
     if (loading || !config) {
         return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#D4AF37" />
-            </View>
+            <>
+                <Stack.Screen options={{ headerShown: false }} />
+                <View style={styles.center}>
+                    <ActivityIndicator size="large" color="#D4AF37" />
+                </View>
+            </>
         );
     }
 
     return (
-        <RateDisplayContent
-            config={config}
-            calculatedRates={calculatedRates}
-            currentTime={currentTime}
-            viewOnly={true}
-            withGST={withGST}
-            onToggleGST={onToggleGST}
-            onShare={onShare}
-            gold999Change={gold999Change}
-            gold916Change={gold916Change}
-            silver999Change={silver999Change}
-            silver925Change={silver925Change}
-        />
+        <>
+            <Stack.Screen options={{ headerShown: false }} />
+            <RateDisplayContent
+                config={config}
+                calculatedRates={calculatedRates}
+                currentTime={currentTime}
+                viewOnly={true}
+                withGST={withGST}
+                onToggleGST={onToggleGST}
+                onShare={onShare}
+                shareUrl={`${(Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.origin) || "https://karatpay-retailers.vercel.app"}/view/${retailerId}`}
+                gold999Change={gold999Change}
+                gold916Change={gold916Change}
+                silver999Change={silver999Change}
+                silver925Change={silver925Change}
+            />
+        </>
     );
 }
 

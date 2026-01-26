@@ -1,4 +1,4 @@
-import { NotificationsCard, ShopBrandingCard } from "@/components/RateSetup/BrandingSettings";
+import { NotificationsCard, ShareScannerCard, ShopBrandingCard } from "@/components/RateSetup/BrandingSettings";
 import {
   GSTSettingsCard,
   MakingChargesCard,
@@ -212,6 +212,12 @@ export default function RateSetupScreen(): ReactElement {
               isMobile={isMobile}
               isSmallMobile={isSmallMobile}
             />
+
+            <ShareScannerCard
+              shopName={shopName}
+              logoBase64={logoBase64}
+            />
+
             <RateStatusCard
               config={localConfig}
               onUpdate={handleLocalUpdate}

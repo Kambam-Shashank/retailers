@@ -82,6 +82,7 @@ export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
                         withGST={withGST}
                         onToggleGST={() => setWithGST(!withGST)}
                         onShare={() => { }}
+                        shareUrl="https://karatpay-retailers.vercel.app"
                         gold999Change={MOCK_PRICE_CHANGE}
                         gold916Change={MOCK_PRICE_CHANGE}
                         silver999Change={MOCK_PRICE_CHANGE}

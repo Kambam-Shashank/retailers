@@ -17,7 +17,7 @@ export const usePriceChange = (currentPrice: number) => {
         hasChanged: false,
     });
     const previousPriceRef = useRef<number>(currentPrice);
-    const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (currentPrice && currentPrice !== previousPriceRef.current && previousPriceRef.current > 0) {

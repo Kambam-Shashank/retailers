@@ -162,6 +162,7 @@ ${shareUrl}`;
         onToggleGST={onToggleGST}
         onShare={onShare}
         onSetupPress={() => router.push("/setup")}
+        shareUrl={user ? `${(Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.origin) || "https://karatpay-retailers.vercel.app"}/view/${user.uid}` : "https://karatpay-retailers.vercel.app"}
         gold999Change={gold999Change}
         gold916Change={gold916Change}
         silver999Change={silver999Change}

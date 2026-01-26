@@ -1,7 +1,10 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { NotificationConfig, RateConfig } from "@/contexts/RateConfigContext";
 import { useRateSetupNotifications } from "@/customHooks/useRateSetupNotifications";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { memo } from "react";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import { memo, useRef } from "react";
 import {
     Image,
     Platform,
@@ -11,10 +14,10 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
 const GOLD = "#D4AF37";
 
-// ====== ShopBrandingCard ======
 interface ShopBrandingProps {
     shopName: string;
     logoBase64: string | null;
@@ -32,12 +35,12 @@ interface ShopBrandingProps {
     isSmallMobile?: boolean;
 }
 
-export const ShopBrandingCard: React.FC<ShopBrandingProps> = ({
+export const ShopBrandingCard = ({
     shopName, logoBase64, logoSize, address = "", phone = "",
     logoPlacement, logoOpacity,
     onShopNameChange, onShopNameBlur, onPickLogo, onDeleteLogo, onUpdate,
     isMobile, isSmallMobile
-}) => {
+}: ShopBrandingProps) => {
     return (
         <View style={brandingStyles.card}>
             <View style={brandingStyles.cardHeader}>
@@ -101,25 +104,23 @@ export const ShopBrandingCard: React.FC<ShopBrandingProps> = ({
     );
 };
 
-// ====== NotificationsCard ======
-const NotificationItem = memo<{ notification: NotificationConfig; onToggle: () => void; onMsgChange: (t: string) => void }>(
-    ({ notification, onToggle, onMsgChange }) => (
-        <View style={notifStyles.item}>
-            <View style={notifStyles.header}>
-                <TouchableOpacity style={[notifStyles.track, notification.enabled && notifStyles.trackOn]} onPress={onToggle}>
-                    <View style={[notifStyles.thumb, notification.enabled && notifStyles.thumbOn]} />
-                </TouchableOpacity>
-                <Text style={notifStyles.notifLabel}>Notification {notification.id}</Text>
-            </View>
-            <View style={notifStyles.inputBox}>
-                <TextInput style={notifStyles.input} placeholder="Announcement text..." multiline maxLength={100} value={notification.message} onChangeText={onMsgChange} />
-                <Text style={notifStyles.chars}>{notification.message.length}/100</Text>
-            </View>
+const NotificationItem = memo(({ notification, onToggle, onMsgChange }: { notification: NotificationConfig; onToggle: () => void; onMsgChange: (t: string) => void }) => (
+    <View style={notifStyles.item}>
+        <View style={notifStyles.header}>
+            <TouchableOpacity style={[notifStyles.track, notification.enabled && notifStyles.trackOn]} onPress={onToggle}>
+                <View style={[notifStyles.thumb, notification.enabled && notifStyles.thumbOn]} />
+            </TouchableOpacity>
+            <Text style={notifStyles.notifLabel}>Notification {notification.id}</Text>
         </View>
-    )
+        <View style={notifStyles.inputBox}>
+            <TextInput style={notifStyles.input} placeholder="Announcement text..." multiline maxLength={100} value={notification.message} onChangeText={onMsgChange} />
+            <Text style={notifStyles.chars}>{notification.message.length}/100</Text>
+        </View>
+    </View>
+)
 );
 
-export const NotificationsCard: React.FC<{ config: RateConfig; onUpdate: (u: Partial<RateConfig>) => void; isMobile?: boolean; isSmallMobile?: boolean }> = ({ config, onUpdate, isMobile, isSmallMobile }) => {
+export const NotificationsCard = ({ config, onUpdate, isMobile, isSmallMobile }: { config: RateConfig; onUpdate: (u: Partial<RateConfig>) => void; isMobile?: boolean; isSmallMobile?: boolean }) => {
     const { notifications, toggleNotificationEnabled, updateNotificationMessage } = useRateSetupNotifications(config, onUpdate);
     return (
         <View style={brandingStyles.card}>
@@ -131,6 +132,68 @@ export const NotificationsCard: React.FC<{ config: RateConfig; onUpdate: (u: Par
             {notifications.map(n => (
                 <NotificationItem key={n.id} notification={n} onToggle={() => toggleNotificationEnabled(n.id)} onMsgChange={(t) => updateNotificationMessage(n.id, t)} />
             ))}
+        </View>
+    );
+};
+
+export const ShareScannerCard = ({ shopName, logoBase64 }: { shopName: string; logoBase64: string | null }) => {
+    const { user } = useAuth();
+    const qrRef = useRef<any>(null);
+
+    const baseUrl = "https://karatpay-retailers.vercel.app";
+    const shareUrl = `${baseUrl}/view/${user?.uid}`;
+
+    const handleShareQR = async () => {
+        if (!qrRef.current) return;
+        (qrRef.current as any).toDataURL(async (dataURL: string) => {
+            const fileName = `Karatpay_QR_${(shopName || "Rates").replace(/\s+/g, '_')}.png`;
+            const filePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+            await FileSystem.writeAsStringAsync(filePath, dataURL, {
+                encoding: "base64" as any,
+            });
+            await Sharing.shareAsync(filePath);
+        });
+    };
+
+    return (
+        <View style={brandingStyles.card}>
+            <View style={brandingStyles.cardHeader}>
+                <MaterialCommunityIcons name="qrcode-scan" size={24} color={GOLD} />
+                <Text style={brandingStyles.cardTitle}>Share Scanner</Text>
+            </View>
+            <Text style={brandingStyles.subtitle}>Share your QR code so customers can view live rates</Text>
+
+            <View style={brandingStyles.qrPreviewContainer}>
+                <View style={brandingStyles.qrBackground}>
+                    <QRCode
+                        value={shareUrl}
+                        size={150}
+                        getRef={(c) => (qrRef.current = c)}
+                        logo={logoBase64 ? { uri: logoBase64 } : undefined}
+                        logoSize={40}
+                        logoBackgroundColor='#FFFFFF'
+                        logoMargin={2}
+                        ecl="H"
+                    />
+                </View>
+
+                <TouchableOpacity style={brandingStyles.shareBtn} onPress={handleShareQR}>
+                    <Feather name="share-2" size={20} color="#000" />
+                    <Text style={brandingStyles.shareBtnText}>Share QR Code</Text>
+                </TouchableOpacity>
+            </View>
+
+            <View style={{ height: 0, opacity: 0, overflow: 'hidden', position: 'absolute' }}>
+                <QRCode
+                    value={shareUrl}
+                    size={512} // Higher resolution for sharing
+                    logo={logoBase64 ? { uri: logoBase64 } : undefined}
+                    logoSize={120}
+                    logoBackgroundColor='#FFFFFF'
+                    logoMargin={5}
+                    ecl="H"
+                />
+            </View>
         </View>
     );
 };
@@ -155,6 +218,10 @@ const brandingStyles = StyleSheet.create({
     sizeBtnText: { fontSize: 12, fontWeight: "600", color: "#666" },
     sizeBtnTextActive: { color: "#000" },
     subtitle: { fontSize: 13, color: "#666", marginBottom: 15 },
+    qrPreviewContainer: { alignItems: 'center', gap: 20, marginTop: 10 },
+    qrBackground: { padding: 15, backgroundColor: '#F9F9F9', borderRadius: 16, borderWidth: 1, borderColor: '#EEE' },
+    shareBtn: { backgroundColor: GOLD, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 12, width: '100%', shadowColor: GOLD, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
+    shareBtnText: { fontSize: 16, fontWeight: '700', color: '#000' },
 });
 
 const notifStyles = StyleSheet.create({

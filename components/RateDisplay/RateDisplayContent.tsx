@@ -7,11 +7,15 @@ import {
   FontAwesome,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import * as Sharing from "expo-sharing";
+import React, { useRef, useState } from "react";
 import {
   Image,
   Linking,
+  Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,6 +23,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Shadow } from "react-native-shadow-2";
 
@@ -32,6 +37,7 @@ interface RateDisplayContentProps {
   onToggleGST: () => void;
   onShare: () => void;
   onSetupPress?: () => void;
+  shareUrl: string;
   gold999Change: ReturnType<typeof usePriceChange>;
   gold916Change: ReturnType<typeof usePriceChange>;
   silver999Change: ReturnType<typeof usePriceChange>;
@@ -150,6 +156,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   onToggleGST,
   onShare,
   onSetupPress,
+  shareUrl,
   gold999Change,
   gold916Change,
   silver999Change,
@@ -158,6 +165,35 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const { width } = useWindowDimensions();
   const isMobile = width < 420;
   const isSmallMobile = width < 360;
+
+  const [showQRModal, setShowQRModal] = useState(false);
+  const qrRef = useRef<any>(null);
+
+  const handleShareQR = async () => {
+    if (!qrRef.current) return;
+    (qrRef.current as any).toDataURL(async (dataURL: string) => {
+      const fileName = `Karatpay_QR_${(config.shopName || "Rates").replace(/\s+/g, '_')}.png`;
+      const filePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
+      await FileSystem.writeAsStringAsync(filePath, dataURL, {
+        encoding: "base64" as any,
+      });
+      await Sharing.shareAsync(filePath);
+    });
+  };
+
+  const handleDownloadQR = async () => {
+    // Sharing is often preferred on mobile, but on web we might want a download
+    if (Platform.OS === 'web') {
+      (qrRef.current as any).toDataURL((dataURL: string) => {
+        const link = document.createElement('a');
+        link.href = `data:image/png;base64,${dataURL}`;
+        link.download = `Karatpay_QR_${(config.shopName || "Rates").replace(/\s+/g, '_')}.png`;
+        link.click();
+      });
+    } else {
+      handleShareQR();
+    }
+  };
 
   const enabledNotifications = (config.notifications || []).filter(
     (n) => n.enabled
@@ -284,6 +320,17 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
         <View style={styles.headerContainer}>
           {/* Top row with buttons */}
           <View style={styles.topButtonRow}>
+            <TouchableOpacity
+              style={[styles.iconButton, { marginRight: 8 }]}
+              onPress={() => setShowQRModal(true)}
+            >
+              <MaterialCommunityIcons
+                name="qrcode-scan"
+                size={20}
+                color={config.textColor || "#2D3748"}
+              />
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.iconButton} onPress={onShare}>
               <Feather
                 name="share-2"
@@ -566,6 +613,55 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
             )}
         </ScrollView>
       </SafeContainer>
+
+      {/* QR Code Modal */}
+      <Modal
+        visible={showQRModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowQRModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.qrModalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowQRModal(false)}
+        >
+          <View style={styles.qrContainer}>
+            <TouchableOpacity
+              style={styles.qrCloseIcon}
+              onPress={() => setShowQRModal(false)}
+            >
+              <Feather name="x" size={24} color="#64748B" />
+            </TouchableOpacity>
+
+            <Text style={styles.qrTitle}>Scan for Live Rates</Text>
+            <Text style={styles.qrShopName}>{config.shopName}</Text>
+
+            <View style={styles.qrWrapper}>
+              <QRCode
+                value={shareUrl}
+                size={220}
+                getRef={(c) => (qrRef.current = c)}
+                logo={config.logoBase64 ? { uri: config.logoBase64 } : undefined}
+                logoSize={50}
+                logoBackgroundColor='#FFFFFF'
+                logoMargin={2}
+                ecl="H"
+              />
+            </View>
+
+            <View style={styles.qrActionRow}>
+              <TouchableOpacity
+                style={styles.qrButton}
+                onPress={handleDownloadQR}
+              >
+                <Feather name="download" size={18} color="#FFF" />
+                <Text style={styles.qrButtonText}>{Platform.OS === 'web' ? 'Download' : 'Share'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </LinearGradient>
   );
 };
@@ -893,5 +989,67 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "rgba(0,0,0,0.05)",
     marginVertical: 24,
+  },
+  qrModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  qrContainer: {
+    backgroundColor: "#FFF",
+    borderRadius: 24,
+    padding: 30,
+    alignItems: "center",
+    width: "85%",
+    maxWidth: 340,
+  },
+  qrTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1E293B",
+    marginBottom: 4,
+  },
+  qrShopName: {
+    fontSize: 14,
+    color: "#64748B",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  qrWrapper: {
+    padding: 16,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  qrActionRow: {
+    flexDirection: "row",
+    marginTop: 24,
+    gap: 12,
+  },
+  qrButton: {
+    backgroundColor: "#1E293B",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    gap: 8,
+  },
+  qrButtonText: {
+    color: "#FFF",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  qrCloseIcon: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+    zIndex: 10,
   },
 });
