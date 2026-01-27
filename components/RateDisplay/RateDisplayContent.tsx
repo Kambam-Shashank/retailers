@@ -7,7 +7,6 @@ import {
   FontAwesome,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Sharing from "expo-sharing";
 import React, { useRef, useState } from "react";
@@ -167,31 +166,37 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const isSmallMobile = width < 360;
 
   const [showQRModal, setShowQRModal] = useState(false);
-  const qrRef = useRef<any>(null);
-
-  const handleShareQR = async () => {
-    if (!qrRef.current) return;
-    (qrRef.current as any).toDataURL(async (dataURL: string) => {
-      const fileName = `Karatpay_QR_${(config.shopName || "Rates").replace(/\s+/g, '_')}.png`;
-      const filePath = `${(FileSystem as any).cacheDirectory}${fileName}`;
-      await FileSystem.writeAsStringAsync(filePath, dataURL, {
-        encoding: "base64" as any,
-      });
-      await Sharing.shareAsync(filePath);
-    });
-  };
+  const captureRef = useRef<any>(null);
 
   const handleDownloadQR = async () => {
-    // Sharing is often preferred on mobile, but on web we might want a download
-    if (Platform.OS === 'web') {
-      (qrRef.current as any).toDataURL((dataURL: string) => {
+    try {
+      let uri;
+      if (Platform.OS === 'web') {
+        const html2canvas = require('html2canvas');
+        const element = captureRef.current;
+        if (!element) return;
+        const canvas = await html2canvas(element, {
+          useCORS: true,
+          scale: 2,
+          backgroundColor: '#FFFFFF'
+        });
+        uri = canvas.toDataURL('image/png');
+
         const link = document.createElement('a');
-        link.href = `data:image/png;base64,${dataURL}`;
+        link.href = uri;
         link.download = `Karatpay_QR_${(config.shopName || "Rates").replace(/\s+/g, '_')}.png`;
         link.click();
-      });
-    } else {
-      handleShareQR();
+      } else {
+        const RNViewShot = require("react-native-view-shot");
+        uri = await RNViewShot.captureRef(captureRef, {
+          format: 'png',
+          quality: 1.0,
+          result: 'tmpfile'
+        });
+        await Sharing.shareAsync(uri);
+      }
+    } catch (error) {
+      console.error("Failed to capture QR:", error);
     }
   };
 
@@ -641,13 +646,26 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
               <QRCode
                 value={shareUrl}
                 size={220}
-                getRef={(c) => (qrRef.current = c)}
                 logo={config.logoBase64 ? { uri: config.logoBase64 } : undefined}
                 logoSize={50}
                 logoBackgroundColor='#FFFFFF'
                 logoMargin={2}
                 ecl="H"
               />
+            </View>
+
+            <View style={styles.poweredByContainer}>
+              <Text style={styles.poweredByLabel}>Powered by</Text>
+              <View style={styles.karatpayBadge}>
+                <View style={[styles.karatpayIconBox, { backgroundColor: '#F59E0B' }]}>
+                  <MaterialCommunityIcons
+                    name="star-four-points"
+                    size={10}
+                    color="#FFF"
+                  />
+                </View>
+                <Text style={[styles.karatpayText, { color: '#64748B' }]}>Karatpay</Text>
+              </View>
             </View>
 
             <View style={styles.qrActionRow}>
@@ -658,6 +676,34 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 <Feather name="download" size={18} color="#FFF" />
                 <Text style={styles.qrButtonText}>{Platform.OS === 'web' ? 'Download' : 'Share'}</Text>
               </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Hidden high-res QR for sharing with labels - positioned off-screen */}
+          <View style={{ position: 'absolute', left: -5000, top: -5000 }}>
+            <View ref={captureRef} style={{ backgroundColor: '#FFF', padding: 60, alignItems: 'center', width: 800 }}>
+              <Text style={{ fontSize: 48, fontWeight: 'bold', color: '#000', marginBottom: 40, textAlign: 'center' }}>
+                {config.shopName?.toUpperCase()}
+              </Text>
+
+              <QRCode
+                value={shareUrl}
+                size={550}
+                logo={config.logoBase64 ? { uri: config.logoBase64 } : undefined}
+                logoSize={120}
+                logoBackgroundColor='#FFFFFF'
+                logoMargin={5}
+                ecl="H"
+              />
+
+              <View style={{ marginTop: 40, alignItems: 'center' }}>
+                <Text style={{ fontSize: 24, color: '#64748B', fontWeight: '600', marginBottom: 10 }}>
+                  Scan for Live Rates
+                </Text>
+                <Text style={{ fontSize: 20, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>
+                  Powered by Karatpay
+                </Text>
+              </View>
             </View>
           </View>
         </TouchableOpacity>
