@@ -1,9 +1,7 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { NotificationConfig, RateConfig } from "@/contexts/RateConfigContext";
 import { useRateSetupNotifications } from "@/customHooks/useRateSetupNotifications";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Sharing from "expo-sharing";
-import { memo, useRef } from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { memo } from "react";
 import {
     Image,
     Platform,
@@ -13,7 +11,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 
 const GOLD = "#D4AF37";
 
@@ -135,115 +132,6 @@ export const NotificationsCard = ({ config, onUpdate, isMobile, isSmallMobile }:
     );
 };
 
-export const ShareScannerCard = ({ shopName, logoBase64 }: { shopName: string; logoBase64: string | null }) => {
-    const { user } = useAuth();
-    const captureRef = useRef<any>(null);
-
-    const baseUrl = "https://karatpay-retailers.vercel.app";
-    const shareUrl = `${baseUrl}/view/${user?.uid}`;
-
-    const handleShareQR = async () => {
-        try {
-            let uri;
-            if (Platform.OS === 'web') {
-                const html2canvas = require('html2canvas');
-                const element = captureRef.current;
-                if (!element) return;
-                const canvas = await html2canvas(element, {
-                    useCORS: true,
-                    scale: 2,
-                    backgroundColor: '#FFFFFF'
-                });
-                uri = canvas.toDataURL('image/png');
-
-                const link = document.createElement('a');
-                link.href = uri;
-                link.download = `Karatpay_QR_${(shopName || "Rates").replace(/\s+/g, '_')}.png`;
-                link.click();
-            } else {
-                // For mobile, we can use the snapshot if we had ViewShot, 
-                // but let's use the simplest capture method
-                const RNViewShot = require("react-native-view-shot");
-                uri = await RNViewShot.captureRef(captureRef, {
-                    format: 'png',
-                    quality: 1.0,
-                    result: 'tmpfile'
-                });
-                await Sharing.shareAsync(uri);
-            }
-        } catch (error) {
-            console.error("Failed to capture QR:", error);
-        }
-    };
-
-    return (
-        <View style={brandingStyles.card}>
-            <View style={brandingStyles.cardHeader}>
-                <MaterialCommunityIcons name="qrcode-scan" size={24} color={GOLD} />
-                <Text style={brandingStyles.cardTitle}>Share Scanner</Text>
-            </View>
-            <Text style={brandingStyles.subtitle}>Share your QR code so customers can view live rates</Text>
-
-            <View style={brandingStyles.qrPreviewContainer}>
-                <View style={brandingStyles.qrBackground}>
-                    <QRCode
-                        value={shareUrl}
-                        size={150}
-                        logo={logoBase64 ? { uri: logoBase64 } : undefined}
-                        logoSize={40}
-                        logoBackgroundColor='#FFFFFF'
-                        logoMargin={2}
-                        ecl="H"
-                    />
-                </View>
-
-                <View style={brandingStyles.poweredByRow}>
-                    <Text style={brandingStyles.poweredByText}>Powered by</Text>
-                    <View style={brandingStyles.karatpaySmallBadge}>
-                        <View style={brandingStyles.karatpaySmallIcon}>
-                            <MaterialCommunityIcons name="star-four-points" size={8} color="#FFF" />
-                        </View>
-                        <Text style={brandingStyles.karatpaySmallText}>Karatpay</Text>
-                    </View>
-                </View>
-
-                <TouchableOpacity style={brandingStyles.shareBtn} onPress={handleShareQR}>
-                    <Feather name="share-2" size={20} color="#000" />
-                    <Text style={brandingStyles.shareBtnText}>Share QR Code</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Hidden high-res QR for sharing with labels - positioned off-screen */}
-            <View style={{ position: 'absolute', left: -5000, top: -5000 }}>
-                <View ref={captureRef} style={{ backgroundColor: '#FFF', padding: 60, alignItems: 'center', width: 800 }}>
-                    <Text style={{ fontSize: 48, fontWeight: 'bold', color: '#000', marginBottom: 40, textAlign: 'center' }}>
-                        {shopName.toUpperCase()}
-                    </Text>
-
-                    <QRCode
-                        value={shareUrl}
-                        size={550}
-                        logo={logoBase64 ? { uri: logoBase64 } : undefined}
-                        logoSize={120}
-                        logoBackgroundColor='#FFFFFF'
-                        logoMargin={5}
-                        ecl="H"
-                    />
-
-                    <View style={{ marginTop: 40, alignItems: 'center' }}>
-                        <Text style={{ fontSize: 24, color: '#64748B', fontWeight: '600', marginBottom: 10 }}>
-                            Scan for Live Rates
-                        </Text>
-                        <Text style={{ fontSize: 20, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>
-                            Powered by Karatpay
-                        </Text>
-                    </View>
-                </View>
-            </View>
-        </View>
-    );
-};
-
 const brandingStyles = StyleSheet.create({
     card: { backgroundColor: "#FFF", borderRadius: 12, marginHorizontal: 16, marginTop: 16, padding: 20, borderWidth: 1, borderColor: "#EEE" },
     cardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 20 },
@@ -264,15 +152,6 @@ const brandingStyles = StyleSheet.create({
     sizeBtnText: { fontSize: 12, fontWeight: "600", color: "#666" },
     sizeBtnTextActive: { color: "#000" },
     subtitle: { fontSize: 13, color: "#666", marginBottom: 15 },
-    qrPreviewContainer: { alignItems: 'center', gap: 20, marginTop: 10 },
-    qrBackground: { padding: 15, backgroundColor: '#F9F9F9', borderRadius: 16, borderWidth: 1, borderColor: '#EEE' },
-    shareBtn: { backgroundColor: GOLD, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 14, paddingHorizontal: 30, borderRadius: 12, width: '100%', shadowColor: GOLD, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
-    shareBtnText: { fontSize: 16, fontWeight: '700', color: '#000' },
-    poweredByRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: -10, marginBottom: 5 },
-    poweredByText: { fontSize: 10, color: '#94A3B8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
-    karatpaySmallBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    karatpaySmallIcon: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#F59E0B', justifyContent: 'center', alignItems: 'center' },
-    karatpaySmallText: { fontSize: 11, fontWeight: '700', color: '#64748B', letterSpacing: 0.3 },
 });
 
 const notifStyles = StyleSheet.create({
