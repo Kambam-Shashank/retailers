@@ -87,18 +87,22 @@ export default function SharedRateView() {
         setWithGST(!withGST);
     };
 
+    const getShareUrl = () => {
+        let baseUrl = "https://karatpay-retailers.vercel.app";
+        if (
+            Platform.OS === "web" &&
+            typeof window !== "undefined" &&
+            window.location?.origin
+        ) {
+            baseUrl = window.location.origin;
+        }
+        return `${baseUrl}/view/${retailerId}`;
+    };
+
+    const shareUrl = getShareUrl();
+
     const onShare = async () => {
         try {
-            let baseUrl = "https://karatpay-retailers.vercel.app";
-            if (
-                Platform.OS === "web" &&
-                typeof window !== "undefined" &&
-                window.location?.origin
-            ) {
-                baseUrl = window.location.origin;
-            }
-
-            const shareUrl = `${baseUrl}/view/${retailerId}`;
             const message = `Gold & Silver Live Rates
 
 Gold 999: ${formatPricePerGram(calculatedRates.gold999.finalPrice)}
@@ -151,7 +155,7 @@ View live: ${shareUrl}`;
                 withGST={withGST}
                 onToggleGST={onToggleGST}
                 onShare={onShare}
-                shareUrl={`${(Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.origin) || "https://karatpay-retailers.vercel.app"}/view/${retailerId}`}
+                shareUrl={shareUrl}
                 gold999Change={gold999Change}
                 gold916Change={gold916Change}
                 silver999Change={silver999Change}

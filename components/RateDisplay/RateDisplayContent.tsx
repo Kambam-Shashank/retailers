@@ -644,7 +644,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
 
             <View style={styles.qrWrapper}>
               <QRCode
-                value={shareUrl}
+                value={shareUrl || "https://karatpay.in"}
                 size={220}
                 logo={config.logoBase64 ? { uri: config.logoBase64 } : undefined}
                 logoSize={50}
@@ -679,15 +679,23 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
             </View>
           </View>
 
-          {/* Hidden high-res QR for sharing with labels - positioned off-screen */}
-          <View style={{ position: 'absolute', left: -5000, top: -5000 }}>
+          {/* Hidden capture view for high-res QR sharing */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              left: -9999,
+              top: -9999,
+              opacity: 0,
+            }}
+          >
             <View ref={captureRef} style={{ backgroundColor: '#FFF', padding: 60, alignItems: 'center', width: 800 }}>
               <Text style={{ fontSize: 48, fontWeight: 'bold', color: '#000', marginBottom: 40, textAlign: 'center' }}>
                 {config.shopName?.toUpperCase()}
               </Text>
 
               <QRCode
-                value={shareUrl}
+                value={shareUrl || "https://karatpay.in"}
                 size={550}
                 logo={config.logoBase64 ? { uri: config.logoBase64 } : undefined}
                 logoSize={120}
