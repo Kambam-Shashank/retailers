@@ -6,7 +6,6 @@ import { usePriceChange } from "@/customHooks/usePriceChange";
 import { useRateCalculations } from "@/customHooks/useRateCalculations";
 import useWebSocket, { GoldPriceData } from "@/customHooks/useWebSocket";
 import { db } from "@/Firebaseconfig";
-import { formatPricePerGram } from "@/utils/formatters";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -103,12 +102,10 @@ export default function SharedRateView() {
 
     const onShare = async () => {
         try {
-            const message = `Gold & Silver Live Rates
-
-Gold 999: ${formatPricePerGram(calculatedRates.gold999.finalPrice)}
-Silver 999: ${formatPricePerGram(calculatedRates.silver999.finalPrice)}
-
-View live: ${shareUrl}`;
+            const message = `Namaste,
+Greetings from ${config?.shopName || 'our shop'}.
+Kindly open the link below to view today’s Gold & Silver live rate:
+${shareUrl}`;
 
             if (Platform.OS === "web") {
                 if (navigator.share) {

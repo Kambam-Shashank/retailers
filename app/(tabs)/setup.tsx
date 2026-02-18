@@ -219,6 +219,13 @@ export default function RateSetupScreen(): ReactElement {
               isMobile={isMobile}
               isSmallMobile={isSmallMobile}
             />
+
+            <GSTSettingsCard
+              config={localConfig}
+              onUpdate={handleLocalUpdate}
+              isMobile={isMobile}
+              isSmallMobile={isSmallMobile}
+            />
           </>
         )}
 
@@ -274,18 +281,12 @@ export default function RateSetupScreen(): ReactElement {
 
               onMarginUpdate={(key, val) => updateMargin(key as any, val)}
               onMarginInputChange={handleMarginInputChange}
+              purityOrder={localConfig.purityOrder || []}
               isMobile={isMobile}
               isSmallMobile={isSmallMobile}
             />
 
             <MakingChargesCard
-              config={localConfig}
-              onUpdate={handleLocalUpdate}
-              isMobile={isMobile}
-              isSmallMobile={isSmallMobile}
-            />
-
-            <GSTSettingsCard
               config={localConfig}
               onUpdate={handleLocalUpdate}
               isMobile={isMobile}

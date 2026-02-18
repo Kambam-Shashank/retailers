@@ -51,20 +51,70 @@ export const RateSetupTabs: React.FC<RateSetupTabsProps> = ({ activeTab, onTabCh
 };
 
 // ====== LivePreview ======
-const MOCK_RATES = {
-    gold999: { basePrice: 138255, finalPrice: 138255, priceWithGST: 142422, priceWithMargin: 138255 },
-    gold916: { basePrice: 126650, finalPrice: 126650, priceWithGST: 130409, priceWithMargin: 126650 },
-    gold20k: { basePrice: 115212, finalPrice: 115212, priceWithGST: 118668, priceWithMargin: 115212 },
-    gold18k: { basePrice: 103691, finalPrice: 103691, priceWithGST: 106801, priceWithMargin: 103691 },
-    gold14k: { basePrice: 80602, finalPrice: 80602, priceWithGST: 83020, priceWithMargin: 80602 },
-    silver999: { basePrice: 2370, finalPrice: 2370, priceWithGST: 2441, priceWithMargin: 2370, makingCharges: 0 },
-    silver925: { basePrice: 2192, finalPrice: 2192, priceWithGST: 2257, priceWithMargin: 2192, makingCharges: 0 },
+const MOCK_BASE_RATES = {
+    gold999: 138255,
+    gold916: 126650,
+    gold20k: 115212,
+    gold18k: 103691,
+    gold14k: 80602,
+    silver999: 2370,
+    silver925: 2192,
 };
 
 const MOCK_PRICE_CHANGE = { hasChanged: false, isIncrease: false, isDecrease: false, change: 0, previousPrice: 0, percentageChange: 0 };
 
 export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
     const [withGST, setWithGST] = useState(true);
+
+    const calculatedMockRates = React.useMemo(() => {
+        const rates: any = {};
+        const GST_RATE = 0.03;
+
+        const roundTo = (num: number, multiple: number) => {
+            if (multiple === 0) return num;
+            return Math.round(num / multiple) * multiple;
+        };
+
+        const keys: (keyof typeof MOCK_BASE_RATES)[] = [
+            "gold999", "gold916", "gold20k", "gold18k", "gold14k", "silver999", "silver925"
+        ];
+
+        keys.forEach(key => {
+            const base = MOCK_BASE_RATES[key];
+            const isSilver = key.startsWith('silver');
+
+            // Apply margin
+            const marginKey = key === "gold916" ? "gold22kMargin" : (key + "Margin") as keyof RateConfig;
+            const margin = (config as any)[marginKey] || 0;
+            const withMargin = roundTo(base + margin, isSilver ? 10 : 50);
+
+            // Apply GST
+            const withGSTPrice = withGST ? withMargin * (1 + GST_RATE) : withMargin;
+
+            // Apply Making Charges
+            let mc = 0;
+            if (config.makingChargesEnabled) {
+                const mcKeyPrefix = key === "gold916" ? "22k" : key === "gold999" ? "24k" : key.replace('gold', '').replace('silver', '');
+                const mcTypeKey = `makingCharges${mcKeyPrefix}Type` as keyof RateConfig;
+                const mcValueKey = `makingCharges${mcKeyPrefix}Value` as keyof RateConfig;
+
+                if (config[mcTypeKey] === "percentage") {
+                    mc = withGSTPrice * (Number(config[mcValueKey] || 0) / 100);
+                } else {
+                    mc = Number(config[mcValueKey] || 0);
+                }
+            }
+
+            rates[key] = {
+                basePrice: base,
+                finalPrice: withGSTPrice + mc,
+                makingCharges: mc
+            };
+        });
+
+        return rates;
+    }, [config, withGST]);
+
     return (
         <View style={previewStyles.container}>
             <View style={previewStyles.header}>
@@ -75,7 +125,7 @@ export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
                 <View style={[previewStyles.wrapper, { backgroundColor: config.backgroundColor || "#FFFFFF" }]}>
                     <RateDisplayContent
                         config={config}
-                        calculatedRates={MOCK_RATES}
+                        calculatedRates={calculatedMockRates}
                         currentTime={new Date()}
                         viewOnly={true}
                         previewMode={true}
@@ -123,10 +173,10 @@ const tabStyles = StyleSheet.create({
 });
 
 const previewStyles = StyleSheet.create({
-    container: { backgroundColor: "#F8FAF8", borderRadius: 20, borderWidth: 1, borderColor: "#E2E8E2", marginHorizontal: 16, marginTop: 20, marginBottom: 10, padding: 6, elevation: 3 },
-    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, paddingHorizontal: 6, marginTop: 6 },
+    container: { backgroundColor: "#F8FAF8", borderRadius: 20, borderWidth: 1, borderColor: "#E2E8E2", marginHorizontal: 16, marginTop: 10, marginBottom: 8, padding: 4, elevation: 3 },
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingHorizontal: 6, marginTop: 4 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E', marginRight: 8 },
-    title: { fontSize: 16, fontWeight: '700', color: '#1A1A1A' },
-    content: { backgroundColor: "#FFFFFF", borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0', margin: 4 },
-    wrapper: { width: "100%", minHeight: 220, overflow: "hidden" },
+    title: { fontSize: 14, fontWeight: '700', color: '#1A1A1A' },
+    content: { backgroundColor: "#FFFFFF", borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0', margin: 2 },
+    wrapper: { width: "100%", minHeight: 180, overflow: "hidden" },
 });

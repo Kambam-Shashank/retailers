@@ -1,6 +1,5 @@
 import { RateDisplayContent } from "@/components/RateDisplay/RateDisplayContent";
 import { WEBSOCKET_URL } from "@/config/api";
-import { formatPricePerGram } from "@/utils/formatters";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -93,16 +92,9 @@ const Index = () => {
 
   const onShare = async () => {
     try {
-      const message = `Gold & Silver Live Rates
-
-Gold 999: ${formatPricePerGram(
-        calculatedRates.gold999.finalPrice
-      )}
-Silver 999: ${formatPricePerGram(
-        calculatedRates.silver999.finalPrice
-      )}
-
-View live rates here:
+      const message = `Namaste,
+Greetings from ${config.shopName || 'our shop'}.
+Kindly open the link below to view today’s Gold & Silver live rate:
 ${shareUrl}`;
 
       if (Platform.OS === "web") {

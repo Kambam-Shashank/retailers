@@ -129,25 +129,25 @@ export const DEFAULT_CONFIG: RateConfig = {
   makingChargesEnabled: false,
   makingCharges24kType: "percentage",
   makingCharges24kValue: 0,
-  makingCharges24kTitle: "MC",
+  makingCharges24kTitle: "Making Charges",
   makingCharges22kType: "percentage",
   makingCharges22kValue: 0,
-  makingCharges22kTitle: "MC",
+  makingCharges22kTitle: "Making Charges",
   makingCharges20kType: "percentage",
   makingCharges20kValue: 0,
-  makingCharges20kTitle: "MC",
+  makingCharges20kTitle: "Making Charges",
   makingCharges18kType: "percentage",
   makingCharges18kValue: 0,
-  makingCharges18kTitle: "MC",
+  makingCharges18kTitle: "Making Charges",
   makingCharges14kType: "percentage",
   makingCharges14kValue: 0,
-  makingCharges14kTitle: "MC",
+  makingCharges14kTitle: "Making Charges",
   makingCharges999Type: "percentage",
   makingCharges999Value: 0,
-  makingCharges999Title: "MC",
+  makingCharges999Title: "Making Charges",
   makingCharges925Type: "percentage",
   makingCharges925Value: 0,
-  makingCharges925Title: "MC",
+  makingCharges925Title: "Making Charges",
   notifications: [
     { id: 1, enabled: false, message: "" },
     { id: 2, enabled: false, message: "" },
@@ -183,7 +183,7 @@ export const DEFAULT_CONFIG: RateConfig = {
   logoSize: 80,
   logoOpacity: 1,
   logoPlacement: "header",
-  purityOrder: ["gold24k", "gold22k", "gold20k", "gold18k", "gold14k", "silver999", "silver925"],
+  purityOrder: ["gold24k", "gold22k", "silver999", "silver925", "gold20k", "gold18k", "gold14k"],
   defaultGSTEnabled: true,
 };
 
@@ -223,7 +223,21 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
 
       if (userDoc.exists()) {
         const data = userDoc.data() as RateConfig;
-        setConfig({ ...getDefaultConfig(), ...data });
+
+        const migratedData = { ...data };
+        const mcKeys: (keyof RateConfig)[] = [
+          'makingCharges24kTitle', 'makingCharges22kTitle', 'makingCharges20kTitle',
+          'makingCharges18kTitle', 'makingCharges14kTitle', 'makingCharges999Title',
+          'makingCharges925Title'
+        ];
+
+        mcKeys.forEach(key => {
+          if (migratedData[key] === "MC") {
+            (migratedData as any)[key] = "Making Charges";
+          }
+        });
+
+        setConfig({ ...getDefaultConfig(), ...migratedData });
       } else {
         // Migration logic: Check local storage
         const localJson = await AsyncStorage.getItem(STORAGE_KEY);

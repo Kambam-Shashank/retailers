@@ -76,12 +76,8 @@ export const commonStyles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   inputWrapper: {
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 6,
-    backgroundColor: "#F9F9F9",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -89,8 +85,12 @@ export const commonStyles = StyleSheet.create({
     color: "#1A1A1A",
     fontSize: 15,
     paddingVertical: 10,
+    borderWidth: 0,
     ...Platform.select({
-      web: { outlineStyle: "none" } as any,
+      web: {
+        outlineStyle: "none",
+        boxShadow: "none"
+      } as any,
     }),
   },
 });
@@ -179,6 +179,7 @@ interface MarginsProps {
   gold24kMargin: number; gold22kMargin: number; gold20kMargin: number; gold18kMargin: number; gold14kMargin: number; silver999Margin: number; silver925Margin: number;
   onMarginUpdate: (key: string, value: number) => void;
   onMarginInputChange: (key: string, text: string) => void;
+  purityOrder: string[];
   isMobile?: boolean;
   isSmallMobile?: boolean;
 }
@@ -186,11 +187,22 @@ interface MarginsProps {
 export const MarginsCard: React.FC<MarginsProps> = ({
   gold24kMargin, gold22kMargin, gold20kMargin, gold18kMargin, gold14kMargin, silver999Margin, silver925Margin,
   onMarginUpdate, onMarginInputChange,
+  purityOrder,
   isMobile, isSmallMobile
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const marginMap: Record<string, number> = {
+    gold24k: gold24kMargin,
+    gold22k: gold22kMargin,
+    gold20k: gold20kMargin,
+    gold18k: gold18kMargin,
+    gold14k: gold14kMargin,
+    silver999: silver999Margin,
+    silver925: silver925Margin,
+  };
+
   const renderField = (label: string, value: number, key: string, unit: string, step: number) => (
-    <View style={marginCardStyles.field}>
+    <View style={marginCardStyles.field} key={key}>
       <Text style={marginCardStyles.labelTitle}>{label}</Text>
       <View style={marginCardStyles.controlRow}>
         <TouchableOpacity style={marginCardStyles.adjustBtn} onPress={() => onMarginUpdate(key, value - step)}>
@@ -207,22 +219,22 @@ export const MarginsCard: React.FC<MarginsProps> = ({
       <Text style={marginCardStyles.unit}>{unit}</Text>
     </View>
   );
+
+  const displayList = isExpanded ? purityOrder : purityOrder.slice(0, 4);
+
   return (
     <View style={commonStyles.card}>
       <Text style={commonStyles.cardTitle}>Margins</Text>
       <Text style={commonStyles.cardSubtitle}>Set your profit margin for each metal category</Text>
       <View style={{ gap: 16 }}>
-        {renderField("24K Gold (999)", gold24kMargin, "gold24kMargin", "per 10g", 50)}
-        {renderField("22K Gold (916)", gold22kMargin, "gold22kMargin", "per 10g", 50)}
-        {renderField("Silver (999)", silver999Margin, "silver999Margin", "per gram", 10)}
-        {renderField("Silver (925)", silver925Margin, "silver925Margin", "per gram", 10)}
-        {isExpanded && (
-          <>
-            {renderField("20K Gold (833)", gold20kMargin, "gold20kMargin", "per 10g", 50)}
-            {renderField("18K Gold (750)", gold18kMargin, "gold18kMargin", "per 10g", 50)}
-            {renderField("14K Gold (583)", gold14kMargin, "gold14kMargin", "per 10g", 50)}
-          </>
-        )}
+        {displayList.map((key) => {
+          const label = DEFAULT_LABELS_MAP[key];
+          const value = marginMap[key];
+          const marginKey = `${key}Margin`;
+          const unit = key.includes('silver') ? "per gram" : "per 10g";
+          const step = key.includes('silver') ? 10 : 50;
+          return renderField(label, value, marginKey, unit, step);
+        })}
       </View>
       <TouchableOpacity style={commonStyles.expandButton} onPress={() => setIsExpanded(!isExpanded)}>
         <Text style={commonStyles.expandButtonText}>{isExpanded ? "Show Less" : "Show More"}</Text>
@@ -242,15 +254,27 @@ interface MakingChargesProps {
 
 export const MakingChargesCard: React.FC<MakingChargesProps> = ({ config: globalConfig, onUpdate, isMobile, isSmallMobile }) => {
   const { makingChargesEnabled, handleToggleMakingCharges, handleChangeMakingType, handleMakingValueChange, handleTitleChange, config } = useRateSetupMakingCharges(globalConfig, onUpdate);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const keyMap: Record<string, "24k" | "22k" | "20k" | "18k" | "14k" | "999" | "925"> = {
+    gold24k: "24k",
+    gold22k: "22k",
+    gold20k: "20k",
+    gold18k: "18k",
+    gold14k: "14k",
+    silver999: "999",
+    silver925: "925",
+  };
+
   const renderSection = (key: "24k" | "22k" | "20k" | "18k" | "14k" | "999" | "925", label: string, color: string) => {
     const typeKey = `makingCharges${key}Type` as keyof RateConfig;
     const valueKey = `makingCharges${key}Value` as keyof RateConfig;
     const titleKey = `makingCharges${key}Title` as keyof RateConfig;
     return (
-      <View style={makingCardStyles.section}>
+      <View style={makingCardStyles.section} key={key}>
         <View style={makingCardStyles.nameRow}>
           <Text style={[makingCardStyles.label, { color }]}>{label}</Text>
-          <TextInput style={makingCardStyles.nameInput} value={String(config[titleKey] || '')} onChangeText={(text) => handleTitleChange(key, text)} placeholder="Label (e.g. MC)" />
+          <TextInput style={makingCardStyles.nameInput} value={String(config[titleKey] || '')} onChangeText={(text) => handleTitleChange(key, text)} placeholder="Label (e.g. Making Charges)" />
         </View>
         <View style={makingCardStyles.radioRow}>
           {["percentage", "fixed"].map((type) => (
@@ -274,6 +298,9 @@ export const MakingChargesCard: React.FC<MakingChargesProps> = ({ config: global
       </View>
     );
   };
+
+  const displayList = isExpanded ? config.purityOrder : config.purityOrder.slice(0, 4);
+
   return (
     <View style={commonStyles.card}>
       <View style={makingCardStyles.header}>
@@ -287,12 +314,24 @@ export const MakingChargesCard: React.FC<MakingChargesProps> = ({ config: global
       </View>
       {makingChargesEnabled && (
         <View style={{ marginTop: 10 }}>
-          {renderSection("24k", "24K Gold", GOLD)}
-          <View style={makingCardStyles.divider} />
-          {renderSection("22k", "22K Gold", GOLD)}
-          <View style={makingCardStyles.divider} />
-          {renderSection("999", "Silver 999", "#71717A")}
+          {displayList.map((purityKey, index) => {
+            const mcKey = keyMap[purityKey];
+            const label = DEFAULT_LABELS_MAP[purityKey];
+            const color = purityKey.includes('silver') ? "#71717A" : GOLD;
+            return (
+              <React.Fragment key={purityKey}>
+                {renderSection(mcKey, label, color)}
+                {index < displayList.length - 1 && <View style={makingCardStyles.divider} />}
+              </React.Fragment>
+            );
+          })}
         </View>
+      )}
+      {makingChargesEnabled && (
+        <TouchableOpacity style={commonStyles.expandButton} onPress={() => setIsExpanded(!isExpanded)}>
+          <Text style={commonStyles.expandButtonText}>{isExpanded ? "Show Less" : "Show More"}</Text>
+          <MaterialCommunityIcons name={isExpanded ? "chevron-up" : "chevron-down"} size={18} color={GOLD} />
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -340,9 +379,20 @@ const marginCardStyles = StyleSheet.create({
   controlRow: { flexDirection: "row", alignItems: "center" },
   adjustBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#F9F9F9", justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "#E0E0E0" },
   btnText: { color: "#1A1A1A", fontSize: 20 },
-  valueBox: { flex: 1, marginHorizontal: 12, borderRadius: 12, backgroundColor: "#F9F9F9", borderWidth: 1, borderColor: "#E0E0E0", paddingHorizontal: 12, paddingVertical: 8, flexDirection: "row", alignItems: "center" },
+  valueBox: { flex: 1, marginHorizontal: 12, paddingHorizontal: 12, paddingVertical: 8, flexDirection: "row", alignItems: "center" },
   currency: { color: GOLD, fontSize: 16, fontWeight: "600", marginRight: 6 },
-  valText: { flex: 1, color: "#1A1A1A", fontSize: 16, fontWeight: "600" },
+  valText: {
+    flex: 1,
+    color: "#1A1A1A",
+    fontSize: 16,
+    fontWeight: "600",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    paddingVertical: 4,
+    ...Platform.select({
+      web: { outlineStyle: "none" } as any,
+    }),
+  },
   unit: { marginTop: 4, fontSize: 11, color: "#64748B", textAlign: "center" },
 });
 const makingCardStyles = StyleSheet.create({
@@ -350,7 +400,19 @@ const makingCardStyles = StyleSheet.create({
   section: { marginBottom: 20 },
   nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
   label: { fontSize: 14, fontWeight: "600" },
-  nameInput: { flex: 1, marginLeft: 15, color: GOLD, fontSize: 14, fontWeight: "600", borderBottomWidth: 1, borderBottomColor: "#E0E0E0", paddingVertical: 4 },
+  nameInput: {
+    flex: 1,
+    marginLeft: 15,
+    color: GOLD,
+    fontSize: 14,
+    fontWeight: "600",
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+    ...Platform.select({
+      web: { outlineStyle: "none" } as any,
+    }),
+  },
   radioRow: { flexDirection: "row", marginBottom: 14 },
   radioOption: { flexDirection: "row", alignItems: "center", marginRight: 20 },
   radioOuter: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: "#E0E0E0", justifyContent: "center", alignItems: "center", marginRight: 6 },
