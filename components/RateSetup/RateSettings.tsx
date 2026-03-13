@@ -1,0 +1,476 @@
+import { RateConfig } from "@/contexts/RateConfigContext";
+import { DEFAULT_LABELS, useRateSetup } from "@/customHooks/useRateSetup";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+export const GOLD = "#D4AF37";
+
+export const commonStyles = StyleSheet.create({
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
+    marginHorizontal: 16,
+    marginTop: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: GOLD,
+    marginBottom: 6,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 24,
+  },
+  expandButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    gap: 4,
+  },
+  expandButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: GOLD,
+  },
+  switchTrack: {
+    width: 40,
+    height: 22,
+    borderRadius: 999,
+    backgroundColor: "#E0E0E0",
+    padding: 3,
+    justifyContent: "center",
+  },
+  switchTrackOn: {
+    backgroundColor: GOLD,
+  },
+  switchThumb: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
+  },
+  switchThumbOn: {
+    alignSelf: "flex-end",
+  },
+  inputWrapper: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  textInput: {
+    color: "#1A1A1A",
+    fontSize: 15,
+    paddingVertical: 10,
+    borderWidth: 0,
+    ...Platform.select({
+      web: {
+        outlineStyle: "none",
+        boxShadow: "none"
+      } as any,
+    }),
+  },
+});
+
+// ====== PurityLabelsCard ======
+// We will use DEFAULT_LABELS from the custom hook instead of DEFAULT_LABELS_MAP
+
+interface PurityLabelsProps {
+  gold24kLabel: string; gold22kLabel: string; gold20kLabel: string; gold18kLabel: string; gold14kLabel: string; silver999Label: string; silver925Label: string;
+  showGold24k: boolean; showGold22k: boolean; showGold20k: boolean; showGold18k: boolean; showGold14k: boolean; showSilver999: boolean; showSilver925: boolean;
+  onLabelChange: (key: string, value: string) => void;
+  onUpdate: (key: string, value: boolean) => void;
+  onLabelsBlur: () => void;
+  purityOrder: string[];
+  onOrderChange: (newOrder: string[]) => void;
+  isMobile?: boolean;
+  isSmallMobile?: boolean;
+}
+
+export const PurityLabelsCard: React.FC<PurityLabelsProps> = ({
+  gold24kLabel, gold22kLabel, gold20kLabel, gold18kLabel, gold14kLabel, silver999Label, silver925Label,
+  showGold24k, showGold22k, showGold20k, showGold18k, showGold14k, showSilver999, showSilver925,
+  onLabelChange, onUpdate, onLabelsBlur, purityOrder, onOrderChange,
+  isMobile, isSmallMobile
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const data = purityOrder.map((key) => {
+    const labelMap: Record<string, string> = { gold24k: gold24kLabel, gold22k: gold22kLabel, gold20k: gold20kLabel, gold18k: gold18kLabel, gold14k: gold14kLabel, silver999: silver999Label, silver925: silver925Label };
+    const visMap: Record<string, boolean> = { gold24k: showGold24k, gold22k: showGold22k, gold20k: showGold20k, gold18k: showGold18k, gold14k: showGold14k, silver999: showSilver999, silver925: showSilver925 };
+    const toggleMap: Record<string, string> = { gold24k: "showGold24k", gold22k: "showGold22k", gold20k: "showGold20k", gold18k: "showGold18k", gold14k: "showGold14k", silver999: "showSilver999", silver925: "showSilver925" };
+    return { key, label: labelMap[key], visible: visMap[key], toggleKey: toggleMap[key] };
+  });
+  const handleMove = (index: number, direction: "up" | "down") => {
+    const newOrder = [...purityOrder];
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex >= 0 && newIndex < newOrder.length) {
+      [newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]];
+      onOrderChange(newOrder);
+    }
+  };
+  return (
+    <View style={commonStyles.card}>
+      <Text style={commonStyles.cardTitle}>Custom Purity Labels</Text>
+      <Text style={commonStyles.cardSubtitle}>Reorder categories and customize labels</Text>
+      <View style={{ gap: 12 }}>
+        {(isExpanded ? data : data.slice(0, 4)).map((item) => (
+          <View key={item.key} style={purityCardStyles.itemContainer}>
+            <View style={purityCardStyles.reorderControls}>
+              <TouchableOpacity onPress={() => handleMove(data.findIndex(d => d.key === item.key), "up")} disabled={data.findIndex(d => d.key === item.key) === 0} style={{ opacity: data.findIndex(d => d.key === item.key) === 0 ? 0.3 : 1 }}>
+                <MaterialCommunityIcons name="chevron-up" size={24} color="#666" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleMove(data.findIndex(d => d.key === item.key), "down")} disabled={data.findIndex(d => d.key === item.key) === data.length - 1} style={{ opacity: data.findIndex(d => d.key === item.key) === data.length - 1 ? 0.3 : 1 }}>
+                <MaterialCommunityIcons name="chevron-down" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={purityCardStyles.row}>
+                <Text style={purityCardStyles.labelTitle}>{(DEFAULT_LABELS as any)[item.key]}</Text>
+                <TouchableOpacity style={[commonStyles.switchTrack, item.visible && commonStyles.switchTrackOn]} onPress={() => onUpdate(item.toggleKey, !item.visible)}>
+                  <View style={[commonStyles.switchThumb, item.visible && commonStyles.switchThumbOn]} />
+                </TouchableOpacity>
+              </View>
+              <TextInput style={purityCardStyles.textInputBox} value={item.label} onChangeText={t => onLabelChange(`${item.key}Label`, t)} onBlur={onLabelsBlur} placeholder={(DEFAULT_LABELS as any)[item.key]} />
+            </View>
+          </View>
+        ))}
+      </View>
+      <TouchableOpacity style={commonStyles.expandButton} onPress={() => setIsExpanded(!isExpanded)}>
+        <Text style={commonStyles.expandButtonText}>{isExpanded ? "Show Less" : "Show More"}</Text>
+        <MaterialCommunityIcons name={isExpanded ? "chevron-up" : "chevron-down"} size={18} color={GOLD} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// ====== MarginsCard ======
+interface MarginsProps {
+  gold24kMargin: number; gold22kMargin: number; gold20kMargin: number; gold18kMargin: number; gold14kMargin: number; silver999Margin: number; silver925Margin: number;
+  onMarginUpdate: (key: string, value: number) => void;
+  onMarginInputChange: (key: string, text: string) => void;
+  purityOrder: string[];
+  isMobile?: boolean;
+  isSmallMobile?: boolean;
+}
+
+export const MarginsCard: React.FC<MarginsProps> = ({
+  gold24kMargin, gold22kMargin, gold20kMargin, gold18kMargin, gold14kMargin, silver999Margin, silver925Margin,
+  onMarginUpdate, onMarginInputChange,
+  purityOrder,
+  isMobile, isSmallMobile
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const marginMap: Record<string, number> = {
+    gold24k: gold24kMargin,
+    gold22k: gold22kMargin,
+    gold20k: gold20kMargin,
+    gold18k: gold18kMargin,
+    gold14k: gold14kMargin,
+    silver999: silver999Margin,
+    silver925: silver925Margin,
+  };
+
+  const renderField = (label: string, value: number, key: string, unit: string, step: number) => (
+    <View style={[marginCardStyles.field, isMobile && marginCardStyles.fieldMobile]} key={key}>
+      <View style={[marginCardStyles.labelContainer, isMobile && marginCardStyles.labelContainerMobile]}>
+        <Text style={marginCardStyles.labelTitle}>{label}</Text>
+        <Text style={marginCardStyles.unit}>{unit}</Text>
+      </View>
+      <View style={[marginCardStyles.controlWrapper, isMobile && marginCardStyles.controlWrapperMobile]}>
+        <View style={marginCardStyles.controlRow}>
+          <TouchableOpacity style={marginCardStyles.adjustBtn} onPress={() => onMarginUpdate(key, Number(value || 0) - step)}>
+            <Text style={marginCardStyles.btnText}>−</Text>
+          </TouchableOpacity>
+          <View style={marginCardStyles.valueBox}>
+            <Text style={marginCardStyles.currency}>₹</Text>
+            <TextInput style={marginCardStyles.valText} keyboardType="numeric" value={String(value || 0)} onChangeText={(t) => onMarginInputChange(key, t)} />
+          </View>
+          <TouchableOpacity style={marginCardStyles.adjustBtn} onPress={() => onMarginUpdate(key, Number(value || 0) + step)}>
+            <Text style={marginCardStyles.btnText}>+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+
+  const displayList = isExpanded ? purityOrder : purityOrder.slice(0, 4);
+
+  return (
+    <View style={commonStyles.card}>
+      <Text style={commonStyles.cardTitle}>Margins</Text>
+      <Text style={commonStyles.cardSubtitle}>Set your profit margin for each metal category</Text>
+      <View style={{ gap: 16 }}>
+        {displayList.map((key) => {
+          const label = (DEFAULT_LABELS as any)[key];
+          const value = marginMap[key];
+          const marginKey = `${key}Margin`;
+          const unit = key.includes('silver') ? "per gram" : "per 10g";
+          const step = key.includes('silver') ? 10 : 50;
+          return renderField(label, value, marginKey, unit, step);
+        })}
+      </View>
+      <TouchableOpacity style={commonStyles.expandButton} onPress={() => setIsExpanded(!isExpanded)}>
+        <Text style={commonStyles.expandButtonText}>{isExpanded ? "Show Less" : "Show More"}</Text>
+        <MaterialCommunityIcons name={isExpanded ? "chevron-up" : "chevron-down"} size={18} color={GOLD} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// ====== MakingChargesCard ======
+interface MakingChargesProps {
+  config: RateConfig;
+  onUpdate: (updates: Partial<RateConfig>) => void;
+  isMobile?: boolean;
+  isSmallMobile?: boolean;
+}
+
+export const MakingChargesCard: React.FC<MakingChargesProps> = ({ config: globalConfig, onUpdate, isMobile, isSmallMobile }) => {
+  const { makingChargesEnabled, handleToggleMakingCharges, handleChangeMakingType, handleMakingValueChange, handleTitleChange, config } = useRateSetup(globalConfig, onUpdate);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const keyMap: Record<string, "24k" | "22k" | "20k" | "18k" | "14k" | "999" | "925"> = {
+    gold24k: "24k",
+    gold22k: "22k",
+    gold20k: "20k",
+    gold18k: "18k",
+    gold14k: "14k",
+    silver999: "999",
+    silver925: "925",
+  };
+
+  const renderSection = (key: "24k" | "22k" | "20k" | "18k" | "14k" | "999" | "925", label: string, color: string) => {
+    const typeKey = `makingCharges${key}Type` as keyof RateConfig;
+    const valueKey = `makingCharges${key}Value` as keyof RateConfig;
+    const titleKey = `makingCharges${key}Title` as keyof RateConfig;
+    return (
+      <View style={makingCardStyles.section} key={key}>
+        <View style={[makingCardStyles.nameRow, isMobile && makingCardStyles.nameRowMobile]}>
+          <Text style={[makingCardStyles.label, { color }]}>{label}</Text>
+          <TextInput style={[makingCardStyles.nameInput, isMobile && makingCardStyles.nameInputMobile]} value={String(config[titleKey] || '')} onChangeText={(text) => handleTitleChange(key, text)} placeholder="Label (e.g. Making Charges)" />
+        </View>
+        <View style={[makingCardStyles.radioRow, isMobile && makingCardStyles.radioRowMobile]}>
+          {["percentage", "fixed"].map((type) => (
+            <TouchableOpacity key={type} style={makingCardStyles.radioOption} onPress={() => handleChangeMakingType(key, type as any)}>
+              <View style={[makingCardStyles.radioOuter, config[typeKey] === type && makingCardStyles.radioActive]}>
+                {config[typeKey] === type && <View style={makingCardStyles.radioInner} />}
+              </View>
+              <Text style={[makingCardStyles.radioLabel, config[typeKey] === type && makingCardStyles.radioLabelActive]}>
+                {type === "percentage" ? "Percentage (%)" : "Fixed (₹)"}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={[makingCardStyles.valRow, isMobile && makingCardStyles.valRowMobile]}>
+          <View style={[makingCardStyles.valInputWrapper, isMobile && makingCardStyles.valInputWrapperMobile]}>
+            <Text style={{ color: GOLD, fontWeight: "600", marginRight: 6 }}>{config[typeKey] === "percentage" ? "%" : "₹"}</Text>
+            <TextInput style={makingCardStyles.valInputText} keyboardType="numeric" value={String(config[valueKey] || 0)} onChangeText={(text) => handleMakingValueChange(key, text)} />
+          </View>
+          <Text style={makingCardStyles.unit}>{config[typeKey] === "percentage" ? "of rate" : "per gram"}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  const displayList = isExpanded ? config.purityOrder : config.purityOrder.slice(0, 4);
+
+  return (
+    <View style={commonStyles.card}>
+      <View style={makingCardStyles.header}>
+        <View>
+          <Text style={commonStyles.cardTitle}>Making Charges</Text>
+          <Text style={commonStyles.cardSubtitle}>Add making charges to display</Text>
+        </View>
+        <TouchableOpacity style={[commonStyles.switchTrack, makingChargesEnabled && commonStyles.switchTrackOn]} onPress={handleToggleMakingCharges}>
+          <View style={[commonStyles.switchThumb, makingChargesEnabled && commonStyles.switchThumbOn]} />
+        </TouchableOpacity>
+      </View>
+      {makingChargesEnabled && (
+        <View style={{ marginTop: 10 }}>
+          {displayList.map((purityKey, index) => {
+            const mcKey = keyMap[purityKey];
+            const label = (DEFAULT_LABELS as any)[purityKey];
+            const color = purityKey.includes('silver') ? "#71717A" : GOLD;
+            return (
+              <React.Fragment key={purityKey}>
+                {renderSection(mcKey, label, color)}
+                {index < displayList.length - 1 && <View style={makingCardStyles.divider} />}
+              </React.Fragment>
+            );
+          })}
+        </View>
+      )}
+      {makingChargesEnabled && (
+        <TouchableOpacity style={commonStyles.expandButton} onPress={() => setIsExpanded(!isExpanded)}>
+          <Text style={commonStyles.expandButtonText}>{isExpanded ? "Show Less" : "Show More"}</Text>
+          <MaterialCommunityIcons name={isExpanded ? "chevron-up" : "chevron-down"} size={18} color={GOLD} />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+// ====== RateStatusCard ======
+export const RateStatusCard: React.FC<{ config: RateConfig; onUpdate: (u: Partial<RateConfig>) => void; isMobile?: boolean; isSmallMobile?: boolean }> = ({ config, onUpdate, isMobile, isSmallMobile }) => {
+  const { ratesFrozen, formattedFrozenAt, handleToggleFreeze } = useRateSetup(config, onUpdate);
+  return (
+    <View style={commonStyles.card}>
+      <Text style={commonStyles.cardTitle}>Rate Status</Text>
+      <Text style={commonStyles.cardSubtitle}>
+        {ratesFrozen ? `Rates are frozen${formattedFrozenAt ? ` since ${formattedFrozenAt}` : ""}.` : "Rates are live and updating."}
+      </Text>
+      <TouchableOpacity style={[statusStyles.btn, ratesFrozen && statusStyles.btnFrozen]} onPress={handleToggleFreeze}>
+        <Text style={statusStyles.btnText}>{ratesFrozen ? "Unfreeze Rates" : "Freeze Rates"}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// ====== GSTSettingsCard ======
+export const GSTSettingsCard: React.FC<{ config: RateConfig; onUpdate: (u: Partial<RateConfig>) => void; isMobile?: boolean; isSmallMobile?: boolean }> = ({ config, onUpdate, isMobile, isSmallMobile }) => (
+  <View style={commonStyles.card}>
+    <Text style={commonStyles.cardTitle}>GST Display Settings</Text>
+    <Text style={commonStyles.cardSubtitle}>Set the default GST toggle state</Text>
+    <View style={gstStyles.row}>
+      <Text style={gstStyles.label}>Show with GST by default</Text>
+      <TouchableOpacity style={[commonStyles.switchTrack, config.defaultGSTEnabled && commonStyles.switchTrackOn]} onPress={() => onUpdate({ defaultGSTEnabled: !config.defaultGSTEnabled })}>
+        <View style={[commonStyles.switchThumb, config.defaultGSTEnabled && commonStyles.switchThumbOn]} />
+      </TouchableOpacity>
+    </View>
+  </View>
+);
+
+const purityCardStyles = StyleSheet.create({
+  itemContainer: { flexDirection: "row", alignItems: "center", gap: 12 },
+  reorderControls: { flexDirection: "column" },
+  row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
+  labelTitle: { fontSize: 13, color: "#666", fontWeight: "600" },
+  textInputBox: {
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    backgroundColor: "#F9F9F9",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: "#1A1A1A",
+    fontSize: 15,
+    ...Platform.select({
+      web: { outlineStyle: "none", boxShadow: "none" } as any,
+    }),
+  },
+});
+const marginCardStyles = StyleSheet.create({
+  field: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
+  fieldMobile: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  labelContainer: { width: 140, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  labelContainerMobile: { width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  labelTitle: { fontSize: 13, color: "#333", fontWeight: "600" },
+  unit: { fontSize: 12, color: "#64748B" },
+  controlWrapper: { flex: 1, width: "100%", maxWidth: 220, alignItems: "flex-end" },
+  controlWrapperMobile: { maxWidth: "100%" },
+  controlRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#E0E0E0", borderRadius: 8, backgroundColor: "#F9F9F9", height: 44, width: "100%" },
+  adjustBtn: { width: 44, height: "100%", justifyContent: "center", alignItems: "center" },
+  btnText: { color: "#666", fontSize: 20 },
+  valueBox: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", position: "relative", borderLeftWidth: 1, borderRightWidth: 1, borderColor: "#E0E0E0", height: "100%", backgroundColor: "#FFF" },
+  currency: { position: "absolute", left: 12, color: GOLD, fontSize: 16, fontWeight: "600" },
+  valText: {
+    color: "#1A1A1A",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    minWidth: 50,
+    padding: 0,
+    ...Platform.select({
+      web: { outlineStyle: "none" } as any,
+    }),
+  },
+});
+const makingCardStyles = StyleSheet.create({
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  section: { marginBottom: 20 },
+  nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
+  nameRowMobile: { flexDirection: "column", alignItems: "flex-start", gap: 6 },
+  label: { fontSize: 14, fontWeight: "600" },
+  nameInput: {
+    flex: 1,
+    marginLeft: 15,
+    color: GOLD,
+    fontSize: 14,
+    fontWeight: "600",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    backgroundColor: "#F9F9F9",
+    ...Platform.select({
+      web: { outlineStyle: "none" } as any,
+    }),
+  },
+  nameInputMobile: { marginLeft: 0, width: "100%" },
+  radioRow: { flexDirection: "row", marginBottom: 14 },
+  radioRowMobile: { flexDirection: "column", gap: 8 },
+  radioOption: { flexDirection: "row", alignItems: "center", marginRight: 20 },
+  radioOuter: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: "#E0E0E0", justifyContent: "center", alignItems: "center", marginRight: 6 },
+  radioActive: { borderColor: GOLD },
+  radioInner: { width: 9, height: 9, borderRadius: 4.5, backgroundColor: GOLD },
+  radioLabel: { fontSize: 13, color: "#666" },
+  radioLabelActive: { color: GOLD },
+  valRow: { flexDirection: "row", alignItems: "center" },
+  valRowMobile: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" },
+  valInputWrapper: {
+    flex: 0.5,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    backgroundColor: "#F9F9F9",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  valInputWrapperMobile: { flex: 1, marginRight: 10 },
+  valInputText: {
+    color: "#1A1A1A",
+    fontSize: 15,
+    fontWeight: "600",
+    flex: 1,
+    padding: 0,
+    ...Platform.select({
+      web: { outlineStyle: "none" } as any,
+    }),
+  },
+  unit: { color: "#666", fontSize: 12, marginLeft: 8 },
+  divider: { height: 1, backgroundColor: "#EEEEEE", marginVertical: 15 },
+});
+const statusStyles = StyleSheet.create({
+  btn: { backgroundColor: GOLD, paddingVertical: 12, borderRadius: 999, alignItems: "center" },
+  btnFrozen: { backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: GOLD },
+  btnText: { color: "#000", fontSize: 14, fontWeight: "600" },
+});
+const gstStyles = StyleSheet.create({
+  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  label: { fontSize: 14, color: "#1A1A1A" },
+});
