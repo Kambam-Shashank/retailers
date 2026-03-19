@@ -42,7 +42,7 @@ export default function RateSetupScreen(): ReactElement {
   const isSmallMobile = width < 360;
   const isDesktop = width >= 1024;
 
-  const { config, updateConfig, resetConfigByTab } = useRateConfig();
+  const { config, updateConfig, resetConfig, resetConfigByTab } = useRateConfig();
   const { logout } = useAuth();
   const [localConfig, setLocalConfig] = useState<RateConfig>(config);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -122,8 +122,8 @@ export default function RateSetupScreen(): ReactElement {
     });
   };
 
-  const performReset = () => {
-    resetConfigByTab(activeTab);
+  const performReset = async () => {
+    await resetConfig();
     setShowResetConfirm(false);
   };
 
@@ -384,7 +384,7 @@ export default function RateSetupScreen(): ReactElement {
         visible={showResetConfirm}
         onClose={() => setShowResetConfirm(false)}
         onConfirm={performReset}
-        tabName={activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+        tabName="All App Settings (Excluding Catalog)"
       />
 
       <SaveSuccessModal

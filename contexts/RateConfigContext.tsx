@@ -258,7 +258,6 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
         }
       }
     } catch (error) {
-      console.warn("Failed to load rate config:", error);
     }
   };
 
@@ -272,7 +271,6 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
       const userDocRef = doc(db, "users", user.uid);
       await setDoc(userDocRef, newConfig, { merge: true });
     } catch (error) {
-      console.warn("Failed to update rate config:", error);
     }
   };
 
@@ -286,7 +284,6 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
       const userDocRef = doc(db, "users", user.uid);
       await setDoc(userDocRef, freshConfig);
     } catch (error) {
-      console.warn("Failed to reset rate config:", error);
     }
   };
 
@@ -373,7 +370,6 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
 
       await updateConfig(updates);
     } catch (error) {
-      console.warn(`Failed to reset ${tab} config:`, error);
     }
   };
 

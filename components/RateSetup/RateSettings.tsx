@@ -220,14 +220,14 @@ export const MarginsCard: React.FC<MarginsProps> = ({
   return (
     <View style={commonStyles.card}>
       <Text style={commonStyles.cardTitle}>Margins</Text>
-      <Text style={commonStyles.cardSubtitle}>Set your profit margin for each metal category</Text>
+      <Text style={commonStyles.cardSubtitle}>Set your profit margin for each metal category (per gram)</Text>
       <View style={{ gap: 16 }}>
         {displayList.map((key) => {
           const label = (DEFAULT_LABELS as any)[key];
           const value = marginMap[key];
           const marginKey = `${key}Margin`;
-          const unit = key.includes('silver') ? "per gram" : "per 10g";
-          const step = key.includes('silver') ? 10 : 50;
+          const unit = "per gram";
+          const step = key.includes('silver') ? 10 : 5;
           return renderField(label, value, marginKey, unit, step);
         })}
       </View>
@@ -269,7 +269,7 @@ export const MakingChargesCard: React.FC<MakingChargesProps> = ({ config: global
       <View style={makingCardStyles.section} key={key}>
         <View style={[makingCardStyles.nameRow, isMobile && makingCardStyles.nameRowMobile]}>
           <Text style={[makingCardStyles.label, { color }]}>{label}</Text>
-          <TextInput style={[makingCardStyles.nameInput, isMobile && makingCardStyles.nameInputMobile]} value={String(config[titleKey] || '')} onChangeText={(text) => handleTitleChange(key, text)} placeholder="Label (e.g. Making Charges)" />
+          <TextInput style={[makingCardStyles.nameInput, isMobile && makingCardStyles.nameInputMobile]} value={String(config[titleKey] || '')} onChangeText={(text) => handleTitleChange(key, text)} placeholder="Label (e.g. MAKING CHARGE)" />
         </View>
         <View style={[makingCardStyles.radioRow, isMobile && makingCardStyles.radioRowMobile]}>
           {["percentage", "fixed"].map((type) => (
@@ -298,10 +298,12 @@ export const MakingChargesCard: React.FC<MakingChargesProps> = ({ config: global
 
   return (
     <View style={commonStyles.card}>
-      <View style={makingCardStyles.header}>
-        <View>
-          <Text style={commonStyles.cardTitle}>Making Charges</Text>
-          <Text style={commonStyles.cardSubtitle}>Add making charges to display</Text>
+      <View style={[makingCardStyles.header, { alignItems: 'center' }]}>
+        <View style={{ flex: 1, paddingRight: 16 }}>
+          <Text style={[commonStyles.cardTitle, { marginBottom: 4 }]}>Making Charges</Text>
+          <Text style={[commonStyles.cardSubtitle, { marginBottom: makingChargesEnabled ? 16 : 0 }]}>
+            Add making charges to display (per gram)
+          </Text>
         </View>
         <TouchableOpacity style={[commonStyles.switchTrack, makingChargesEnabled && commonStyles.switchTrackOn]} onPress={handleToggleMakingCharges}>
           <View style={[commonStyles.switchThumb, makingChargesEnabled && commonStyles.switchThumbOn]} />
@@ -384,10 +386,10 @@ const purityCardStyles = StyleSheet.create({
 const marginCardStyles = StyleSheet.create({
   field: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
   fieldMobile: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
-  labelContainer: { width: 140, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  labelContainerMobile: { width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  labelContainer: { minWidth: 160, flexDirection: "row", alignItems: "baseline", gap: 4 },
+  labelContainerMobile: { width: "100%", flexDirection: "column", alignItems: "flex-start", gap: 2 },
   labelTitle: { fontSize: 13, color: "#333", fontWeight: "600" },
-  unit: { fontSize: 12, color: "#64748B" },
+  unit: { fontSize: 11, color: "#94A3B8" },
   controlWrapper: { flex: 1, width: "100%", maxWidth: 220, alignItems: "flex-end" },
   controlWrapperMobile: { maxWidth: "100%" },
   controlRow: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#E0E0E0", borderRadius: 8, backgroundColor: "#F9F9F9", height: 44, width: "100%" },
@@ -431,7 +433,7 @@ const makingCardStyles = StyleSheet.create({
   },
   nameInputMobile: { marginLeft: 0, width: "100%" },
   radioRow: { flexDirection: "row", marginBottom: 14 },
-  radioRowMobile: { flexDirection: "column", gap: 8 },
+  radioRowMobile: { flexDirection: "row", gap: 16, marginTop: 4, marginBottom: 12 },
   radioOption: { flexDirection: "row", alignItems: "center", marginRight: 20 },
   radioOuter: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: "#E0E0E0", justifyContent: "center", alignItems: "center", marginRight: 6 },
   radioActive: { borderColor: GOLD },

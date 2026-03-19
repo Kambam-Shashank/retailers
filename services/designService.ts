@@ -43,7 +43,6 @@ const COLLECTION_NAME = "designs";
 export const designService = {
     getRetailerDesigns: async (retailerId: string): Promise<Design[]> => {
         try {
-            console.log("[designService] Fetching designs for retailerId:", retailerId);
             const q = query(
                 collection(db, COLLECTION_NAME),
                 where("retailerId", "==", retailerId)
@@ -53,10 +52,8 @@ export const designService = {
                 id: doc.id,
                 ...doc.data()
             })) as Design[];
-            console.log(`[designService] Found ${data.length} designs for ${retailerId}`);
             return data;
         } catch (error) {
-            console.error("Error fetching designs:", error);
             throw error;
         }
     },
@@ -70,7 +67,6 @@ export const designService = {
             });
             return docRef.id;
         } catch (error) {
-            console.error("Error adding design:", error);
             throw error;
         }
     },
@@ -81,7 +77,6 @@ export const designService = {
             const docRef = doc(db, COLLECTION_NAME, designId);
             await updateDoc(docRef, updates);
         } catch (error) {
-            console.error("Error updating design:", error);
             throw error;
         }
     },
@@ -91,10 +86,9 @@ export const designService = {
             await deleteDoc(doc(db, COLLECTION_NAME, designId));
             if (imageUrl) {
                 const imageRef = ref(storage, imageUrl);
-                await deleteObject(imageRef).catch(err => console.warn("Failed to delete image from storage:", err));
+                await deleteObject(imageRef).catch(err => {});
             }
         } catch (error) {
-            console.error("Error deleting design:", error);
             throw error;
         }
     },
@@ -116,10 +110,6 @@ export const designService = {
             const uploadResult = await uploadBytes(storageRef, blob);
             return await getDownloadURL(uploadResult.ref);
         } catch (error: any) {
-            console.error("Error uploading image to Firebase Storage:", error);
-            if (error.code) console.error("Firebase Error Code:", error.code);
-            if (error.message) console.error("Firebase Error Message:", error.message);
-            if (error.serverResponse) console.error("Server Response:", error.serverResponse);
             throw error;
         }
     }

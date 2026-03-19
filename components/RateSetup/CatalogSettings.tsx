@@ -41,7 +41,7 @@ const CATEGORIES = [
     "Dokiya",
     "Kamarbandh",
     "Shishful",
-    "Mang Tika",
+    "Maang Tika",
     "Rakhdi",
     "Jhele",
     "Hair Clips",
@@ -924,13 +924,18 @@ const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "flex-end",
+        justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
+        alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
     },
     modalContainer: {
         backgroundColor: "#FFF",
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        height: "92%",
+        borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
+        borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
+        height: Platform.OS === 'web' ? '90%' : "92%",
+        width: Platform.OS === 'web' ? '95%' : '100%',
+        maxWidth: Platform.OS === 'web' ? 600 : undefined,
     },
     modalHeader: {
         flexDirection: "row",
@@ -1073,6 +1078,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#FAFAFA",
         flexDirection: "row",
         gap: 10,
+        width: "100%",
+        maxWidth: 400,
+        alignSelf: 'center',
     },
     uploadAreaText: {
         fontSize: 14,
@@ -1082,9 +1090,11 @@ const styles = StyleSheet.create({
     previewWrapper: {
         position: "relative",
         width: "100%",
+        maxWidth: 400,
         aspectRatio: 1,
         borderRadius: 16,
         overflow: "hidden",
+        alignSelf: 'center',
     },
     imagePreview: {
         width: "100%",

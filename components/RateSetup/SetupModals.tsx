@@ -49,7 +49,7 @@ export const BrandingPreviewModal: React.FC<{
 }> = ({ visible, onClose, shopName, logoBase64, logoSize }) => (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
         <View style={modalStyles.overlay}>
-            <View style={[modalStyles.content, { maxWidth: 500 }]}>
+            <View style={modalStyles.content}>
                 <View style={modalStyles.modalHeader}>
                     <Text style={modalStyles.title}>Branding Preview</Text>
                     <TouchableOpacity onPress={onClose}><Text style={{ fontSize: 20 }}>✕</Text></TouchableOpacity>
@@ -71,7 +71,19 @@ export const BrandingPreviewModal: React.FC<{
 
 const modalStyles = StyleSheet.create({
     overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 20 },
-    content: { backgroundColor: "#FFF", borderRadius: 20, padding: 24, width: "100%", alignItems: "center", elevation: 5 },
+    content: { 
+        backgroundColor: "#FFF", 
+        borderRadius: 20, 
+        padding: 24, 
+        width: "100%", 
+        maxWidth: 500, // Constrain width on desktop
+        alignItems: "center", 
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+    },
     title: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 12 },
     message: { fontSize: 14, color: "#666", textAlign: "center", marginBottom: 24, lineHeight: 20 },
     btnRow: { flexDirection: "row", gap: 12, width: "100%" },

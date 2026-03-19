@@ -60,7 +60,6 @@ export default function useWebSocket(uri: string) {
               if (hasNumericValues && !Array.isArray(parsedData)) {
                 validData = parsedData as GoldPriceData;
               } else {
-                console.warn("Unexpected data structure:", parsedData);
               }
             }
 
@@ -68,11 +67,9 @@ export default function useWebSocket(uri: string) {
               setData(validData);
               setLastValidData(validData);
             }
-          } else {
-            console.warn("Invalid data format:", parsedData);
-          }
+            } else {
+            }
         } catch (error) {
-          console.error("Error parsing WebSocket message:", error);
         }
       };
       ws.onerror = () => {

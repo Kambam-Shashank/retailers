@@ -3,7 +3,7 @@ import { usePriceChange } from "@/customHooks/usePriceChange";
 import { getCalculatedEstimate } from "@/customHooks/useRateCalculations";
 import { CATEGORIES, useDesignCatalog } from "@/customHooks/useRates";
 import { Design } from "@/services/designService";
-import { formatPrice } from "@/utils/formatters";
+import { formatPrice, getContrastColor } from "@/utils/formatters";
 import { Marquee } from "@animatereactnative/marquee";
 import {
   Feather,
@@ -18,6 +18,7 @@ import {
   Alert,
   Animated,
   Image,
+  LayoutAnimation,
   Linking,
   Modal,
   Platform,
@@ -54,6 +55,19 @@ interface RateDisplayContentProps {
   initialTab?: 'rates' | 'designs';
 }
 
+/** Mix hex colour with white. amount=0 → original, amount=1 → white */
+const lightenHex = (hex: string, amount: number): string => {
+  const h = hex.replace('#', '');
+  const parse = (i: number) =>
+    parseInt(h.length === 3 ? h[i] + h[i] : h.substring(i * 2, i * 2 + 2), 16);
+  const r = Math.round(parse(0) + (255 - parse(0)) * amount);
+  const g = Math.round(parse(1) + (255 - parse(1)) * amount);
+  const b = Math.round(parse(2) + (255 - parse(2)) * amount);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+};
+
+const DEFAULT_CARD_BG = '#FFFFFF'; // matches DEFAULT_CONFIG.cardBackgroundColor
+
 const RateCard = React.memo(({
   label,
   price,
@@ -67,6 +81,7 @@ const RateCard = React.memo(({
   makingChargesTitle,
   makingChargeValue,
   makingChargeType,
+  contrastColor,
 }: {
   label: string;
   price: string;
@@ -80,6 +95,7 @@ const RateCard = React.memo(({
   makingChargesTitle?: string;
   makingChargeValue?: number;
   makingChargeType?: "percentage" | "perGram";
+  contrastColor: string;
 }) => {
   const gradientColors: [string, string] = isGold
     ? ["#FFD700", "#F59E0B"]
@@ -92,15 +108,55 @@ const RateCard = React.memo(({
   const labelWeight = isMinimal ? "600" : "700";
   const priceWeight = isMinimal ? "400" : "700";
 
+  // Derive the effective card background:
+  // - If user has set a CUSTOM cardBackgroundColor (not the default white), use it directly.
+  // - Otherwise auto-compute a slightly lighter (or elevated) version of the page backgroundColor.
+  const effectiveCardBg = useMemo(() => {
+    const hasCustomCardBg =
+      config.cardBackgroundColor &&
+      config.cardBackgroundColor !== 'transparent' &&
+      config.cardBackgroundColor.toUpperCase() !== DEFAULT_CARD_BG.toUpperCase();
+
+    if (hasCustomCardBg) {
+      if (config.cardBackgroundColor.startsWith('#')) {
+        return `${config.cardBackgroundColor}F2`;
+      }
+      return config.cardBackgroundColor;
+    }
+
+    // Auto-derive from the page background:
+    // Dark page → cards get a lighter elevated surface (~12% lighter)
+    // Light page → cards get a very slightly off-white, clean surface
+    const pageBg = config.backgroundColor || '#FFFDF5';
+    if (pageBg.startsWith('#')) {
+      if (contrastColor === '#FFFFFF') {
+        // Dark page background: subtle lift
+        return `${lightenHex(pageBg, 0.12)}F8`;
+      } else {
+        // Light page background: clean, crisp look
+        return '#FFFFFFFB';
+      }
+    }
+    return contrastColor === '#FFFFFF' ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.98)';
+  }, [config.cardBackgroundColor, config.backgroundColor, contrastColor]);
+
+  // Contrast color for text on top of the card
+  const cardContrastColor = useMemo(() => {
+    if (effectiveCardBg.startsWith('#')) {
+      return getContrastColor(effectiveCardBg.substring(0, 7));
+    }
+    return contrastColor;
+  }, [effectiveCardBg, contrastColor]);
+
   return (
     <View style={[styles.animatedCardContainer, { marginBottom: previewMode ? 8 : 14 }]}>
       <Shadow
-        distance={previewMode ? 3 : 6}
-        startColor={"rgba(0, 0, 0, 0.05)"}
-        offset={[0, previewMode ? 2 : 4]}
+        distance={previewMode ? 6 : 12}
+        startColor={contrastColor === "#FFFFFF" ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.05)"}
+        offset={[0, previewMode ? 3 : 6]}
         style={{
           width: "100%",
-          borderRadius: 16,
+          borderRadius: 20,
         }}
         containerStyle={{ width: "100%" }}
       >
@@ -108,57 +164,116 @@ const RateCard = React.memo(({
           style={[
             styles.card,
             {
-              borderRadius: 16,
-              backgroundColor: "#FFFFFF",
+              borderRadius: 24,
+              backgroundColor: effectiveCardBg,
               overflow: "hidden",
               flexDirection: "row",
+              alignItems: 'center',
+              paddingHorizontal: 22,
+              paddingVertical: 18,
+              borderWidth: 1,
+              borderColor: contrastColor === "#FFFFFF" ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.03)',
             },
           ]}
         >
           <LinearGradient
-            colors={gradientColors}
+            colors={isGold ? ["rgba(255, 215, 0, 0.15)", "rgba(255, 215, 0, 0.05)"] : ["rgba(255, 255, 255, 0.2)", "rgba(255, 255, 255, 0.05)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+
+          <LinearGradient
+            colors={isGold ? ["#F59E0B", "#B45309"] : ["#94A3B8", "#475569"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
-            style={{ width: 6, height: "100%" }}
+            style={{ 
+              width: 6, 
+              height: '100%', 
+              maxHeight: 48,
+              borderRadius: 3,
+              marginRight: 16
+            }}
           />
 
           <View style={[styles.cardContent, previewMode && { paddingVertical: 8 }]}>
-            <View style={{ gap: 2, flex: 1 }}>
+            <View style={{ gap: 4, flex: 1 }}>
               <Text
                 style={[
                   styles.cardLabel,
                   {
-                    color: "#1E293B",
+                    color: isGold 
+                      ? (cardContrastColor === "#FFFFFF" ? "#FFD700" : "#B45309")
+                      : (cardContrastColor === "#FFFFFF" ? "#E2E8F0" : "#475569"),
                     fontSize: labelFontSize,
                     marginBottom: 0,
-                    fontWeight: labelWeight,
-                  },
-                ]}
-              >
-                {label}
-              </Text>
-              <Text style={{ fontSize: 13, color: "#6F4E37", fontWeight: "500", opacity: 0.8 }}>
-                {isGold ? "per 10g" : "per gram"}
-                {config.makingChargesEnabled && makingChargeValue && makingChargeValue > 0 ? (
-                  <>
-                    {` • ${makingChargesTitle}: ${makingChargeType === "percentage" ? `${makingChargeValue}%` : `₹${makingChargeValue}/g`}`}
-                  </>
-                ) : null}
-              </Text>
-            </View>
-            <View style={styles.priceContainer}>
-              <Text
-                style={[
-                  styles.cardPrice,
-                  {
-                    color: isGold ? "#D97706" : "#475569",
-                    fontSize: priceFontSize,
                     fontWeight: "900",
+                    letterSpacing: 1.2,
+                    textTransform: 'uppercase',
+                    textShadowColor: cardContrastColor === "#FFFFFF" ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
+                    textShadowOffset: { width: 0, height: 1 },
+                    textShadowRadius: 1,
                   },
                 ]}
               >
-                {price}
+                {label.split(' ')[0]} <Text style={{ 
+                  color: isGold 
+                    ? (cardContrastColor === "#FFFFFF" ? "#F59E0B" : "#92400E") 
+                    : (cardContrastColor === "#FFFFFF" ? "#94A3B8" : "#1E293B"),
+                  fontWeight: '400'
+                }}>
+                  {label.split(' ').slice(1).join(' ')}
+                </Text>
               </Text>
+              
+              {config.makingChargesEnabled && makingChargeValue && makingChargeValue > 0 ? (
+                <View style={[styles.mcBadge, { 
+                  backgroundColor: isGold ? 'rgba(217, 119, 6, 0.08)' : 'rgba(71, 85, 105, 0.06)', 
+                  borderColor: isGold ? 'rgba(217, 119, 6, 0.15)' : 'rgba(71, 85, 105, 0.15)', 
+                  borderWidth: 1, 
+                  alignSelf: 'flex-start',
+                  marginTop: 2,
+                  marginBottom: 6
+                }]}>
+                  <Text style={[styles.mcBadgeText, { color: isGold ? '#B45309' : '#475569', fontSize: 10, fontWeight: '700' }]}>
+                    {makingChargeType === "percentage"
+                      ? `${makingChargesTitle || 'MAKING'}: ${makingChargeValue}%`
+                      : `${makingChargesTitle || 'MAKING'}: ₹${makingChargeValue}/G`}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={styles.priceContainer}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <Text style={{ 
+                  fontSize: priceFontSize * 0.6, 
+                  fontWeight: '700', 
+                  color: isGold ? '#D97706' : (cardContrastColor === "#FFFFFF" ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)'),
+                  marginRight: 2
+                }}>₹</Text>
+                <Text
+                  style={[
+                    styles.cardPrice,
+                    {
+                      color: isGold 
+                        ? (cardContrastColor === "#FFFFFF" ? "#FFB300" : "#D97706")
+                        : cardContrastColor, 
+                      fontSize: priceFontSize,
+                      fontWeight: "900",
+                    },
+                  ]}
+                >
+                  {parseFloat(price.replace(/[^0-9.]/g, '')).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                </Text>
+              </View>
+              <Text style={{ 
+                fontSize: 10, 
+                color: cardContrastColor === "#FFFFFF" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)", 
+                fontWeight: '800',
+                letterSpacing: 1,
+                marginTop: -4
+                }}>PER 10G</Text>
             </View>
           </View>
         </View>
@@ -206,24 +321,26 @@ const DesignCard = React.memo(({ design, config, calculatedRates, onPress }: { d
         </View>
       </View>
       <View style={styles.designDetails}>
-        <Text style={styles.designName} numberOfLines={1}>{design.name}</Text>
+        <Text style={styles.designName} numberOfLines={1}>{design.name.toUpperCase()}</Text>
         <Text style={styles.designMeta} numberOfLines={1}>
-          {design.type} • {design.purity}
+          {design.type.toUpperCase()} • {design.purity.toUpperCase()}
           {design.netWeight ? ` • ${design.netWeight}g` : design.weight ? ` • ${design.weight}g` : ""}
         </Text>
         
         <View style={styles.cardPriceRow}>
           {design.priceDisplay === "Show Estimate" && estimate ? (
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.designPrice}>₹{estimate.toLocaleString('en-IN')}</Text>
               {design.makingCharge && (
-                <Text style={styles.cardMC}>
-                  MC: ₹{design.makingCharge}{design.makingChargeType === "percentage" ? "%" : "/g"}
-                </Text>
+                <View style={styles.catalogMcBadge}>
+                  <Text style={styles.catalogMcText}>
+                    {design.makingChargeType === "percentage" ? `+ ${design.makingCharge}% MC` : `+ ₹${design.makingCharge}/G MC`}
+                  </Text>
+                </View>
               )}
             </View>
           ) : (
-            <Text style={styles.priceOnRequest}>Price on request</Text>
+            <Text style={styles.priceOnRequest}>PRICE ON REQUEST</Text>
           )}
         </View>
       </View>
@@ -267,7 +384,7 @@ const DesignDetailModal = React.memo(({
     }
 
     if (!cleanPhone) {
-      Alert.alert("Missing Contact", "Retailer contact number is not setup.");
+      Alert.alert("Missing Contact", "No contact number is configured for this shop. Please ask the retailer to set up their WhatsApp number.");
       return;
     }
 
@@ -284,28 +401,30 @@ Inquiry for: *${design.name}*
 ${design.sku ? `🔖 SKU: ${design.sku}\n` : ""}${design.grossWeight ? `⚖️ Gross Wt: ${design.grossWeight}g\n` : ""}${design.netWeight ? `⚖️ Net Wt: ${design.netWeight}g\n` : ""}${!design.grossWeight && !design.netWeight && design.weight ? `⚖️ Weight: ${design.weight}g\n` : ""}${design.stoneCharges ? `💎 Stone Chg: ₹${design.stoneCharges}\n` : ""}💰 *Price Est: ₹${estimate?.toLocaleString('en-IN') || "Requesting Price"}*
 
 📝 Details: ${design.description || "Interested in this piece."}
-
+${design.imageUrl && design.imageUrl.startsWith('http') ? `🖼️ View Photo: ${design.imageUrl}\n` : ""}
 Sent from: ${config.shopName || "Karatpay Display"}
-🔗 View Design: ${designShareUrl}
+🔗 View Full Details: ${designShareUrl}
 
 (Ref: ${design.id})`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`;
-    const webUrl = `https://wa.me/${cleanPhone}/?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
 
-    // Optimization: Directly try to open WA app if possible, or fallback to browser link
-    Linking.canOpenURL(whatsappUrl).then(supported => {
-      if (supported) {
-        return Linking.openURL(whatsappUrl);
+    // On web use window.open for reliable cross-browser behaviour;
+    // on native, use Linking which deep-links into the WhatsApp app.
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.open) {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
       } else {
-        return Linking.openURL(webUrl);
+        Linking.openURL(whatsappUrl).catch(() => {
+          Alert.alert('Error', 'Could not open WhatsApp. Please try again.');
+        });
       }
-    }).catch(() => {
-      Linking.openURL(webUrl).catch(() => {
-        Alert.alert("Error", "Could not reach WhatsApp.");
+    } else {
+      Linking.openURL(whatsappUrl).catch(() => {
+        Alert.alert('Error', 'Could not open WhatsApp. Please make sure the app is installed.');
       });
-    });
+    }
   };
 
   const handleShareDesign = async () => {
@@ -467,19 +586,19 @@ View it here: ${designShareUrl}`;
                   ? ({ opacity: isHovering ? 0 : 1, ...wT() } as any)
                   : {},
               ]}>
-                <Text style={[styles.dpTitle, isDesktop && styles.dpTitleDesktop]}>{design.name}</Text>
-                <Text style={[styles.dpShopLink, isDesktop && styles.dpShopLinkDesktop]}>Visit {config.shopName || 'Our Shop'}</Text>
+                <Text style={[styles.dpTitle, isDesktop && styles.dpTitleDesktop]}>{design.name.toUpperCase()}</Text>
+                <Text style={[styles.dpShopLink, isDesktop && styles.dpShopLinkDesktop]}>VISIT {config.shopName?.toUpperCase() || 'OUR SHOP'}</Text>
                 <View style={styles.dpDivider} />
 
                 <View style={styles.dpTagsRow}>
                   <View style={[styles.dpTag, { backgroundColor: '#E8F4FD', borderColor: '#9ED3F7' }]}>
-                    <Text style={[styles.dpTagTxt, { color: '#1A6FA0' }]}>{design.type}</Text>
+                    <Text style={[styles.dpTagTxt, { color: '#1A6FA0' }]}>{design.type.toUpperCase()}</Text>
                   </View>
                   <View style={[styles.dpTag, { backgroundColor: '#FEF0FB', borderColor: '#F0ACEA' }]}>
-                    <Text style={[styles.dpTagTxt, { color: '#9C1F8F' }]}>{design.purity}</Text>
+                    <Text style={[styles.dpTagTxt, { color: '#1A6FA0' }]}>{design.purity.toUpperCase()}</Text>
                   </View>
                   <View style={[styles.dpTag, { backgroundColor: '#F0FDF4', borderColor: '#86EFAC' }]}>
-                    <Text style={[styles.dpTagTxt, { color: '#166534' }]}>{design.category}</Text>
+                    <Text style={[styles.dpTagTxt, { color: '#1A6FA0' }]}>{design.category.toUpperCase()}</Text>
                   </View>
                 </View>
 
@@ -487,38 +606,48 @@ View it here: ${designShareUrl}`;
                   <View style={styles.dpPriceBlock}>
                     <View style={styles.dpLivePill}>
                       <View style={styles.dpLiveDot} />
-                      <Text style={styles.dpLiveText}>LIVE RATE</Text>
+                      <Text style={styles.dpLiveText}>CERTIFIED LIVE RATE</Text>
                     </View>
-                    <Text style={styles.dpPrice}>₹{estimate.toLocaleString('en-IN')}</Text>
-                    <Text style={styles.dpPriceSub}>Inclusive of all taxes · Based on live gold rate</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 4 }}>
+                      <Text style={{ fontSize: 20, color: '#334155', fontWeight: '800', marginRight: 4 }}>₹</Text>
+                      <Text style={styles.dpPrice}>{estimate.toLocaleString('en-IN')}</Text>
+                    </View>
+                    <Text style={styles.dpPriceSub}>Inclusive of all taxes · Calculation based on current live market price</Text>
+                    
+                    <View style={styles.dpDividerSmall} />
+                    
                     <View style={styles.dpSpecsTable}>
                       {design.sku ? (
                         <View style={styles.dpSpecRow}>
-                          <Text style={styles.dpSpecKey}>SKU / TAG NO</Text>
+                          <Text style={styles.dpSpecKey}>SERIAL / SKU</Text>
                           <Text style={styles.dpSpecVal}>{design.sku}</Text>
                         </View>
                       ) : null}
                       {design.grossWeight || design.weight ? (
                         <View style={styles.dpSpecRow}>
-                          <Text style={styles.dpSpecKey}>Gross Weight</Text>
-                          <Text style={styles.dpSpecVal}>{design.grossWeight || design.weight} g</Text>
+                          <Text style={styles.dpSpecKey}>GROSS MASS</Text>
+                          <Text style={styles.dpSpecVal}>{design.grossWeight || design.weight} G</Text>
                         </View>
                       ) : null}
                       {design.netWeight ? (
                         <View style={styles.dpSpecRow}>
-                          <Text style={styles.dpSpecKey}>Net Weight</Text>
-                          <Text style={styles.dpSpecVal}>{design.netWeight} g</Text>
+                          <Text style={styles.dpSpecKey}>NET MASS</Text>
+                          <Text style={styles.dpSpecVal}>{design.netWeight} G</Text>
                         </View>
                       ) : null}
                       {design.makingCharge ? (
                         <View style={styles.dpSpecRow}>
-                          <Text style={styles.dpSpecKey}>Making Charge</Text>
-                          <Text style={styles.dpSpecVal}>₹{design.makingCharge}{design.makingChargeType === 'percentage' ? '%' : '/g'}</Text>
+                          <Text style={styles.dpSpecKey}>{config.makingCharges22kTitle || 'MAKING'}</Text>
+                          <Text style={styles.dpSpecVal}>
+                            {design.makingChargeType === 'percentage'
+                              ? `${design.makingCharge}% OF RATE`
+                              : `₹${design.makingCharge} / G`}
+                          </Text>
                         </View>
                       ) : null}
                       {design.stoneCharges ? (
                         <View style={styles.dpSpecRow}>
-                          <Text style={styles.dpSpecKey}>Stone Charges</Text>
+                          <Text style={styles.dpSpecKey}>STONE CHARGES</Text>
                           <Text style={styles.dpSpecVal}>₹{parseFloat(design.stoneCharges).toLocaleString('en-IN')}</Text>
                         </View>
                       ) : null}
@@ -526,38 +655,29 @@ View it here: ${designShareUrl}`;
                   </View>
                 ) : (
                   <View style={styles.dpPOR}>
-                    <Text style={styles.dpPORTitle}>Price on Request</Text>
-                    <Text style={styles.dpPORSub}>Enquire below for the best price</Text>
+                    <Text style={styles.dpPORTitle}>PRICE ON REQUEST</Text>
+                    <Text style={styles.dpPORSub}>Experience this piece in person at our lounge</Text>
                   </View>
                 )}
 
                 {design.description ? (
                   <View style={styles.dpDescBlock}>
-                    <Text style={styles.dpDescLabel}>About this piece</Text>
+                    <Text style={styles.dpDescLabel}>CRAFTSMANSHIP & STORY</Text>
                     <Text style={[styles.dpDescText, isDesktop && styles.dpDescTextDesktop]}>{design.description}</Text>
                   </View>
                 ) : null}
 
-                {design.tags && design.tags.length > 0 && (
-                  <View style={styles.dpTagsBlock}>
-                    <Text style={styles.dpDescLabel}>Features</Text>
-                    <View style={styles.dpFeaturePills}>
-                      {design.tags.map(t => (
-                        <View key={t} style={styles.dpFeaturePill}>
-                          <Text style={styles.dpFeaturePillTxt}>{t}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                <TouchableOpacity style={styles.dpWhatsApp} onPress={handleWhatsAppEnquiry}>
-                  <MaterialCommunityIcons name="whatsapp" size={22} color="#FFF" />
-                  <Text style={styles.dpWhatsAppTxt}>Enquire via WhatsApp</Text>
+                <TouchableOpacity 
+                  activeOpacity={0.8}
+                  style={styles.dpWhatsApp} 
+                  onPress={handleWhatsAppEnquiry}
+                >
+                  <MaterialCommunityIcons name="whatsapp" size={24} color="#FFF" />
+                  <Text style={styles.dpWhatsAppTxt}>SECURE ENQUIRY</Text>
                 </TouchableOpacity>
 
                 <Text style={styles.dpCaution}>
-                  * Final price may vary based on actual weight and prevailing gold rates.
+                  * Final acquisition price is subject to actual measurements and spot market rates at the time of purchase.
                 </Text>
               </View>
 
@@ -632,10 +752,6 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
 
   // Ensure targetRetailerId is a trimmed string to avoid mismatch during fetch
   const targetRetailerId = String(retailerId || "").trim();
-  if (__DEV__) {
-    console.log("[RateDisplayContent] Props retailerId:", retailerId);
-    console.log("[RateDisplayContent] Using targetRetailerId:", targetRetailerId);
-  }
 
   const {
     designs,
@@ -649,10 +765,6 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   } = useDesignCatalog(targetRetailerId);
 
   useEffect(() => {
-    if (__DEV__) {
-      console.log("[RateDisplayContent] Component state for:", targetRetailerId);
-      console.log(`[RateDisplayContent] Designs loaded: ${designs.length}, Loading: ${designsLoading}`);
-    }
   }, [targetRetailerId, designs.length, designsLoading]);
 
   const qrLogoSource = useMemo(() => {
@@ -660,7 +772,27 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
     return { uri: config.logoBase64 };
   }, [config.logoBase64]);
 
-  const [activeTab, setActiveTab] = useState<'rates' | 'designs'>(initialTab || 'rates');
+  const [activeTab, setActiveTabRaw] = useState<'rates' | 'designs'>(initialTab || 'rates');
+  const setActiveTab = (tab: 'rates' | 'designs') => {
+    if (Platform.OS !== 'web') {
+      const customAnim = {
+        duration: 250,
+        create: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+          property: LayoutAnimation.Properties.opacity,
+        },
+        update: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+        },
+        delete: {
+          type: LayoutAnimation.Types.easeInEaseOut,
+          property: LayoutAnimation.Properties.opacity,
+        },
+      };
+      LayoutAnimation.configureNext(customAnim);
+    }
+    setActiveTabRaw(tab);
+  };
   const headerAnim = useRef(new Animated.Value(activeTab === 'designs' ? 1 : 0)).current;
 
   useEffect(() => {
@@ -705,8 +837,6 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
         setSelectedDesign(targetDesign);
         setShowDetailModal(true);
         setActiveTab('designs');
-      } else {
-        console.log(`[RateDisplayContent] Deep-linked design ${designId} not found in ${designs.length} designs.`);
       }
     }
   }, [initialDesignId, designs]);
@@ -750,7 +880,6 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
         await Sharing.shareAsync(uri);
       }
     } catch (error) {
-      console.error("Failed to capture QR:", error);
     }
   }, [config.shopName]);
 
@@ -764,13 +893,13 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
       key: string; visible: boolean; label: string; price: number; isGold: boolean;
       makingCharges?: number; makingChargesTitle?: string; makingChargeValue?: number; makingChargeType?: "percentage" | "perGram";
     } | undefined> = {
-      gold24k: { key: "gold24k", visible: Boolean(config.showGold24k), label: config.gold24kLabel || "24K Gold", price: calculatedRates?.gold999?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold999?.makingCharges, makingChargesTitle: config.makingCharges24kTitle, makingChargeValue: config.makingCharges24kValue, makingChargeType: config.makingCharges24kType },
-      gold22k: { key: "gold22k", visible: Boolean(config.showGold22k), label: config.gold22kLabel || "22K Gold", price: calculatedRates?.gold916?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold916?.makingCharges, makingChargesTitle: config.makingCharges22kTitle, makingChargeValue: config.makingCharges22kValue, makingChargeType: config.makingCharges22kType },
-      gold20k: { key: "gold20k", visible: Boolean(config.showGold20k), label: config.gold20kLabel || "20K Gold", price: calculatedRates?.gold20k?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold20k?.makingCharges, makingChargesTitle: config.makingCharges20kTitle, makingChargeValue: config.makingCharges20kValue, makingChargeType: config.makingCharges20kType },
-      gold18k: { key: "gold18k", visible: Boolean(config.showGold18k), label: config.gold18kLabel || "18K Gold", price: calculatedRates?.gold18k?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold18k?.makingCharges, makingChargesTitle: config.makingCharges18kTitle, makingChargeValue: config.makingCharges18kValue, makingChargeType: config.makingCharges18kType },
-      gold14k: { key: "gold14k", visible: Boolean(config.showGold14k), label: config.gold14kLabel || "14K Gold", price: calculatedRates?.gold14k?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold14k?.makingCharges, makingChargesTitle: config.makingCharges14kTitle, makingChargeValue: config.makingCharges14kValue, makingChargeType: config.makingCharges14kType },
-      silver999: { key: "silver999", visible: Boolean(config.showSilver999), label: config.silver999Label || "Pure Silver", price: calculatedRates?.silver999?.finalPrice ?? 0, isGold: false, makingCharges: calculatedRates?.silver999?.makingCharges, makingChargesTitle: config.makingCharges999Title, makingChargeValue: config.makingCharges999Value, makingChargeType: config.makingCharges999Type },
-      silver925: { key: "silver925", visible: Boolean(config.showSilver925), label: config.silver925Label || "925 Silver", price: calculatedRates?.silver925?.finalPrice ?? 0, isGold: false, makingCharges: calculatedRates?.silver925?.makingCharges, makingChargesTitle: config.makingCharges925Title, makingChargeValue: config.makingCharges925Value, makingChargeType: config.makingCharges925Type },
+      gold24k: { key: "gold24k", visible: Boolean(config.showGold24k), label: config.gold24kLabel || "24K Gold", price: calculatedRates?.gold999?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold999?.makingCharges, makingChargesTitle: config.makingCharges24kTitle || "MAKING CHARGE", makingChargeValue: config.makingCharges24kValue, makingChargeType: config.makingCharges24kType },
+      gold22k: { key: "gold22k", visible: Boolean(config.showGold22k), label: config.gold22kLabel || "22K Gold", price: calculatedRates?.gold916?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold916?.makingCharges, makingChargesTitle: config.makingCharges22kTitle || "MAKING CHARGE", makingChargeValue: config.makingCharges22kValue, makingChargeType: config.makingCharges22kType },
+      gold20k: { key: "gold20k", visible: Boolean(config.showGold20k), label: config.gold20kLabel || "20K Gold", price: calculatedRates?.gold20k?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold20k?.makingCharges, makingChargesTitle: config.makingCharges20kTitle || "MAKING CHARGE", makingChargeValue: config.makingCharges20kValue, makingChargeType: config.makingCharges20kType },
+      gold18k: { key: "gold18k", visible: Boolean(config.showGold18k), label: config.gold18kLabel || "18K Gold", price: calculatedRates?.gold18k?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold18k?.makingCharges, makingChargesTitle: config.makingCharges18kTitle || "MAKING CHARGE", makingChargeValue: config.makingCharges18kValue, makingChargeType: config.makingCharges18kType },
+      gold14k: { key: "gold14k", visible: Boolean(config.showGold14k), label: config.gold14kLabel || "14K Gold", price: calculatedRates?.gold14k?.finalPrice ?? 0, isGold: true, makingCharges: calculatedRates?.gold14k?.makingCharges, makingChargesTitle: config.makingCharges14kTitle || "MAKING CHARGE", makingChargeValue: config.makingCharges14kValue, makingChargeType: config.makingCharges14kType },
+      silver999: { key: "silver999", visible: Boolean(config.showSilver999), label: config.silver999Label || "Pure Silver", price: calculatedRates?.silver999?.finalPrice ?? 0, isGold: false, makingCharges: calculatedRates?.silver999?.makingCharges, makingChargesTitle: config.makingCharges999Title || "MAKING CHARGE", makingChargeValue: config.makingCharges999Value, makingChargeType: config.makingCharges999Type },
+      silver925: { key: "silver925", visible: Boolean(config.showSilver925), label: config.silver925Label || "925 Silver", price: calculatedRates?.silver925?.finalPrice ?? 0, isGold: false, makingCharges: calculatedRates?.silver925?.makingCharges, makingChargesTitle: config.makingCharges925Title || "MAKING CHARGE", makingChargeValue: config.makingCharges925Value, makingChargeType: config.makingCharges925Type },
     };
 
     const defaultOrder = ["gold24k", "gold22k", "silver999", "silver925", "gold20k", "gold18k", "gold14k"];
@@ -798,45 +927,71 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const SafeContainer = previewMode ? View : SafeAreaView;
 
 
-  return (
-    <LinearGradient
-      colors={[config.backgroundColor, config.backgroundColor]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.container}
-    >
+    const bgBase = config.backgroundColor || "#FFFDF5";
+    const contrastColor = getContrastColor(bgBase);
+
+    return (
+      <LinearGradient
+        colors={[bgBase, config.backgroundColor ? bgBase : "#FDF1E0"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.container}
+      >
       <SafeContainer style={{ flex: 1 }}>
         <View style={[styles.headerContainer, previewMode && { paddingBottom: 8, paddingTop: 5 }]}>
           {!previewMode && (
             <View style={styles.topButtonRow}>
               <TouchableOpacity
-                style={[styles.iconButton, { marginRight: 8 }]}
+                style={[
+                  styles.iconButton, 
+                  { 
+                    marginRight: 8,
+                    backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.05)",
+                    borderColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.1)"
+                  }
+                ]}
                 onPress={() => setShowQRModal(true)}
               >
                 <MaterialCommunityIcons
                   name="qrcode-scan"
                   size={20}
-                  color={config.textColor || "#2D3748"}
+                  color={contrastColor}
                 />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.iconButton} onPress={() => onShare(activeTab)}>
+              <TouchableOpacity
+                style={[
+                  styles.iconButton, 
+                  { 
+                    backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.05)",
+                    borderColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.1)"
+                  }
+                ]}
+                onPress={() => onShare(activeTab)}
+              >
                 <Feather
                   name="share-2"
                   size={20}
-                  color={config.textColor || "#2D3748"}
+                  color={contrastColor}
                 />
               </TouchableOpacity>
 
               {!viewOnly && onSetupPress && (
                 <TouchableOpacity
-                  style={[styles.iconButton, { marginLeft: 8 }]}
+                  style={[
+                    styles.iconButton, 
+                    { 
+                      marginLeft: 8,
+                      backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.05)",
+                      borderColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.1)"
+                    }
+                  ]}
                   onPress={() => onSetupPress(activeTab)}
                 >
                   <Feather
                     name="settings"
                     size={20}
-                    color={config.textColor || "#2D3748"}
+                    color={contrastColor}
                   />
                 </TouchableOpacity>
               )}
@@ -860,39 +1015,44 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 style={[
                   styles.brandName,
                   {
-                    color: config.textColor || "#2D3748",
+                    color: config.priceColor || contrastColor, // Use user selected color
                     fontSize: animatedFontSize,
                     textAlign: "center",
-                    textShadowColor: "rgba(0, 0, 0, 0.1)",
-                    textShadowOffset: { width: 1, height: 1 },
-                    textShadowRadius: 2,
+                    fontWeight: "900",
+                    letterSpacing: -0.5,
                   },
                 ]}
               >
-                {config.shopName}
+                {config.shopName.toUpperCase()}
               </Animated.Text>
             )}
 
-            <View style={[styles.tabContainer, previewMode && { width: '95%', marginTop: 8 }]}>
+            <View style={[
+              styles.tabContainer, 
+              previewMode && { width: '95%', marginTop: 8 },
+              { backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.05)" }
+            ]}>
               <TouchableOpacity
                 onPress={() => setActiveTab('rates')}
                 style={[
                   styles.tab,
                   activeTab === 'rates' && styles.activeTab,
+                  activeTab === 'rates' && { backgroundColor: config.priceColor || "#C2410C" },
                   previewMode && { paddingVertical: 6 }
                 ]}
               >
-                <Feather
-                  name="trending-up"
+                <MaterialCommunityIcons 
+                  name="trending-up" 
                   size={previewMode ? 14 : 18}
-                  color={activeTab === 'rates' ? (config.priceColor || "#5D4037") : "#8D6E63"}
+                  color={activeTab === 'rates' ? "#FFFFFF" : (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8")} 
                 />
                 <Text style={[
                   styles.tabText,
-                  activeTab === 'rates' && { color: config.priceColor || "#5D4037" },
+                  activeTab === 'rates' && { color: "#FFFFFF" },
+                  activeTab !== 'rates' && { color: (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8") },
                   previewMode && { fontSize: 12 }
                 ]}>
-                  Live Rates
+                  LIVE RATES
                 </Text>
               </TouchableOpacity>
 
@@ -901,20 +1061,22 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 style={[
                   styles.tab,
                   activeTab === 'designs' && styles.activeTab,
+                  activeTab === 'designs' && { backgroundColor: config.priceColor || "#C2410C" },
                   previewMode && { paddingVertical: 6 }
                 ]}
               >
-                <Feather
-                  name="shopping-bag"
+                <MaterialCommunityIcons 
+                  name="shopping-outline" 
                   size={previewMode ? 14 : 18}
-                  color={activeTab === 'designs' ? (config.priceColor || "#5D4037") : "#8D6E63"}
+                  color={activeTab === 'designs' ? "#FFFFFF" : (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8")} 
                 />
                 <Text style={[
                   styles.tabText,
-                  activeTab === 'designs' && { color: config.priceColor || "#5D4037" },
+                  activeTab === 'designs' && { color: "#FFFFFF" },
+                  activeTab !== 'designs' && { color: (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8") },
                   previewMode && { fontSize: 12 }
                 ]}>
-                  Designs
+                  DESIGNS
                 </Text>
               </TouchableOpacity>
             </View>
@@ -937,7 +1099,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 <View key={item.key} style={[styles.gridItem, { paddingHorizontal: 0, marginBottom: 0 }]}>
                   <RateCard
                     label={item.label}
-                    price={formatPrice(item.price, item.isGold)}
+                    price={formatPrice(item.price)}
                     priceColor={
                       config.priceColor || (item.isGold ? "#E6A119" : "#2D3748")
                     }
@@ -950,11 +1112,12 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                     makingChargesTitle={item.makingChargesTitle}
                     makingChargeValue={item.makingChargeValue}
                     makingChargeType={item.makingChargeType}
+                    contrastColor={contrastColor}
                   />
                 </View>
               ))}
 
-              {viewOnly && (designs.length > 0 || designsLoading) && (
+              {viewOnly && !previewMode && (designs.length > 0 || designsLoading) && (
                 <View style={styles.catalogTeaser}>
                   <View style={styles.separator} />
                   <Text style={styles.teaserTitle}>Explore Our Catalog</Text>
@@ -1031,29 +1194,32 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                       showsHorizontalScrollIndicator={false}
                       contentContainerStyle={styles.categoryScroll}
                     >
-                      {availableCategories.map(category => (
-                        <TouchableOpacity
-                          key={category}
-                          onPress={() => setSelectedCategory(category)}
-                          style={[
-                            styles.categoryChip,
-                            selectedCategory === category && { backgroundColor: (config.priceColor || "#5D4037") }
-                          ]}
-                        >
-                          <Text style={[
-                            styles.categoryText,
-                            selectedCategory === category && { color: "#FFF" }
-                          ]}>
-                            {category}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                      {availableCategories.map(category => {
+                        const isActive = selectedCategory === category;
+                        const chipBg = isActive ? (config.priceColor || "#5D4037") : "rgba(255, 255, 255, 0.7)";
+                        const textColor = isActive ? getContrastColor(chipBg) : "#5D4037";
+
+                        return (
+                          <TouchableOpacity
+                            key={category}
+                            onPress={() => setSelectedCategory(category)}
+                            style={[
+                              styles.categoryChip,
+                              isActive && { backgroundColor: chipBg, borderColor: chipBg }
+                            ]}
+                          >
+                            <Text style={[
+                              styles.categoryText,
+                              { color: textColor }
+                            ]}>
+                              {category}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
                     </ScrollView>
                   </View>
 
-                  <Text style={styles.resultsCount}>
-                    {filteredDesigns.length} designs found ({designs.length} total for {targetRetailerId})
-                  </Text>
 
                   <View style={styles.designsGrid}>
                     {filteredDesigns.map(design => (
@@ -1111,12 +1277,12 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 <MaterialCommunityIcons
                   name="bullhorn-outline"
                   size={16}
-                  color={config.textColor || "#2D3748"}
+                  color={contrastColor}
                 />
                 <Text
                   style={[
                     styles.announcementsTitle,
-                    { color: config.textColor || "#2D3748" },
+                    { color: contrastColor },
                   ]}
                 >
                   ANNOUNCEMENTS
@@ -1131,13 +1297,13 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                           <View
                             style={[
                               styles.notificationDot,
-                              { backgroundColor: config.priceColor || "#2D3748" },
+                              { backgroundColor: config.priceColor || "#C2410C" },
                             ]}
                           />
                           <Text
                             style={[
                               styles.notificationText,
-                              { color: config.textColor || "#2D3748" },
+                              { color: contrastColor },
                             ]}
                           >
                             {n.message}
@@ -1483,21 +1649,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.7)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
     alignItems: "center",
     justifyContent: "center",
   },
   gstToggleText: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#5D4037",
+    color: "#78350F",
     textTransform: "uppercase",
     paddingHorizontal: 6,
     letterSpacing: 0.5,
@@ -1532,19 +1698,23 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   brandName: {
-    fontWeight: "800",
+    fontWeight: "900",
     letterSpacing: -0.5,
   },
   iconButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.6)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
     elevation: 3,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.4)",
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -1554,11 +1724,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginHorizontal: -10,
+    justifyContent: "center",
   },
   gridItem: {
     width: "100%",
-    paddingHorizontal: 16,
+    maxWidth: 800,
+    paddingHorizontal: 0,
     paddingVertical: 0,
+    alignSelf: "center",
   },
   animatedCardContainer: {
     width: "100%",
@@ -1567,6 +1740,9 @@ const styles = StyleSheet.create({
   card: {
     position: "relative",
     overflow: "hidden",
+    backgroundColor: "rgba(255, 255, 255, 0.45)",
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.8)",
   },
   cardGlow: {
     position: "absolute",
@@ -1579,8 +1755,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 4,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1591,16 +1766,16 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "900",
     marginBottom: 6,
-    letterSpacing: 0.2,
+    letterSpacing: 0.5,
   },
 
   cardPrice: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "900",
-    letterSpacing: -0.5,
-    opacity: 0.95,
+    letterSpacing: -1,
+    opacity: 1,
   },
   notificationFooter: {
     marginTop: 10,
@@ -1723,13 +1898,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
-    alignSelf: "flex-end",
+    alignSelf: "flex-start",
   },
   mcBadgeText: {
     fontSize: 10,
     color: "#64748B",
     fontWeight: "600",
     textTransform: "uppercase",
+  },
+  catalogMcBadge: {
+    marginTop: 4,
+    backgroundColor: "rgba(180, 83, 9, 0.08)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(180, 83, 9, 0.15)",
+    alignSelf: "flex-start",
+  },
+  catalogMcText: {
+    fontSize: 9,
+    color: "#B45309",
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   modalOverlay: {
     flex: 1,
@@ -1838,15 +2030,20 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
-    borderRadius: 30,
-    padding: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    borderRadius: 32,
+    padding: 4,
     marginTop: 16,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 420,
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.5)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 4,
   },
   tab: {
     flex: 1,
@@ -1858,17 +2055,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   activeTab: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
   },
   tabText: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#8D6E63',
+    fontWeight: '800',
+    color: '#78350F',
   },
   designsContainer: {
     flex: 1,
@@ -1899,6 +2096,9 @@ const styles = StyleSheet.create({
   searchSection: {
     gap: 16,
     marginBottom: 16,
+    maxWidth: 900,
+    width: "100%",
+    alignSelf: "center",
   },
   searchBarWrapper: {
     flexDirection: 'row',
@@ -1950,17 +2150,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryChip: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   categoryText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '900',
     color: '#5D4037',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
   resultsCount: {
     fontSize: 14,
@@ -1972,6 +2179,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 16,
+    justifyContent: 'center',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+    marginTop: 8,
+    paddingTop: 8,
   },
   designCard: {
     width: Platform.OS === 'web' ? 'auto' : '47.5%',
@@ -2183,6 +2396,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#C2410C',
     fontWeight: '700',
+  },
+  dpDividerSmall: {
+    height: 1,
+    width: 60,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 20,
   },
   horizontalDivider: {
     height: 1,

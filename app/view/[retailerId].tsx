@@ -33,17 +33,14 @@ export default function SharedRateView() {
             try {
                 const rawParam = retailerId ? (Array.isArray(retailerId) ? retailerId.join('/') : retailerId as string) : "";
                 const actualRetailerId = rawParam.split(/[:/]/)[0];
-                console.log("[SharedRateView] Computed actualRetailerId:", actualRetailerId);
 
                 const docRef = doc(db, "users", actualRetailerId);
                 const snapshot = await getDoc(docRef);
                 if (snapshot.exists()) {
                     setConfig({ ...DEFAULT_CONFIG, ...(snapshot.data() as RateConfig) });
                 } else {
-                    console.warn("Retailer not found:", actualRetailerId);
                 }
             } catch (error) {
-                console.error("Error fetching retailer config:", error);
             } finally {
                 setLoading(false);
             }
@@ -142,15 +139,12 @@ ${currentUrl}`;
                 url: currentUrl,
             });
         } catch (error) {
-            console.error("Share failed");
-            console.error("[SharedRateView] Share failed:", error);
         }
     };
 
 
 
     if (loading || !config) {
-        console.log("[SharedRateView] Loading or config not available. Displaying activity indicator.");
         return (
             <>
                 <Stack.Screen options={{ headerShown: false }} />
@@ -161,7 +155,6 @@ ${currentUrl}`;
         );
     }
 
-    console.log("[SharedRateView] Rendering RateDisplayContent with config:", config);
     return (
         <>
             <Stack.Screen options={{ headerShown: false }} />

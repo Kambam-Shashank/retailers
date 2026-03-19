@@ -20,7 +20,7 @@ export const CATEGORIES = [
     "Dokiya",
     "Kamarbandh",
     "Shishful",
-    "Mang Tika",
+    "Maang Tika",
     "Rakhdi",
     "Jhele",
     "Hair Clips",
@@ -58,7 +58,6 @@ export function useFetch<T = any>(
             }
             setData(result);
         } catch (err: unknown) {
-            console.error("=== FETCH ERROR ===>", err);
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -134,7 +133,6 @@ export const useAaravRates = () => {
             }
             setParsedError(null);
         } catch (err) {
-            console.error("Failed to parse Aarav rates", err);
             setParsedError("Failed to parse rates");
         }
     }, [rawData]);
@@ -162,17 +160,13 @@ export const useDesignCatalog = (retailerId: string | undefined) => {
         let isMounted = true;
         const fetchDesigns = async () => {
             if (!retailerId) {
-                console.log("[useDesignCatalog] No retailerId provided, skipping fetch.");
                 return;
             }
             try {
                 setLoading(true);
-                console.log("[useDesignCatalog] Fetching designs for:", retailerId);
                 const data = await designService.getRetailerDesigns(retailerId);
-                console.log(`[useDesignCatalog] Successfully fetched ${data.length} designs.`);
                 if (isMounted) setDesigns(data);
             } catch (error) {
-                console.error("[useDesignCatalog] Error fetching designs:", error);
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -189,8 +183,7 @@ export const useDesignCatalog = (retailerId: string | undefined) => {
 
     const filteredDesigns = useMemo(() => {
         return designs.filter(design => {
-            // Temporarily ignore isActive filter to debug
-            // if (design.isActive === false) return false;
+            if (design.isActive === false) return false;
 
             const name = design.name || "";
             const purity = design.purity || "";

@@ -168,13 +168,10 @@ export const useRateCalculations = (
       "price_999" in wsData ||
       "spot" in wsData
     );
-    // Helper to calculate price with/without GST based on source
     const calculateFinalGSTPrice = (price: number, sourceIncludesGST: boolean | undefined) => {
       if (withGST) {
-        // Toggle ON: Should show WITH GST
         return sourceIncludesGST ? price : price + price * GST_RATE;
       } else {
-        // Toggle OFF: Should show WITHOUT GST
         return sourceIncludesGST ? price / (1 + GST_RATE) : price;
       }
     };
@@ -199,15 +196,13 @@ export const useRateCalculations = (
     let silver925MakingCharges = 0;
 
     if (config.makingChargesEnabled) {
-      // 24K
       if (config.makingCharges24kType === "percentage") {
         gold999MakingCharges = gold999WithGST * (config.makingCharges24kValue / 100);
       } else {
         gold999MakingCharges = config.makingCharges24kValue * 10;
       }
 
-      // 22K (916) - We use 22k settings for both 995 and 916 as per existing logic, 
-      // but let's see if we should use 22k for both.
+
       if (config.makingCharges22kType === "percentage") {
         gold995MakingCharges = gold995WithGST * (config.makingCharges22kValue / 100);
         gold916MakingCharges = gold916WithGST * (config.makingCharges22kValue / 100);
@@ -216,35 +211,30 @@ export const useRateCalculations = (
         gold916MakingCharges = config.makingCharges22kValue * 10;
       }
 
-      // 20K
       if (config.makingCharges20kType === "percentage") {
         gold20kMakingCharges = gold20kWithGST * (config.makingCharges20kValue / 100);
       } else {
         gold20kMakingCharges = config.makingCharges20kValue * 10;
       }
 
-      // 18K
       if (config.makingCharges18kType === "percentage") {
         gold18kMakingCharges = gold18kWithGST * (config.makingCharges18kValue / 100);
       } else {
         gold18kMakingCharges = config.makingCharges18kValue * 10;
       }
 
-      // 14K
       if (config.makingCharges14kType === "percentage") {
         gold14kMakingCharges = gold14kWithGST * (config.makingCharges14kValue / 100);
       } else {
         gold14kMakingCharges = config.makingCharges14kValue * 10;
       }
 
-      // Silver 999
       if (config.makingCharges999Type === "percentage") {
         silver999MakingCharges = silver999WithGST * (config.makingCharges999Value / 100);
       } else {
         silver999MakingCharges = config.makingCharges999Value * 10;
       }
 
-      // Silver 925
       if (config.makingCharges925Type === "percentage") {
         silver925MakingCharges = silver925WithGST * (config.makingCharges925Value / 100);
       } else {
@@ -347,8 +337,17 @@ export const useRateCalculations = (
 };
 
 export const getCalculatedEstimate = (design: any, calculatedRates: CalculatedRates | null) => {
-  const weightVal = parseFloat(design.netWeight || design.weight || design.grossWeight) || 0;
-  if (!design || weightVal <= 0 || !calculatedRates) return null;
+  if (!design || !calculatedRates) return null;
+
+
+  const rawWeight = (design.netWeight !== undefined && design.netWeight !== "") 
+    ? design.netWeight 
+    : (design.weight !== undefined && design.weight !== "")
+      ? design.weight
+      : design.grossWeight;
+      
+  const weightVal = parseFloat(rawWeight) || 0;
+  if (weightVal <= 0) return null;
 
   const purityToKey: Record<string, keyof CalculatedRates> = {
     "24K": "gold999",
@@ -363,23 +362,23 @@ export const getCalculatedEstimate = (design: any, calculatedRates: CalculatedRa
   const rateKey = purityToKey[design.purity];
   if (!rateKey || !calculatedRates[rateKey]) return null;
 
+
   const baseRate = calculatedRates[rateKey].priceWithGST || 0;
-  // All rates (Gold per 10g, Silver per 10g internally) need to be / 10 for per gram calculation
+  
   const ratePerGram = baseRate / 10;
 
-  const makingChargeVal = parseFloat(design.makingCharge || "0") || 0;
+  const designMakingChargeVal = parseFloat(design.makingCharge || "0") || 0;
   const stoneChargesVal = parseFloat(design.stoneCharges || "0") || 0;
 
-  const totalMetalPrice = ratePerGram * weightVal;
-  let estimatedTotal = totalMetalPrice;
+  let estimatedTotal = 0;
+  const metalValue = ratePerGram * weightVal;
 
   if (design.makingChargeType === "percentage") {
-    estimatedTotal = totalMetalPrice * (1 + makingChargeVal / 100);
+    estimatedTotal = metalValue + (metalValue * (designMakingChargeVal / 100));
   } else {
-    estimatedTotal = totalMetalPrice + (makingChargeVal * weightVal);
+    estimatedTotal = metalValue + (designMakingChargeVal * weightVal);
   }
 
-  // Add Stone Charges (₹)
   estimatedTotal += stoneChargesVal;
 
   return Math.round(estimatedTotal);
