@@ -168,6 +168,7 @@ export const PurityLabelsCard: React.FC<PurityLabelsProps> = ({
 // ====== MarginsCard ======
 interface MarginsProps {
   gold24kMargin: number; gold22kMargin: number; gold20kMargin: number; gold18kMargin: number; gold14kMargin: number; silver999Margin: number; silver925Margin: number;
+  showGold24k: boolean; showGold22k: boolean; showGold20k: boolean; showGold18k: boolean; showGold14k: boolean; showSilver999: boolean; showSilver925: boolean;
   onMarginUpdate: (key: string, value: number) => void;
   onMarginInputChange: (key: string, text: string) => void;
   purityOrder: string[];
@@ -177,6 +178,7 @@ interface MarginsProps {
 
 export const MarginsCard: React.FC<MarginsProps> = ({
   gold24kMargin, gold22kMargin, gold20kMargin, gold18kMargin, gold14kMargin, silver999Margin, silver925Margin,
+  showGold24k, showGold22k, showGold20k, showGold18k, showGold14k, showSilver999, showSilver925,
   onMarginUpdate, onMarginInputChange,
   purityOrder,
   isMobile, isSmallMobile
@@ -215,7 +217,18 @@ export const MarginsCard: React.FC<MarginsProps> = ({
     </View>
   );
 
-  const displayList = isExpanded ? purityOrder : purityOrder.slice(0, 4);
+  const visibilityMap: Record<string, boolean> = {
+    gold24k: showGold24k,
+    gold22k: showGold22k,
+    gold20k: showGold20k,
+    gold18k: showGold18k,
+    gold14k: showGold14k,
+    silver999: showSilver999,
+    silver925: showSilver925,
+  };
+
+  const enabledOrder = purityOrder.filter(key => visibilityMap[key]);
+  const displayList = isExpanded ? enabledOrder : enabledOrder.slice(0, 4);
 
   return (
     <View style={commonStyles.card}>

@@ -138,62 +138,66 @@ export default function RateSetupScreen(): ReactElement {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.headerWrapper}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerLeft}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <Text style={styles.backIcon}>←</Text>
-            </TouchableOpacity>
-            <View>
-              <Text style={[styles.headerTitle, isMobile && { fontSize: isSmallMobile ? 18 : 20 }]}>
-                Rate Setup
-              </Text>
-              <Text style={styles.headerSubtitle}>Configure your display</Text>
+      {activeTab !== "catalog" && (
+        <View style={styles.headerWrapper}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={styles.backButton}
+              >
+                <Text style={styles.backIcon}>←</Text>
+              </TouchableOpacity>
+              <View>
+                <Text style={[styles.headerTitle, isMobile && { fontSize: isSmallMobile ? 18 : 20 }]}>
+                  Retail Display Setup
+                </Text>
+                <Text style={styles.headerSubtitle}>Customize your rate display for customers</Text>
+              </View>
+            </View>
+
+            <View style={styles.headerRight}>
+              <TouchableOpacity
+                style={styles.previewButton}
+                onPress={() => router.push("/")}
+              >
+                <Text style={[styles.previewButtonText, isMobile && { fontSize: 13 }]}>
+                  Preview
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+              >
+                <MaterialCommunityIcons name="logout" size={20} color="#EF4444" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.saveButtonTop, !isDirty && styles.disabledButton]}
+                onPress={handleSave}
+                disabled={!isDirty}
+              >
+                <Text
+                  style={[
+                    styles.saveButtonTextTop,
+                    isMobile && { fontSize: 13 },
+                    !isDirty && styles.disabledButtonText,
+                  ]}
+                >
+                  Save
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={styles.previewButton}
-              onPress={() => router.push("/")}
-            >
-              <Text style={[styles.previewButtonText, isMobile && { fontSize: 13 }]}>
-                Preview
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
-              <MaterialCommunityIcons name="logout" size={20} color="#EF4444" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.saveButtonTop, !isDirty && styles.disabledButton]}
-              onPress={handleSave}
-              disabled={!isDirty}
-            >
-              <Text
-                style={[
-                  styles.saveButtonTextTop,
-                  isMobile && { fontSize: 13 },
-                  !isDirty && styles.disabledButtonText,
-                ]}
-              >
-                Save
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
-      </View>
+      )}
 
-      <View style={[styles.mainLayout, isDesktop && styles.mainLayoutDesktop]}>
-        <View style={[styles.leftColumn, isDesktop && styles.leftColumnDesktop]}>
-          <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} isMobile={isMobile} />
+      <View style={[styles.mainLayout, (isDesktop && activeTab !== "catalog") && styles.mainLayoutDesktop]}>
+        <View style={[styles.leftColumn, (isDesktop && activeTab !== "catalog") && styles.leftColumnDesktop, activeTab === "catalog" && { flex: 1 }]}>
+          {activeTab !== "catalog" && (
+            <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} isMobile={isMobile} />
+          )}
 
           <ScrollView
             style={styles.scroll}
@@ -302,6 +306,14 @@ export default function RateSetupScreen(): ReactElement {
                   silver999Margin={silver999Margin}
                   silver925Margin={silver925Margin}
 
+                  showGold24k={localConfig.showGold24k}
+                  showGold22k={localConfig.showGold22k}
+                  showGold20k={localConfig.showGold20k}
+                  showGold18k={localConfig.showGold18k}
+                  showGold14k={localConfig.showGold14k}
+                  showSilver999={localConfig.showSilver999}
+                  showSilver925={localConfig.showSilver925}
+
                   onMarginUpdate={(key, val) => updateMargin(key as any, val)}
                   onMarginInputChange={handleMarginInputChange}
                   purityOrder={localConfig.purityOrder || []}
@@ -333,45 +345,47 @@ export default function RateSetupScreen(): ReactElement {
             )}
 
             {activeTab === "catalog" && (
-              <CatalogSettings />
+              <CatalogSettings onBack={() => setActiveTab("profile")} />
             )}
 
-            <View style={styles.footerActions}>
-              <View style={{ flex: 1 }} />
-              <TouchableOpacity
-                style={[styles.saveButton, !isDirty && styles.disabledButton]}
-                onPress={handleSave}
-                disabled={!isDirty}
-              >
-                <Text
-                  style={[
-                    styles.saveButtonText,
-                    isMobile && { fontSize: isSmallMobile ? 13 : 14 },
-                    !isDirty && styles.disabledButtonText,
-                  ]}
+            {activeTab !== "catalog" && (
+              <View style={styles.footerActions}>
+                <View style={{ flex: 1 }} />
+                <TouchableOpacity
+                  style={[styles.saveButton, !isDirty && styles.disabledButton]}
+                  onPress={handleSave}
+                  disabled={!isDirty}
                 >
-                  Save Configuration
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={[
+                      styles.saveButtonText,
+                      isMobile && { fontSize: isSmallMobile ? 13 : 14 },
+                      !isDirty && styles.disabledButtonText,
+                    ]}
+                  >
+                    Save Configuration
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.resetButton}
-                onPress={() => setShowResetConfirm(true)}
-              >
-                <Text
-                  style={[
-                    styles.resetText,
-                    isMobile && { fontSize: isSmallMobile ? 12 : 13 },
-                  ]}
+                <TouchableOpacity
+                  style={styles.resetButton}
+                  onPress={() => setShowResetConfirm(true)}
                 >
-                  ⟲ Reset Defaults
-                </Text>
-              </TouchableOpacity>
-            </View>
+                  <Text
+                    style={[
+                      styles.resetText,
+                      isMobile && { fontSize: isSmallMobile ? 12 : 13 },
+                    ]}
+                  >
+                    ⟲ Reset Defaults
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </ScrollView>
         </View>
 
-        {isDesktop && (
+        {isDesktop && activeTab !== "catalog" && (
           <View style={styles.rightColumnDesktop}>
             <View style={styles.stickyPreview}>
               <LivePreview config={localConfig} />

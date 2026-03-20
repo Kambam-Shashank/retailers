@@ -130,36 +130,32 @@ export const useRateCalculations = (
       wsData?.price_916;
 
     const gold916Base = gold916FromWS || (gold999Base * 0.916);
-    const gold20kBase = gold999Base * (20 / 24);
-    const gold18kBase = gold999Base * (18 / 24);
-    const gold14kBase = gold999Base * (14 / 24);
+    const gold20kBase = gold916FromWS ? (gold916FromWS / 0.916) * 0.833 : gold999Base * 0.833;
+    const gold18kBase = gold916FromWS ? (gold916FromWS / 0.916) * 0.750 : gold999Base * 0.750;
+    const gold14kBase = gold916FromWS ? (gold916FromWS / 0.916) * 0.585 : gold999Base * 0.585;
 
 
     const silver999Base = externalSilverPrice || 0;
     const silver925Base = externalSilverPrice ? externalSilverPrice * 0.925 : 0;
 
-    const gold999MarginPerGram = config.gold24kMargin;
-    const gold995MarginPerGram = config.gold22kMargin;
-    const gold916MarginPerGram = config.gold22kMargin;
-    const gold20kMarginPerGram = config.gold20kMargin;
-    const gold18kMarginPerGram = config.gold18kMargin;
-    const gold14kMarginPerGram = config.gold14kMargin;
+    const gold999MarginScaled = config.gold24kMargin * 10;
+    const gold995MarginScaled = config.gold22kMargin * 10;
+    const gold916MarginScaled = config.gold22kMargin * 10;
+    const gold20kMarginScaled = config.gold20kMargin * 10;
+    const gold18kMarginScaled = config.gold18kMargin * 10;
+    const gold14kMarginScaled = config.gold14kMargin * 10;
+    const silver999MarginScaled = config.silver999Margin * 10;
+    const silver925MarginScaled = config.silver925Margin * 10;
 
-    // Rounding helper
-    const roundTo = (num: number, multiple: number) => {
-      if (multiple === 0) return num;
-      return Math.round(num / multiple) * multiple;
-    };
-
-    // Apply specific rounding: Gold -> 50, Silver -> 10
-    const gold999WithMargin = roundTo(gold999Base + gold999MarginPerGram, 50);
-    const gold995WithMargin = roundTo(gold995Base + gold995MarginPerGram, 50);
-    const gold916WithMargin = roundTo(gold916Base + gold916MarginPerGram, 50);
-    const gold20kWithMargin = roundTo(gold20kBase + gold20kMarginPerGram, 50);
-    const gold18kWithMargin = roundTo(gold18kBase + gold18kMarginPerGram, 50);
-    const gold14kWithMargin = roundTo(gold14kBase + gold14kMarginPerGram, 50);
-    const silver999WithMargin = roundTo(silver999Base + config.silver999Margin, 10);
-    const silver925WithMargin = roundTo(silver925Base + config.silver925Margin, 10);
+    // Apply exact calculation (No Rounding)
+    const gold999WithMargin = gold999Base + gold999MarginScaled;
+    const gold995WithMargin = gold995Base + gold995MarginScaled;
+    const gold916WithMargin = gold916Base + gold916MarginScaled;
+    const gold20kWithMargin = gold20kBase + gold20kMarginScaled;
+    const gold18kWithMargin = gold18kBase + gold18kMarginScaled;
+    const gold14kWithMargin = gold14kBase + gold14kMarginScaled;
+    const silver999WithMargin = silver999Base + silver999MarginScaled;
+    const silver925WithMargin = silver925Base + silver925MarginScaled;
 
 
     const isKaratpayData = !!wsData && (
@@ -381,5 +377,5 @@ export const getCalculatedEstimate = (design: any, calculatedRates: CalculatedRa
 
   estimatedTotal += stoneChargesVal;
 
-  return Math.round(estimatedTotal);
+  return estimatedTotal;
 };

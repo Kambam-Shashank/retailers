@@ -12,14 +12,14 @@ export const formatPricePerGram = (price: number) => {
     const perGram = price / 10;
     return `₹${perGram.toLocaleString("en-IN", {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     })}`;
 };
 
 export const formatPrice = (price: number) => {
     return `₹${price.toLocaleString("en-IN", {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     })}`;
 };
 

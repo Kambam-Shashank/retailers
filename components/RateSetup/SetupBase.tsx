@@ -18,10 +18,10 @@ interface RateSetupTabsProps {
 
 export const RateSetupTabs: React.FC<RateSetupTabsProps> = ({ activeTab, onTabChange, isMobile }) => {
     const tabs: { id: TabType; label: string; icon: any }[] = [
-        { id: "profile", label: "Branding", icon: "storefront" },
-        { id: "rates", label: "Rates", icon: "currency-inr" },
-        { id: "visual", label: "Visual", icon: "palette-outline" },
-        { id: "catalog", label: "Catalog", icon: "image-multiple-outline" },
+        { id: "profile", label: "Profile", icon: "storefront" },
+        { id: "rates", label: "Rates", icon: "star-shooting-outline" },
+        { id: "visual", label: "Theme", icon: "palette-outline" },
+        { id: "catalog", label: "Catalogue", icon: "upload-outline" },
     ];
 
     return (
@@ -73,23 +73,17 @@ export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
         const rates: any = {};
         const GST_RATE = 0.03;
 
-        const roundTo = (num: number, multiple: number) => {
-            if (multiple === 0) return num;
-            return Math.round(num / multiple) * multiple;
-        };
-
         const keys: (keyof typeof MOCK_BASE_RATES)[] = [
             "gold999", "gold916", "gold20k", "gold18k", "gold14k", "silver999", "silver925"
         ];
 
         keys.forEach(key => {
             const base = MOCK_BASE_RATES[key];
-            const isSilver = key.startsWith('silver');
 
             // Apply margin
             const marginKey = key === "gold916" ? "gold22kMargin" : (key + "Margin") as keyof RateConfig;
             const margin = (config as any)[marginKey] || 0;
-            const withMargin = roundTo(base + margin, isSilver ? 10 : 50);
+            const withMargin = base + margin;
 
             // Apply GST
             const withGSTPrice = withGST ? withMargin * (1 + GST_RATE) : withMargin;
@@ -178,10 +172,10 @@ const tabStyles = StyleSheet.create({
 });
 
 const previewStyles = StyleSheet.create({
-    container: { backgroundColor: "#F8FAF8", borderRadius: 20, borderWidth: 1, borderColor: "#E2E8E2", marginHorizontal: 16, marginTop: 10, marginBottom: 8, padding: 4, elevation: 3 },
-    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, paddingHorizontal: 6, marginTop: 4 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E', marginRight: 8 },
-    title: { fontSize: 14, fontWeight: '700', color: '#1A1A1A' },
-    content: { backgroundColor: "#FFFFFF", borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0', margin: 2 },
-    wrapper: { width: "100%", minHeight: 180, overflow: "hidden" },
+    container: { backgroundColor: "#FFF", borderRadius: 16, borderWidth: 1, borderColor: "#E2E8F0", marginHorizontal: 0, marginTop: 10, marginBottom: 8, padding: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 },
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, paddingHorizontal: 0 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E', marginRight: 10 },
+    title: { fontSize: 16, fontWeight: '700', color: '#1A1A1A' },
+    content: { backgroundColor: "#FFFFFF", borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0', padding: 0 },
+    wrapper: { width: "100%", minHeight: 400, overflow: "hidden" },
 });

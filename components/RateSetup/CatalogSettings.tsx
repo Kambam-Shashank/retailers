@@ -55,6 +55,449 @@ const PRICE_DISPLAY_OPTIONS = ["Price on Request", "Show Estimate"];
 const STOCK_STATUS_OPTIONS = ["In Stock", "Out of Stock", "Available on Order"];
 const TAG_OPTIONS = ["New Designs", "Limited Edition", "Best Sellers", "Wedding", "Festive", "Daily Wear", "Traditional", "Modern"];
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingHorizontal: 20,
+        backgroundColor: "#FBFBFB",
+        maxWidth: 1000,
+        width: "100%",
+        alignSelf: "center",
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    loadingText: {
+        marginTop: 12,
+        color: "#64748B",
+        fontSize: 14,
+    },
+    backNav: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        marginTop: 16,
+        marginBottom: 20,
+    },
+    backNavText: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#64748B",
+    },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        marginBottom: 24,
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: "900",
+        color: "#1E293B",
+        letterSpacing: -0.5,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: "#94A3B8",
+        marginTop: 4,
+    },
+    addButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#F1B52B",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 14,
+        gap: 8,
+        shadowColor: "#F1B52B",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 6,
+    },
+    addButtonText: {
+        fontWeight: "800",
+        color: "#000",
+        fontSize: 15,
+    },
+    filterSection: {
+        marginBottom: 28,
+    },
+    filterScroll: {
+        gap: 6,
+        paddingRight: 20,
+    },
+    categoryChip: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 16,
+        backgroundColor: "#FFF",
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+    },
+    categoryChipActive: {
+        backgroundColor: "#F1B52B",
+        borderColor: "#F1B52B",
+    },
+    categoryChipText: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: "#64748B",
+    },
+    categoryChipTextActive: {
+        color: "#FFF",
+    },
+    listContainer: {
+        gap: 16,
+        paddingBottom: 60,
+    },
+    listItem: {
+        flexDirection: "row",
+        backgroundColor: "#FFF",
+        borderRadius: 20,
+        padding: 14,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#F1F5F9",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+        elevation: 1,
+    },
+    itemImageContainer: {
+        width: 86,
+        height: 86,
+        borderRadius: 14,
+        overflow: "hidden",
+        backgroundColor: "#F8FAFC",
+    },
+    itemImage: {
+        width: "100%",
+        height: "100%",
+    },
+    imagePlaceholder: {
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    itemInfo: {
+        flex: 1,
+        marginLeft: 20,
+    },
+    itemName: {
+        fontSize: 19,
+        fontWeight: "800",
+        color: "#1E293B",
+        marginBottom: 6,
+    },
+    itemMeta: {
+        fontSize: 14,
+        color: "#94A3B8",
+        fontWeight: "500",
+    },
+    itemActions: {
+        flexDirection: "row",
+        gap: 8,
+        alignItems: "center",
+        paddingLeft: 10,
+    },
+    actionBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#F8FAFC",
+    },
+    emptyContainer: {
+        paddingVertical: 100,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    emptyText: {
+        fontSize: 20,
+        fontWeight: "800",
+        color: "#475569",
+        marginTop: 20,
+    },
+    emptySubText: {
+        fontSize: 15,
+        color: "#94A3B8",
+        textAlign: "center",
+        marginTop: 10,
+        paddingHorizontal: 40,
+        lineHeight: 22,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(15, 23, 42, 0.6)",
+        justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
+        alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
+    },
+    modalContainer: {
+        backgroundColor: "#FFF",
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        borderBottomLeftRadius: Platform.OS === 'web' ? 32 : 0,
+        borderBottomRightRadius: Platform.OS === 'web' ? 32 : 0,
+        height: Platform.OS === 'web' ? '90%' : "94%",
+        width: Platform.OS === 'web' ? '95%' : '100%',
+        maxWidth: Platform.OS === 'web' ? 700 : undefined,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 24,
+        borderBottomWidth: 1,
+        borderBottomColor: "#F1F5F9",
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: "900",
+        color: "#1E293B",
+    },
+    modalSubTitle: {
+        fontSize: 13,
+        color: '#94A3B8',
+        marginTop: 4,
+        fontWeight: "500",
+    },
+    modalForm: {
+        padding: 24,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#64748B",
+        marginBottom: 10,
+        marginTop: 20,
+    },
+    input: {
+        backgroundColor: "#F8FAFC",
+        borderRadius: 14,
+        padding: 16,
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        color: "#1E293B",
+    },
+    tripleRow: {
+        flexDirection: "row",
+        gap: 12,
+    },
+    doubleRow: {
+        flexDirection: "row",
+        gap: 16,
+    },
+    dropdownButton: {
+        backgroundColor: "#F8FAFC",
+        borderRadius: 14,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    dropdownButtonText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#1E293B',
+        flex: 1,
+    },
+    dropdownList: {
+        backgroundColor: '#FFF',
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        marginTop: 6,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+        elevation: 8,
+    },
+    dropdownItem: {
+        padding: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F8FAFC',
+    },
+    dropdownItemActive: {
+        backgroundColor: '#FFFBEB',
+    },
+    dropdownItemText: {
+        fontSize: 15,
+        color: '#475569',
+    },
+    dropdownItemTextActive: {
+        color: '#F1B52B',
+        fontWeight: '800',
+    },
+    tagsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 10,
+    },
+    tagChip: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+        backgroundColor: "#FFF",
+    },
+    tagChipActive: {
+        backgroundColor: "#FFFBEB",
+        borderColor: "#F1B52B",
+    },
+    tagChipText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#64748B",
+    },
+    tagChipTextActive: {
+        color: "#854D0E",
+        fontWeight: "800",
+    },
+    toggleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: "#F8FAFC",
+        borderRadius: 14,
+        padding: 18,
+        marginTop: 24,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+    },
+    toggleLabel: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#1E293B",
+    },
+    uploadArea: {
+        borderWidth: 2,
+        borderStyle: "dashed",
+        borderColor: "#CBD5E1",
+        borderRadius: 20,
+        padding: 40,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#F8FAFC",
+        flexDirection: "column",
+        gap: 14,
+        marginTop: 10,
+    },
+    uploadAreaText: {
+        fontSize: 15,
+        color: "#94A3B8",
+        fontWeight: "600",
+    },
+    previewWrapper: {
+        position: "relative",
+        width: "100%",
+        maxWidth: 400,
+        aspectRatio: 1,
+        borderRadius: 20,
+        overflow: "hidden",
+        alignSelf: 'center',
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+    },
+    imagePreview: {
+        width: "100%",
+        height: "100%",
+    },
+    imageActionRow: {
+        position: "absolute",
+        bottom: 16,
+        left: 16,
+        right: 16,
+        flexDirection: "row",
+        justifyContent: "center",
+        gap: 10,
+    },
+    imageActionButton: {
+        backgroundColor: "rgba(15, 23, 42, 0.85)",
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 12,
+        gap: 6,
+    },
+    imageActionText: {
+        color: "#FFF",
+        fontWeight: "800",
+        fontSize: 12,
+    },
+    modalFooter: {
+        flexDirection: "row",
+        padding: 24,
+        gap: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#F1F5F9",
+    },
+    cancelButton: {
+        flex: 1,
+        paddingVertical: 16,
+        borderRadius: 14,
+        alignItems: "center",
+        backgroundColor: "#F8FAFC",
+        borderWidth: 1,
+        borderColor: "#E2E8F0",
+    },
+    cancelButtonText: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#64748B",
+    },
+    submitButton: {
+        flex: 2,
+        backgroundColor: "#F1B52B",
+        paddingVertical: 16,
+        borderRadius: 14,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#F1B52B",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 4,
+    },
+    submitButtonText: {
+        fontSize: 17,
+        fontWeight: "900",
+        color: "#000",
+    },
+    disabledButton: {
+        opacity: 0.5,
+    },
+    headerSaveButton: {
+        backgroundColor: '#1E293B',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 10,
+    },
+    headerSaveText: {
+        color: '#F1B52B',
+        fontWeight: '900',
+        fontSize: 15,
+    },
+    headerCloseButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#F1F5F9',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
+
 // Simple Dropdown Picker Component
 const DropdownPicker = ({ label, value, options, onSelect }: {
     label: string;
@@ -92,7 +535,7 @@ const DropdownPicker = ({ label, value, options, onSelect }: {
     );
 };
 
-export const CatalogSettings = () => {
+export const CatalogSettings = ({ onBack }: { onBack?: () => void }) => {
     const { user } = useAuth();
     const [designs, setDesigns] = useState<Design[]>([]);
     const [loading, setLoading] = useState(true);
@@ -100,6 +543,7 @@ export const CatalogSettings = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isImageEditorVisible, setIsImageEditorVisible] = useState(false);
     const [editingDesignId, setEditingDesignId] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<"Manual" | "Name" | "Newest">("Manual");
 
     // Form State
@@ -407,28 +851,45 @@ export const CatalogSettings = () => {
 
     return (
         <View style={styles.container}>
+            {/* Nav Row */}
+            <TouchableOpacity style={styles.backNav} onPress={onBack}>
+                <Feather name="arrow-left" size={20} color="#64748B" />
+                <Text style={styles.backNavText}>Back to Setup</Text>
+            </TouchableOpacity>
+
             <View style={styles.header}>
-                <View style={{ flex: 1 }}>
-                    <Text style={styles.title}>Your Catalog</Text>
-                    <View style={styles.sortSelector}>
-                        <TouchableOpacity onPress={() => setSortBy("Manual")} style={[styles.sortChip, sortBy === "Manual" && styles.sortChipActive]}>
-                            <Text style={[styles.sortChipText, sortBy === "Manual" && styles.sortChipTextActive]}>Manual</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setSortBy("Name")} style={[styles.sortChip, sortBy === "Name" && styles.sortChipActive]}>
-                            <Text style={[styles.sortChipText, sortBy === "Name" && styles.sortChipTextActive]}>Name</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setSortBy("Newest")} style={[styles.sortChip, sortBy === "Newest" && styles.sortChipActive]}>
-                            <Text style={[styles.sortChipText, sortBy === "Newest" && styles.sortChipTextActive]}>Newest</Text>
-                        </TouchableOpacity>
-                    </View>
+                <View>
+                    <Text style={styles.title}>Product Catalogue</Text>
+                    <Text style={styles.subtitle}>{designs.length} products</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.addButton}
                     onPress={() => setIsModalVisible(true)}
                 >
                     <MaterialCommunityIcons name="plus" size={24} color="#000" />
-                    <Text style={styles.addButtonText}>Add New</Text>
+                    <Text style={styles.addButtonText}>Add Product</Text>
                 </TouchableOpacity>
+            </View>
+
+            {/* Category Filters */}
+            <View style={styles.filterSection}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+                    <TouchableOpacity 
+                        style={[styles.categoryChip, !selectedCategory && styles.categoryChipActive]} 
+                        onPress={() => setSelectedCategory(null)}
+                    >
+                        <Text style={[styles.categoryChipText, !selectedCategory && styles.categoryChipTextActive]}>All</Text>
+                    </TouchableOpacity>
+                    {CATEGORIES.map(cat => (
+                        <TouchableOpacity 
+                            key={cat} 
+                            style={[styles.categoryChip, selectedCategory === cat && styles.categoryChipActive]} 
+                            onPress={() => setSelectedCategory(cat)}
+                        >
+                            <Text style={[styles.categoryChipText, selectedCategory === cat && styles.categoryChipTextActive]}>{cat}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
 
             {designs.length === 0 ? (
@@ -438,64 +899,60 @@ export const CatalogSettings = () => {
                     <Text style={styles.emptySubText}>Start building your digital catalog by adding your first design.</Text>
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={styles.grid}>
-                    {sortedDesigns.map((design) => (
-                        <View key={design.id} style={[styles.card, design.isActive === false && { opacity: 0.8 }]}>
-                            <View style={styles.cardImageWrapper}>
+                <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
+                    {sortedDesigns
+                        .filter(d => !selectedCategory || d.category === selectedCategory)
+                        .map((design) => (
+                        <View key={design.id} style={[styles.listItem, design.isActive === false && { opacity: 0.7 }]}>
+                            <View style={styles.itemImageContainer}>
                                 {design.imageUrl ? (
-                                    <Image source={{ uri: design.imageUrl }} style={styles.cardImage} />
+                                    <Image source={{ uri: design.imageUrl }} style={styles.itemImage} />
                                 ) : (
-                                    <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
-                                        <MaterialCommunityIcons name="image-outline" size={32} color="#CBD5E1" />
-                                    </View>
-                                )}
-                                {design.isActive === false && (
-                                    <View style={styles.inactiveBadge}>
-                                        <Text style={styles.inactiveBadgeText}>Hidden From Display</Text>
+                                    <View style={[styles.itemImage, styles.imagePlaceholder]}>
+                                        <MaterialCommunityIcons name="image-outline" size={24} color="#CBD5E1" />
                                     </View>
                                 )}
                             </View>
-                            <View style={styles.cardDetails}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                                    <Text style={[styles.cardName, { flex: 1 }]} numberOfLines={1}>{design.name}</Text>
-                                    <Text style={styles.sortBadge}>#{design.sortOrder || 1}</Text>
-                                </View>
-                                <Text style={styles.cardMeta}>
-                                    {design.sku ? `${design.sku} • ` : ""}{design.category} • {design.purity}
+                            
+                            <View style={styles.itemInfo}>
+                                <Text style={styles.itemName} numberOfLines={1}>{design.name}</Text>
+                                <Text style={styles.itemMeta}>
+                                    {design.category} • Gold {design.purity}
                                 </Text>
-                                <Text style={styles.cardMeta} numberOfLines={1}>
-                                    {design.grossWeight ? `G: ${design.grossWeight}g ` : ""}
-                                    {design.netWeight ? `N: ${design.netWeight}g` : ""}
-                                    {!design.grossWeight && !design.netWeight && design.weight ? `Wt: ${design.weight}g` : ""}
-                                </Text>
+                            </View>
+
+                            <View style={styles.itemActions}>
                                 <TouchableOpacity
-                                    style={[styles.stockPill, design.stockStatus === "Out of Stock" ? styles.stockPillOOS : styles.stockPillIn]}
+                                    style={styles.actionBtn}
                                     onPress={() => handleToggleStock(design)}
                                 >
-                                    <View style={[styles.stockDot, design.stockStatus === "Out of Stock" ? { backgroundColor: '#EF4444' } : { backgroundColor: '#10B981' }]} />
-                                    <Text style={[styles.stockPillText, design.stockStatus === "Out of Stock" ? { color: '#EF4444' } : { color: '#10B981' }]}>
-                                        {design.stockStatus || "In Stock"}
-                                    </Text>
+                                    <Feather
+                                        name="box"
+                                        size={18}
+                                        color={design.stockStatus === "In Stock" ? "#10B981" : "#EF4444"}
+                                    />
                                 </TouchableOpacity>
-                            </View>
-                            <View style={styles.actionButtonsRow}>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, design.isActive === false && { backgroundColor: 'rgba(239,68,68,0.1)' }]}
+                                <TouchableOpacity 
+                                    style={styles.actionBtn}
                                     onPress={() => handleToggleActive(design)}
                                 >
-                                    <Feather name={design.isActive === false ? "eye-off" : "eye"} size={16} color={design.isActive === false ? "#EF4444" : "#10B981"} />
+                                    <MaterialCommunityIcons 
+                                        name={design.isActive === false ? "eye-off-outline" : "eye-outline"} 
+                                        size={20} 
+                                        color="#333" 
+                                    />
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.actionButton}
+                                <TouchableOpacity 
+                                    style={styles.actionBtn}
                                     onPress={() => handleEdit(design)}
                                 >
-                                    <Feather name="edit-2" size={16} color="#3B82F6" />
+                                    <MaterialCommunityIcons name="pencil-outline" size={20} color="#333" />
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.actionButton, { backgroundColor: 'rgba(239,68,68,0.1)' }]}
+                                <TouchableOpacity 
+                                    style={styles.actionBtn}
                                     onPress={() => handleDelete(design)}
                                 >
-                                    <Feather name="trash-2" size={16} color="#EF4444" />
+                                    <MaterialCommunityIcons name="trash-can-outline" size={20} color="#EF4444" />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -776,471 +1233,4 @@ export const CatalogSettings = () => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 16,
-    },
-    loadingContainer: {
-        padding: 60,
-        alignItems: "center",
-    },
-    loadingText: {
-        marginTop: 12,
-        color: "#64748B",
-        fontSize: 16,
-    },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 20,
-        marginTop: 10,
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: "800",
-        color: "#1E293B",
-    },
-    addButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#D4AF37",
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 12,
-        gap: 6,
-    },
-    addButtonText: {
-        fontWeight: "700",
-        color: "#000",
-    },
-    emptyContainer: {
-        padding: 60,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    emptyText: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#475569",
-        marginTop: 16,
-    },
-    emptySubText: {
-        fontSize: 14,
-        color: "#94A3B8",
-        textAlign: "center",
-        marginTop: 8,
-    },
-    grid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 16,
-        paddingBottom: 40,
-    },
-    card: {
-        width: Platform.OS === 'web' ? 'auto' : COLUMN_WIDTH,
-        minWidth: 160,
-        maxWidth: Platform.OS === 'web' ? 240 : undefined,
-        flex: Platform.OS === 'web' ? 1 : undefined,
-        backgroundColor: "#FFF",
-        borderRadius: 16,
-        overflow: "hidden",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
-        position: "relative",
-    },
-    cardImage: {
-        width: "100%",
-        aspectRatio: 1,
-        backgroundColor: "#F1F5F9",
-    },
-    cardImageWrapper: {
-        width: "100%",
-        aspectRatio: 1,
-        backgroundColor: "#F1F5F9",
-        position: 'relative',
-    },
-    cardImagePlaceholder: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    inactiveBadge: {
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 6,
-    },
-    inactiveBadgeText: {
-        color: '#FFF',
-        fontSize: 10,
-        fontWeight: '700',
-    },
-    cardDetails: {
-        padding: 10,
-    },
-    cardName: {
-        fontSize: 14,
-        fontWeight: "800",
-        color: "#1E293B",
-    },
-    cardMeta: {
-        fontSize: 12,
-        color: "#64748B",
-        marginTop: 2,
-    },
-    cardStock: {
-        fontSize: 11,
-        color: "#EF4444",
-        fontWeight: "600",
-        marginTop: 2,
-    },
-    actionButtonsRow: {
-        position: "absolute",
-        top: 8,
-        right: 8,
-        flexDirection: "row",
-        gap: 6,
-    },
-    actionButton: {
-        backgroundColor: "rgba(255,255,255,0.95)",
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        justifyContent: "center",
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
-        alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
-    },
-    modalContainer: {
-        backgroundColor: "#FFF",
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
-        borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
-        height: Platform.OS === 'web' ? '90%' : "92%",
-        width: Platform.OS === 'web' ? '95%' : '100%',
-        maxWidth: Platform.OS === 'web' ? 600 : undefined,
-    },
-    modalHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: "#F1F5F9",
-    },
-    modalTitle: {
-        fontSize: 22,
-        fontWeight: "800",
-        color: "#5D4037",
-    },
-    modalForm: {
-        padding: 20,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: "700",
-        color: "#475569",
-        marginBottom: 8,
-        marginTop: 18,
-    },
-    input: {
-        backgroundColor: "#F8FAFC",
-        borderRadius: 12,
-        padding: 14,
-        fontSize: 15,
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-        color: "#1E293B",
-    },
-    tripleRow: {
-        flexDirection: "row",
-        gap: 10,
-    },
-    doubleRow: {
-        flexDirection: "row",
-        gap: 12,
-    },
-    // Dropdown styles
-    dropdownButton: {
-        backgroundColor: "#F8FAFC",
-        borderRadius: 12,
-        padding: 14,
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    dropdownButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#1E293B',
-        flex: 1,
-    },
-    dropdownList: {
-        backgroundColor: '#FFF',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
-        marginTop: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 5,
-    },
-    dropdownItem: {
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F1F5F9',
-    },
-    dropdownItemActive: {
-        backgroundColor: '#FFFBEB',
-    },
-    dropdownItemText: {
-        fontSize: 14,
-        color: '#475569',
-    },
-    dropdownItemTextActive: {
-        color: '#D4AF37',
-        fontWeight: '700',
-    },
-    // Tags
-    tagsContainer: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 8,
-    },
-    tagChip: {
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-        backgroundColor: "#FFF",
-    },
-    tagChipActive: {
-        backgroundColor: "#FFFBEB",
-        borderColor: "#D4AF37",
-    },
-    tagChipText: {
-        fontSize: 13,
-        fontWeight: "600",
-        color: "#64748B",
-    },
-    tagChipTextActive: {
-        color: "#5D4037",
-        fontWeight: "700",
-    },
-    // Toggle row
-    toggleRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: "#F8FAFC",
-        borderRadius: 12,
-        padding: 16,
-        marginTop: 20,
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-    },
-    toggleLabel: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#1E293B",
-    },
-    // Upload area
-    uploadArea: {
-        borderWidth: 2,
-        borderStyle: "dashed",
-        borderColor: "#CBD5E1",
-        borderRadius: 16,
-        padding: 30,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#FAFAFA",
-        flexDirection: "row",
-        gap: 10,
-        width: "100%",
-        maxWidth: 400,
-        alignSelf: 'center',
-    },
-    uploadAreaText: {
-        fontSize: 14,
-        color: "#94A3B8",
-        fontWeight: "500",
-    },
-    previewWrapper: {
-        position: "relative",
-        width: "100%",
-        maxWidth: 400,
-        aspectRatio: 1,
-        borderRadius: 16,
-        overflow: "hidden",
-        alignSelf: 'center',
-    },
-    imagePreview: {
-        width: "100%",
-        height: "100%",
-    },
-    imageActionRow: {
-        position: "absolute",
-        bottom: 12,
-        left: 12,
-        right: 12,
-        flexDirection: "row",
-        justifyContent: "center",
-        gap: 8,
-    },
-    imageActionButton: {
-        backgroundColor: "rgba(0,0,0,0.7)",
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 8,
-        gap: 4,
-    },
-    imageActionText: {
-        color: "#FFF",
-        fontWeight: "700",
-        fontSize: 11,
-    },
-    modalFooter: {
-        flexDirection: "row",
-        padding: 20,
-        gap: 12,
-        borderTopWidth: 1,
-        borderTopColor: "#F1F5F9",
-    },
-    cancelButton: {
-        flex: 1,
-        paddingVertical: 14,
-        borderRadius: 12,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#64748B",
-    },
-    submitButton: {
-        flex: 2,
-        backgroundColor: "#D4AF37",
-        paddingVertical: 14,
-        borderRadius: 12,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    submitButtonText: {
-        fontSize: 16,
-        fontWeight: "800",
-        color: "#000",
-    },
-    disabledButton: {
-        opacity: 0.6,
-    },
-    modalSubTitle: {
-        fontSize: 12,
-        color: '#64748B',
-        marginTop: 2,
-    },
-    headerSaveButton: {
-        backgroundColor: '#000',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 8,
-    },
-    headerSaveText: {
-        color: '#D4AF37',
-        fontWeight: '800',
-        fontSize: 14,
-    },
-    headerCloseButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: '#F1F5F9',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    sortSelector: {
-        flexDirection: "row",
-        gap: 8,
-        marginTop: 6,
-    },
-    sortChip: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-        backgroundColor: "#F1F5F9",
-        borderWidth: 1,
-        borderColor: "#E2E8F0",
-    },
-    sortChipActive: {
-        backgroundColor: "#FFFBEB",
-        borderColor: "#D4AF37",
-    },
-    sortChipText: {
-        fontSize: 11,
-        fontWeight: "600",
-        color: "#64748B",
-    },
-    sortChipTextActive: {
-        color: "#5D4037",
-    },
-    sortBadge: {
-        fontSize: 10,
-        fontWeight: "700",
-        color: "#D4AF37",
-        backgroundColor: "#FFFBEB",
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
-        marginLeft: 4,
-    },
-    stockPill: {
-        flexDirection: "row",
-        alignItems: "center",
-        alignSelf: "flex-start",
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
-        marginTop: 6,
-    },
-    stockPillIn: {
-        backgroundColor: "rgba(16, 185, 129, 0.1)",
-    },
-    stockPillOOS: {
-        backgroundColor: "rgba(239, 68, 68, 0.1)",
-    },
-    stockDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        marginRight: 6,
-    },
-    stockPillText: {
-        fontSize: 11,
-        fontWeight: "700",
-    },
-});
+

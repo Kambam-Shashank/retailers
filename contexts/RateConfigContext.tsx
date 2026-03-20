@@ -157,7 +157,7 @@ export const DEFAULT_CONFIG: RateConfig = {
   frozenAt: null,
   backgroundColor: "#FFFDF5",
   textColor: "#5D4037",
-  priceColor: "#000000",
+  priceColor: "#78350F",
   theme: "modern",
   layoutDensity: "normal",
   fontTheme: "minimal",
