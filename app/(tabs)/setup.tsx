@@ -146,48 +146,48 @@ export default function RateSetupScreen(): ReactElement {
                 onPress={() => router.back()}
                 style={styles.backButton}
               >
-                <Text style={{ fontSize: 16, color: '#334155', fontWeight: '500' }}>← Back</Text>
+                <Text style={{ fontSize: isMobile ? 14 : 16, color: '#334155', fontWeight: '500' }}>← Back</Text>
               </TouchableOpacity>
 
               <View style={{ marginTop: 8 }}>
                 <Text style={[styles.headerTitle, {
-                  fontSize: isSmallMobile ? 18 : isMobile ? 22 : isDesktop ? 30 : 26,
+                  fontSize: isSmallMobile ? 16 : isMobile ? 19 : isDesktop ? 30 : 26,
                 }]}>
-                  Retail Display Setup
+                  Retail Display
                 </Text>
                 <Text style={[styles.headerSubtitle, {
-                  fontSize: isSmallMobile ? 11 : isMobile ? 12 : 13,
+                  fontSize: isSmallMobile ? 10 : isMobile ? 11 : 13,
                   marginTop: 2,
-                }]}>Customize your rate display for customers</Text>
+                }]}>Customize your rate display</Text>
               </View>
             </View>
 
-            <View style={styles.headerRight}>
+            <View style={[styles.headerRight, isMobile && { gap: 12 }]}>
               <TouchableOpacity
-                style={styles.previewButton}
+                style={[styles.previewButton, isMobile && { paddingVertical: 10, paddingHorizontal: 10 }]}
                 onPress={() => router.push("/")}
               >
-                <Text style={[styles.previewButtonText, isMobile && { fontSize: 13 }]}>
+                <Text style={[styles.previewButtonText, isMobile && { fontSize: 12 }]}>
                   Preview
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.logoutButton}
+                style={[styles.logoutButton, isMobile && { padding: 10 }]}
                 onPress={handleLogout}
               >
-                <MaterialCommunityIcons name="logout" size={20} color="#EF4444" />
+                <MaterialCommunityIcons name="logout" size={isMobile ? 18 : 20} color="#EF4444" />
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.saveButtonTop, !isDirty && styles.disabledButton]}
+                style={[styles.saveButtonTop, !isDirty && styles.disabledButton, isMobile && { paddingVertical: 10, paddingHorizontal: 10 }]}
                 onPress={handleSave}
                 disabled={!isDirty}
               >
                 <Text
                   style={[
                     styles.saveButtonTextTop,
-                    isMobile && { fontSize: 13 },
+                    isMobile && { fontSize: 12 },
                     !isDirty && styles.disabledButtonText,
                   ]}
                 >
@@ -219,53 +219,53 @@ export default function RateSetupScreen(): ReactElement {
               </>
             )}
 
-              {activeTab === "profile" && (
-                <>
-                  <ShopBrandingCard
-                    shopName={shopName}
-                    address={localConfig.shopAddress}
-                    phone={localConfig.shopPhone}
-                    logoBase64={logoBase64}
-                    logoSize={localConfig.logoSize}
-                    logoPlacement={localConfig.logoPlacement}
-                    logoOpacity={localConfig.logoOpacity}
-                    onShopNameChange={handleShopNameChange}
-                    onShopNameBlur={onShopNameBlur}
-                    onPickLogo={handlePickLogo}
-                    onDeleteLogo={handleDeleteLogo}
-                    onUpdate={(u: Partial<RateConfig>) => {
-                      if ("showBrandingPreview" in u) {
-                        setShowBrandingPreview(true);
-                      } else {
-                        handleLocalUpdate(u);
-                      }
-                    }}
-                    isMobile={isMobile}
-                    isSmallMobile={isSmallMobile}
-                  />
+            {activeTab === "profile" && (
+              <>
+                <ShopBrandingCard
+                  shopName={shopName}
+                  address={localConfig.shopAddress}
+                  phone={localConfig.shopPhone}
+                  logoBase64={logoBase64}
+                  logoSize={localConfig.logoSize}
+                  logoPlacement={localConfig.logoPlacement}
+                  logoOpacity={localConfig.logoOpacity}
+                  onShopNameChange={handleShopNameChange}
+                  onShopNameBlur={onShopNameBlur}
+                  onPickLogo={handlePickLogo}
+                  onDeleteLogo={handleDeleteLogo}
+                  onUpdate={(u: Partial<RateConfig>) => {
+                    if ("showBrandingPreview" in u) {
+                      setShowBrandingPreview(true);
+                    } else {
+                      handleLocalUpdate(u);
+                    }
+                  }}
+                  isMobile={isMobile}
+                  isSmallMobile={isSmallMobile}
+                />
 
-                  <NotificationsCard
-                    config={localConfig}
-                    onUpdate={handleLocalUpdate}
-                    isMobile={isMobile}
-                    isSmallMobile={isSmallMobile}
-                  />
+                <NotificationsCard
+                  config={localConfig}
+                  onUpdate={handleLocalUpdate}
+                  isMobile={isMobile}
+                  isSmallMobile={isSmallMobile}
+                />
 
-                  <RateStatusCard
-                    config={localConfig}
-                    onUpdate={handleLocalUpdate}
-                    isMobile={isMobile}
-                    isSmallMobile={isSmallMobile}
-                  />
+                <RateStatusCard
+                  config={localConfig}
+                  onUpdate={handleLocalUpdate}
+                  isMobile={isMobile}
+                  isSmallMobile={isSmallMobile}
+                />
 
-                  <GSTSettingsCard
-                    config={localConfig}
-                    onUpdate={handleLocalUpdate}
-                    isMobile={isMobile}
-                    isSmallMobile={isSmallMobile}
-                  />
-                </>
-              )}
+                <GSTSettingsCard
+                  config={localConfig}
+                  onUpdate={handleLocalUpdate}
+                  isMobile={isMobile}
+                  isSmallMobile={isSmallMobile}
+                />
+              </>
+            )}
 
             {activeTab === "rates" && (
               <>
@@ -453,6 +453,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    marginTop: 20,
   },
   backButton: {
     padding: 8,

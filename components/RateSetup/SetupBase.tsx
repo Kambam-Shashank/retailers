@@ -37,13 +37,13 @@ export const RateSetupTabs: React.FC<RateSetupTabsProps> = ({ activeTab, onTabCh
                         >
                             <MaterialCommunityIcons
                                 name={tab.icon}
-                                size={isMobile ? 18 : 20}
+                                size={isMobile ? 16 : 20}
                                 color={isActive ? "#1E293B" : "#94A3B8"}
                             />
                             <Text style={[
                                 tabStyles.label,
                                 isActive && tabStyles.activeLabel,
-                                isMobile && { fontSize: 11 }
+                                isMobile && { fontSize: 10 }
                             ]}>
                                 {tab.label}
                             </Text>
@@ -145,36 +145,38 @@ export const LivePreview: React.FC<{ config: RateConfig; isMobile?: boolean }> =
 const tabStyles = StyleSheet.create({
     outerContainer: {
         width: '100%',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        alignItems: 'flex-start',
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        alignItems: 'center',
     },
     container: {
         flexDirection: 'row',
         backgroundColor: '#F1F5F9',
-        borderRadius: 12,
-        padding: 6,
-        width: '100%',
-        gap: 8,
+        borderRadius: 10,
+        padding: 4,
+        gap: 6,
+        alignSelf: 'center',
+        minWidth: 320,
     },
     tab: {
         flex: 1,
         flexDirection: 'row',
         alignItems: "center",
         justifyContent: "center",
-        paddingVertical: 10,
-        borderRadius: 10,
-        gap: 6,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        gap: 4,
     },
     activeTab: {
         backgroundColor: "#FFFFFF",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowRadius: 2,
+        elevation: 2,
     },
-    label: { fontSize: 13, fontWeight: "600", color: "#64748B" },
+    label: { fontSize: 12, fontWeight: "600", color: "#64748B" },
     activeLabel: { color: "#1E293B" },
 });
 

@@ -99,8 +99,12 @@ const RateCard = React.memo(({
   isDesktop: boolean;
   contrastColor: string;
 }) => {
-  const labelFontSize = isSmallMobile ? 12 : isMobile ? 14 : isDesktop ? 18 : 20;
-  const priceFontSize = isSmallMobile ? 24 : isMobile ? 26 : isDesktop ? 34 : 32;
+  const labelFontSize = previewMode 
+    ? (isSmallMobile ? 10 : isMobile ? 11 : 14) 
+    : (isSmallMobile ? 12 : isMobile ? 14 : isDesktop ? 18 : 20);
+  const priceFontSize = previewMode 
+    ? (isSmallMobile ? 20 : isMobile ? 22 : 28) 
+    : (isSmallMobile ? 24 : isMobile ? 26 : isDesktop ? 34 : 32);
 
   const isMinimal = config.fontTheme === "minimal";
   const labelWeight = "800";
@@ -762,16 +766,20 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const animatedLogoSize = headerAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      previewMode ? Math.max(config.logoSize || 80, 80) * 0.9 : Math.max(config.logoSize || 80, 100),
-      previewMode ? Math.max(config.logoSize || 80, 80) * 0.45 : Math.max(config.logoSize || 80, 100) * 0.6
+      previewMode 
+        ? (isMobile ? Math.max(config.logoSize || 80, 80) * 0.5 : Math.max(config.logoSize || 80, 80) * 0.9) 
+        : (isDesktop ? Math.max(config.logoSize || 64, 80) : Math.max(config.logoSize || 64, 80)),
+      previewMode 
+        ? (isMobile ? Math.max(config.logoSize || 80, 80) * 0.3 : Math.max(config.logoSize || 80, 80) * 0.45) 
+        : (isDesktop ? Math.max(config.logoSize || 64, 80) * 0.6 : Math.max(config.logoSize || 64, 80) * 0.6)
     ]
   });
 
   const animatedFontSize = headerAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      previewMode ? 28 : (isDesktop ? 48 : 42),
-      previewMode ? 16 : (isDesktop ? 28 : 24)
+      previewMode ? (isMobile ? 16 : 28) : (isDesktop ? 34 : 30),
+      previewMode ? (isMobile ? 11 : 16) : (isDesktop ? 20 : 18)
     ]
   });
 
