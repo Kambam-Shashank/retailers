@@ -217,6 +217,16 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
   const loadConfig = async () => {
     if (!user) return;
 
+    // Step 1: Load from AsyncStorage immediately (fast, offline-safe)
+    try {
+      const cachedJson = await AsyncStorage.getItem(`${STORAGE_KEY}_${user.uid}`);
+      if (cachedJson) {
+        const cached = JSON.parse(cachedJson) as RateConfig;
+        setConfig({ ...getDefaultConfig(), ...cached });
+      }
+    } catch (_) {}
+
+    // Step 2: Try Firestore (may be blocked by ad blockers)
     try {
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
@@ -237,7 +247,10 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
           }
         });
 
-        setConfig({ ...getDefaultConfig(), ...migratedData });
+        const merged = { ...getDefaultConfig(), ...migratedData };
+        setConfig(merged);
+        // Keep local cache fresh
+        await AsyncStorage.setItem(`${STORAGE_KEY}_${user.uid}`, JSON.stringify(merged));
       } else {
         // Migration logic: Check local storage
         const localJson = await AsyncStorage.getItem(STORAGE_KEY);
@@ -248,9 +261,7 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
           // Save to Firestore
           await setDoc(userDocRef, migratedConfig);
           setConfig(migratedConfig);
-
-          // Optional: Clear local storage after successful migration
-          // await AsyncStorage.removeItem(STORAGE_KEY);
+          await AsyncStorage.setItem(`${STORAGE_KEY}_${user.uid}`, JSON.stringify(migratedConfig));
         } else {
           // Initialize new user with default config in Firestore
           await setDoc(userDocRef, getDefaultConfig());
@@ -258,6 +269,7 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
         }
       }
     } catch (error) {
+      // Firestore blocked (e.g. by ad blocker) — we already loaded from cache above
     }
   };
 
@@ -267,10 +279,13 @@ export const RateConfigProvider: React.FC<RateConfigProviderProps> = ({
     try {
       const newConfig = { ...config, ...updates };
       setConfig(newConfig);
+      // Always cache locally so logo and settings survive ad-blocker/offline
+      await AsyncStorage.setItem(`${STORAGE_KEY}_${user.uid}`, JSON.stringify(newConfig));
 
       const userDocRef = doc(db, "users", user.uid);
       await setDoc(userDocRef, newConfig, { merge: true });
     } catch (error) {
+      // Firestore might be blocked — local cache was already updated above
     }
   };
 

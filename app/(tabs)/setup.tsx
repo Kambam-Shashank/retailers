@@ -141,18 +141,24 @@ export default function RateSetupScreen(): ReactElement {
       {activeTab !== "catalog" && (
         <View style={styles.headerWrapper}>
           <View style={styles.headerContent}>
-            <View style={styles.headerLeft}>
+            <View style={{ marginBottom: 16 }}>
               <TouchableOpacity
                 onPress={() => router.back()}
                 style={styles.backButton}
               >
-                <Text style={styles.backIcon}>←</Text>
+                <Text style={{ fontSize: 16, color: '#334155', fontWeight: '500' }}>← Back</Text>
               </TouchableOpacity>
-              <View>
-                <Text style={[styles.headerTitle, isMobile && { fontSize: isSmallMobile ? 18 : 20 }]}>
+
+              <View style={{ marginTop: 8 }}>
+                <Text style={[styles.headerTitle, {
+                  fontSize: isSmallMobile ? 18 : isMobile ? 22 : isDesktop ? 30 : 26,
+                }]}>
                   Retail Display Setup
                 </Text>
-                <Text style={styles.headerSubtitle}>Customize your rate display for customers</Text>
+                <Text style={[styles.headerSubtitle, {
+                  fontSize: isSmallMobile ? 11 : isMobile ? 12 : 13,
+                  marginTop: 2,
+                }]}>Customize your rate display for customers</Text>
               </View>
             </View>
 
@@ -195,7 +201,7 @@ export default function RateSetupScreen(): ReactElement {
 
       <View style={[styles.mainLayout, (isDesktop && activeTab !== "catalog") && styles.mainLayoutDesktop]}>
         <View style={[styles.leftColumn, (isDesktop && activeTab !== "catalog") && styles.leftColumnDesktop, activeTab === "catalog" && { flex: 1 }]}>
-          {activeTab !== "catalog" && (
+          {isDesktop && activeTab !== "catalog" && (
             <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} isMobile={isMobile} />
           )}
 
@@ -206,59 +212,63 @@ export default function RateSetupScreen(): ReactElement {
               { paddingBottom: 100 },
             ]}
           >
-            {activeTab === "profile" && (
+            {activeTab !== "catalog" && !isDesktop && (
               <>
-                {!isDesktop && <LivePreview config={localConfig} />}
-
-                <ShopBrandingCard
-                  shopName={shopName}
-                  address={localConfig.shopAddress}
-                  phone={localConfig.shopPhone}
-                  logoBase64={logoBase64}
-                  logoSize={localConfig.logoSize}
-                  logoPlacement={localConfig.logoPlacement}
-                  logoOpacity={localConfig.logoOpacity}
-                  onShopNameChange={handleShopNameChange}
-                  onShopNameBlur={onShopNameBlur}
-                  onPickLogo={handlePickLogo}
-                  onDeleteLogo={handleDeleteLogo}
-                  onUpdate={(u: Partial<RateConfig>) => {
-                    if ("showBrandingPreview" in u) {
-                      setShowBrandingPreview(true);
-                    } else {
-                      handleLocalUpdate(u);
-                    }
-                  }}
-                  isMobile={isMobile}
-                  isSmallMobile={isSmallMobile}
-                />
-
-                <NotificationsCard
-                  config={localConfig}
-                  onUpdate={handleLocalUpdate}
-                  isMobile={isMobile}
-                  isSmallMobile={isSmallMobile}
-                />
-
-                <RateStatusCard
-                  config={localConfig}
-                  onUpdate={handleLocalUpdate}
-                  isMobile={isMobile}
-                  isSmallMobile={isSmallMobile}
-                />
-
-                <GSTSettingsCard
-                  config={localConfig}
-                  onUpdate={handleLocalUpdate}
-                  isMobile={isMobile}
-                  isSmallMobile={isSmallMobile}
-                />
+                <LivePreview config={localConfig} isMobile={isMobile} />
+                <RateSetupTabs activeTab={activeTab} onTabChange={setActiveTab} isMobile={isMobile} />
               </>
             )}
 
+              {activeTab === "profile" && (
+                <>
+                  <ShopBrandingCard
+                    shopName={shopName}
+                    address={localConfig.shopAddress}
+                    phone={localConfig.shopPhone}
+                    logoBase64={logoBase64}
+                    logoSize={localConfig.logoSize}
+                    logoPlacement={localConfig.logoPlacement}
+                    logoOpacity={localConfig.logoOpacity}
+                    onShopNameChange={handleShopNameChange}
+                    onShopNameBlur={onShopNameBlur}
+                    onPickLogo={handlePickLogo}
+                    onDeleteLogo={handleDeleteLogo}
+                    onUpdate={(u: Partial<RateConfig>) => {
+                      if ("showBrandingPreview" in u) {
+                        setShowBrandingPreview(true);
+                      } else {
+                        handleLocalUpdate(u);
+                      }
+                    }}
+                    isMobile={isMobile}
+                    isSmallMobile={isSmallMobile}
+                  />
+
+                  <NotificationsCard
+                    config={localConfig}
+                    onUpdate={handleLocalUpdate}
+                    isMobile={isMobile}
+                    isSmallMobile={isSmallMobile}
+                  />
+
+                  <RateStatusCard
+                    config={localConfig}
+                    onUpdate={handleLocalUpdate}
+                    isMobile={isMobile}
+                    isSmallMobile={isSmallMobile}
+                  />
+
+                  <GSTSettingsCard
+                    config={localConfig}
+                    onUpdate={handleLocalUpdate}
+                    isMobile={isMobile}
+                    isSmallMobile={isSmallMobile}
+                  />
+                </>
+              )}
+
             {activeTab === "rates" && (
               <>
-                {!isDesktop && <LivePreview config={localConfig} />}
 
                 <PurityLabelsCard
                   gold24kLabel={gold24kLabel}
@@ -332,7 +342,6 @@ export default function RateSetupScreen(): ReactElement {
 
             {activeTab === "visual" && (
               <>
-                {!isDesktop && <LivePreview config={localConfig} />}
 
                 <ColorCustomizationCard
                   backgroundColor={localConfig.backgroundColor}
@@ -509,10 +518,11 @@ const styles = StyleSheet.create({
   },
   mainLayoutDesktop: {
     flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 24,
+    paddingHorizontal: 8,
+    gap: 16,
     alignSelf: "center",
     width: "100%",
+    maxWidth: 1400,
   },
   leftColumn: {
     flex: 1,
@@ -530,7 +540,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { position: 'sticky', top: 20 } : {}),
   },
   footerActions: {
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     marginTop: 24,
     marginBottom: 16,
     flexDirection: "column",
@@ -583,7 +593,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#EEEEEE",
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     marginTop: 20,
     padding: 24,
     shadowColor: "#000",

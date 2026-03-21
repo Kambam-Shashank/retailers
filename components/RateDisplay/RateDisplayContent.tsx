@@ -82,6 +82,7 @@ const RateCard = React.memo(({
   makingChargeValue,
   makingChargeType,
   contrastColor,
+  isDesktop,
 }: {
   label: string;
   price: string | number;
@@ -95,198 +96,166 @@ const RateCard = React.memo(({
   makingChargesTitle?: string;
   makingChargeValue?: number;
   makingChargeType?: "percentage" | "perGram";
+  isDesktop: boolean;
   contrastColor: string;
 }) => {
-  const gradientColors: [string, string] = isGold
-    ? ["#FFD700", "#F59E0B"]
-    : ["#E2E8F0", "#94A3B8"];
-
-  const labelFontSize = isSmallMobile ? 14 : isMobile ? 15 : 17;
-  const priceFontSize = isSmallMobile ? 28 : isMobile ? 32 : 36;
+  const labelFontSize = isSmallMobile ? 12 : isMobile ? 14 : isDesktop ? 18 : 20;
+  const priceFontSize = isSmallMobile ? 24 : isMobile ? 26 : isDesktop ? 34 : 32;
 
   const isMinimal = config.fontTheme === "minimal";
-  const labelWeight = isMinimal ? "600" : "700";
-  const priceWeight = isMinimal ? "400" : "700";
-
-  // Derive the effective card background:
-  // - If user has set a CUSTOM cardBackgroundColor (not the default white), use it directly.
-  // - Otherwise auto-compute a slightly lighter (or elevated) version of the page backgroundColor.
-  const effectiveCardBg = useMemo(() => {
-    const hasCustomCardBg =
-      config.cardBackgroundColor &&
-      config.cardBackgroundColor !== 'transparent' &&
-      config.cardBackgroundColor.toUpperCase() !== DEFAULT_CARD_BG.toUpperCase();
-
-    if (hasCustomCardBg) {
-      if (config.cardBackgroundColor.startsWith('#')) {
-        return `${config.cardBackgroundColor}F2`;
-      }
-      return config.cardBackgroundColor;
-    }
-
-    // Auto-derive from the page background:
-    // Dark page → cards get a lighter elevated surface (~12% lighter)
-    // Light page → cards get a very slightly off-white, clean surface
-    const pageBg = config.backgroundColor || '#FFFDF5';
-    if (pageBg.startsWith('#')) {
-      if (contrastColor === '#FFFFFF') {
-        // Dark page background: subtle lift
-        return `${lightenHex(pageBg, 0.12)}F8`;
-      } else {
-        // Light page background: clean, crisp look
-        return '#FFFFFFFB';
-      }
-    }
-    return contrastColor === '#FFFFFF' ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.98)';
-  }, [config.cardBackgroundColor, config.backgroundColor, contrastColor]);
-
-  // Contrast color for text on top of the card
-  const cardContrastColor = useMemo(() => {
-    if (effectiveCardBg.startsWith('#')) {
-      return getContrastColor(effectiveCardBg.substring(0, 7));
-    }
-    return contrastColor;
-  }, [effectiveCardBg, contrastColor]);
+  const labelWeight = "800";
+  const priceWeight = "900";
 
   return (
-    <View style={[styles.animatedCardContainer, { marginBottom: previewMode ? 8 : 14 }]}>
+    <View style={[styles.animatedCardContainer, { marginBottom: previewMode ? 10 : 16 }]}>
       <Shadow
         distance={previewMode ? 6 : 12}
-        startColor={contrastColor === "#FFFFFF" ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.05)"}
-        offset={[0, previewMode ? 3 : 6]}
-        style={{
-          width: "100%",
-          borderRadius: 14,
-        }}
+        startColor="rgba(0, 0, 0, 0.04)"
+        offset={[0, previewMode ? 2 : 4]}
+        style={{ width: "100%", borderRadius: 18 }}
         containerStyle={{ width: "100%" }}
       >
-            <View
-              style={[
-                styles.card,
-                {
-                  borderRadius: 14,
-                  backgroundColor: effectiveCardBg,
-                  overflow: "hidden",
-                  flexDirection: "row",
-                  alignItems: 'center',
-                  paddingHorizontal: 20,
-                  paddingVertical: 12,
-                  borderWidth: 1,
-                  borderColor: contrastColor === "#FFFFFF" ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.03)',
-                },
-              ]}
-            >
-          <LinearGradient
-            colors={isGold ? ["rgba(255, 215, 0, 0.15)", "rgba(255, 215, 0, 0.05)"] : ["rgba(255, 255, 255, 0.2)", "rgba(255, 255, 255, 0.05)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
+        <View
+          style={[
+            styles.card,
+            {
+              borderRadius: 18,
+              backgroundColor: "#FFFFFF",
+              overflow: "hidden",
+              flexDirection: previewMode ? "column" : "row",
+              alignItems: previewMode ? 'flex-start' : 'center',
+              paddingHorizontal: 16,
+              paddingVertical: previewMode ? 8 : 18,
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.02)',
+              minHeight: previewMode ? 80 : 0,
+              justifyContent: previewMode ? 'space-between' : 'flex-start',
+            },
+          ]}
+        >
+          {!previewMode && (
+            <LinearGradient
+              colors={isGold ? ["#F59E0B", "#B45309"] : ["#94A3B8", "#475569"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={{
+                width: 8,
+                height: 52,
+                borderRadius: 4,
+                marginRight: 16
+              }}
+            />
+          )}
 
-          <LinearGradient
-            colors={isGold ? ["#F59E0B", "#B45309"] : ["#94A3B8", "#475569"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ 
-              width: 6, 
-              height: '100%', 
-              maxHeight: 48,
-              borderRadius: 3,
-              marginRight: 16
-            }}
-          />
-
-          <View style={[styles.cardContent, previewMode && { paddingVertical: 8 }]}>
-            <View style={{ gap: 4, flex: 1 }}>
-              <Text
-                style={[
-                  styles.cardLabel,
-                  {
-                    color: isGold 
-                      ? (cardContrastColor === "#FFFFFF" ? "#FFD700" : "#78350F")
-                      : (cardContrastColor === "#FFFFFF" ? "#E2E8F0" : "#78350F"),
-                    fontSize: labelFontSize,
-                    marginBottom: 0,
-                    fontWeight: "900",
-                    letterSpacing: 0.5,
-                    textTransform: 'uppercase',
-                    textShadowColor: cardContrastColor === "#FFFFFF" ? 'rgba(0, 0, 0, 0.2)' : 'transparent',
-                    textShadowOffset: { width: 0, height: 1 },
-                    textShadowRadius: 1,
-                  },
-                ]}
-              >
-                {label}
-              </Text>
+          <View style={[styles.cardContent, previewMode && { flexDirection: 'column', alignItems: 'flex-start', width: '100%', gap: 4 }]}>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: previewMode ? '100%' : 'auto' }}>
+                <Text
+                  style={[
+                    styles.cardLabel,
+                    {
+                      color: previewMode ? (isGold ? "#92400E" : "#475569") : "#78350F",
+                      fontSize: labelFontSize,
+                      fontWeight: previewMode ? "700" : labelWeight,
+                      letterSpacing: previewMode ? 0.1 : 0.2,
+                      textTransform: previewMode ? 'none' : 'uppercase',
+                    },
+                  ]}
+                >
+                  {label}
+                </Text>
+                
+                {/* Removed up arrow symbol per user request */}
+              </View>
               
-              {config.makingChargesEnabled && makingChargeValue && makingChargeValue > 0 ? (
-                <View style={[styles.mcBadge, { 
-                  backgroundColor: isGold ? 'rgba(217, 119, 6, 0.08)' : 'rgba(71, 85, 105, 0.06)', 
-                  borderColor: isGold ? 'rgba(217, 119, 6, 0.15)' : 'rgba(71, 85, 105, 0.15)', 
-                  borderWidth: 1, 
+              {!previewMode && config.makingChargesEnabled && makingChargeValue && makingChargeValue > 0 ? (
+                <View style={{
+                  backgroundColor: isGold ? 'rgba(217, 119, 6, 0.05)' : 'rgba(71, 85, 105, 0.04)',
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  borderRadius: 4,
                   alignSelf: 'flex-start',
-                  marginTop: 2,
-                  marginBottom: 6
-                }]}>
-                  <Text style={[styles.mcBadgeText, { color: isGold ? '#B45309' : '#475569', fontSize: 10, fontWeight: '700' }]}>
+                  marginTop: 4
+                }}>
+                  <Text style={{ color: isGold ? '#B45309' : '#475569', fontSize: 10, fontWeight: '700' }}>
                     {makingChargeType === "percentage"
-                      ? `${makingChargesTitle || 'MAKING'}: ${makingChargeValue}%`
-                      : `${makingChargesTitle || 'MAKING'}: ₹${makingChargeValue}/G`}
+                      ? `${makingChargesTitle || 'MC'}: ${makingChargeValue}%`
+                      : `${makingChargesTitle || 'MC'}: ₹${makingChargeValue}/G`}
                   </Text>
                 </View>
               ) : null}
             </View>
 
-            <View style={[styles.priceContainer, { flexDirection: 'row', alignItems: 'baseline' }]}>
-              <Text style={{ 
-                fontSize: priceFontSize * 0.65, 
-                fontWeight: '800', 
-                color: isGold ? '#D97706' : (cardContrastColor === "#FFFFFF" ? 'rgba(255,255,255,0.7)' : '#64748B'),
+            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+              <Text style={{
+                fontSize: priceFontSize * (previewMode ? 0.7 : 0.8),
+                fontWeight: previewMode ? "900" : priceWeight,
+                color: isGold ? "#D97706" : "#64748B",
                 marginRight: 2
               }}>₹</Text>
               <Text
                 style={[
                   styles.cardPrice,
                   {
-                    color: isGold 
-                      ? (cardContrastColor === "#FFFFFF" ? "#FFB300" : "#D97706")
-                      : (cardContrastColor === "#FFFFFF" ? "#FFFFFF" : "#64748B"), 
+                    color: isGold ? "#D97706" : "#64748B",
                     fontSize: priceFontSize,
-                    fontWeight: "900",
+                    fontWeight: previewMode ? "900" : priceWeight,
+                    letterSpacing: previewMode ? -0.5 : 0,
                   },
                 ]}
               >
-                {typeof price === 'number' 
+                {typeof price === 'number'
                   ? price.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: (config.priceDecimalPlaces !== undefined ? config.priceDecimalPlaces : 2) })
                   : parseFloat(String(price).replace(/[^0-9.]/g, '')).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: (config.priceDecimalPlaces !== undefined ? config.priceDecimalPlaces : 2) })
                 }
               </Text>
-              <Text style={{ 
-                fontSize: priceFontSize * 0.35, 
-                color: isGold ? (cardContrastColor === "#FFFFFF" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.4)") : (cardContrastColor === "#FFFFFF" ? "rgba(255,255,255,0.7)" : "#94A3B8"), 
-                fontWeight: '700',
-                marginLeft: 4
-              }}>
-                /{isGold ? '10g' : 'g'}
-              </Text>
+              
+              {!previewMode && (
+                <Text style={{
+                  fontSize: 12,
+                  color: "#94A3B8",
+                  fontWeight: '700',
+                  marginLeft: 4,
+                  opacity: 0.8
+                }}>
+                  /{isGold ? '10g' : 'g'}
+                </Text>
+              )}
             </View>
+
+            {previewMode && (
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', marginTop: 8 }}>
+                <Text style={{ fontSize: 11, color: "#94A3B8", fontWeight: '600' }}>
+                  /{isGold ? '10g' : 'g'}
+                </Text>
+                
+                {config.makingChargesEnabled && makingChargeValue && makingChargeValue > 0 ? (
+                  <View style={{ backgroundColor: isGold ? 'rgba(217, 119, 6, 0.05)' : 'rgba(71, 85, 105, 0.04)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+                    <Text style={{ color: isGold ? '#B45309' : '#475569', fontSize: 9, fontWeight: '700' }}>
+                      {makingChargeType === "percentage" ? `${makingChargeValue}% MC` : `₹${makingChargeValue}/G MC`}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            )}
           </View>
         </View>
       </Shadow>
     </View>
   );
 });
+;
 
 
 
 
 
 // Design Card Component for Catalog
-const DesignCard = React.memo(({ design, config, calculatedRates, onPress }: { design: Design, config: RateConfig, calculatedRates: any, onPress: (design: Design) => void }) => {
+const DesignCard = React.memo(({ design, config, calculatedRates, onPress, isDesktop }: { design: Design, config: RateConfig, calculatedRates: any, onPress: (design: Design) => void, isDesktop?: boolean }) => {
   const estimate = getCalculatedEstimate(design, calculatedRates);
 
   return (
-    <TouchableOpacity style={styles.designCard} onPress={() => onPress(design)}>
+    <TouchableOpacity style={[styles.designCard, isDesktop && { width: 260 }]} onPress={() => onPress(design)}>
       <View style={styles.designImageWrapper}>
         {design.imageUrl ? (
           <Image
@@ -300,7 +269,7 @@ const DesignCard = React.memo(({ design, config, calculatedRates, onPress }: { d
             <View style={styles.designImageDecoration} />
           </View>
         )}
-        
+
         {/* Badges Container */}
         <View style={styles.badgeContainer}>
           {design.isNew && (
@@ -316,16 +285,16 @@ const DesignCard = React.memo(({ design, config, calculatedRates, onPress }: { d
         </View>
       </View>
       <View style={styles.designDetails}>
-        <Text style={styles.designName} numberOfLines={1}>{design.name.toUpperCase()}</Text>
-        <Text style={styles.designMeta} numberOfLines={1}>
+        <Text style={[styles.designName, isDesktop && { fontSize: 18 }]} numberOfLines={1}>{design.name.toUpperCase()}</Text>
+        <Text style={[styles.designMeta, isDesktop && { fontSize: 14 }]} numberOfLines={1}>
           {design.type.toUpperCase()} • {design.purity.toUpperCase()}
           {design.netWeight ? ` • ${design.netWeight}g` : design.weight ? ` • ${design.weight}g` : ""}
         </Text>
-        
+
         <View style={styles.cardPriceRow}>
           {design.priceDisplay === "Show Estimate" && estimate ? (
             <View style={{ flex: 1 }}>
-              <Text style={styles.designPrice}>₹{estimate.toLocaleString('en-IN')}</Text>
+              <Text style={[styles.designPrice, isDesktop && { fontSize: 18 }]}>₹{estimate.toLocaleString('en-IN')}</Text>
               {design.makingCharge && (
                 <View style={styles.catalogMcBadge}>
                   <Text style={styles.catalogMcText}>
@@ -335,7 +304,7 @@ const DesignCard = React.memo(({ design, config, calculatedRates, onPress }: { d
               )}
             </View>
           ) : (
-            <Text style={styles.priceOnRequest}>PRICE ON REQUEST</Text>
+            <Text style={[styles.priceOnRequest, isDesktop && { fontSize: 14 }]}>PRICE ON REQUEST</Text>
           )}
         </View>
       </View>
@@ -468,10 +437,10 @@ View it here: ${designShareUrl}`;
 
   // Clamped lens top-left corner (so lens never goes out of bounds)
   const lensLeft = Math.max(0, Math.min(1 - LENS_F, zoomPos.x - LENS_F / 2));
-  const lensTop  = Math.max(0, Math.min(1 - LENS_F, zoomPos.y - LENS_F / 2));
+  const lensTop = Math.max(0, Math.min(1 - LENS_F, zoomPos.y - LENS_F / 2));
   // The center of the lens in 0-1 space
   const focusX = lensLeft + LENS_F / 2;
-  const focusY = lensTop  + LENS_F / 2;
+  const focusY = lensTop + LENS_F / 2;
 
   // CSS transition helper (web only)
   const wT = (d = '0.25s') =>
@@ -539,8 +508,8 @@ View it here: ${designShareUrl}`;
                     style={{
                       position: 'absolute',
                       left: `${lensLeft * 100}%`,
-                      top:  `${lensTop  * 100}%`,
-                      width:  `${LENS_F * 100}%`,
+                      top: `${lensTop * 100}%`,
+                      width: `${LENS_F * 100}%`,
                       height: `${LENS_F * 100}%`,
                       borderWidth: 2,
                       borderColor: 'rgba(255,165,0,0.9)',
@@ -608,9 +577,9 @@ View it here: ${designShareUrl}`;
                       <Text style={styles.dpPrice}>{estimate.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</Text>
                     </View>
                     <Text style={styles.dpPriceSub}>Inclusive of all taxes · Calculation based on current live market price</Text>
-                    
+
                     <View style={styles.dpDividerSmall} />
-                    
+
                     <View style={styles.dpSpecsTable}>
                       {design.sku ? (
                         <View style={styles.dpSpecRow}>
@@ -662,9 +631,9 @@ View it here: ${designShareUrl}`;
                   </View>
                 ) : null}
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   activeOpacity={0.8}
-                  style={styles.dpWhatsApp} 
+                  style={styles.dpWhatsApp}
                   onPress={handleWhatsAppEnquiry}
                 >
                   <MaterialCommunityIcons name="whatsapp" size={24} color="#FFF" />
@@ -705,7 +674,7 @@ View it here: ${designShareUrl}`;
                       height: `${ZOOM_FACTOR * 100}%`,
                       // shift so that focus point is centred in the panel
                       left: `${(0.5 - focusX * ZOOM_FACTOR) * 100}%`,
-                      top:  `${(0.5 - focusY * ZOOM_FACTOR) * 100}%`,
+                      top: `${(0.5 - focusY * ZOOM_FACTOR) * 100}%`,
                     } as any}
                     resizeMode="cover"
                   />
@@ -746,7 +715,6 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const isSmallMobile = width < 360;
   const isDesktop = width >= 1024;
 
-  // Ensure targetRetailerId is a trimmed string to avoid mismatch during fetch
   const targetRetailerId = String(retailerId || "").trim();
 
   const {
@@ -757,8 +725,17 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
     searchQuery,
     setSearchQuery,
     selectedCategory,
-    setSelectedCategory
+    setSelectedCategory,
+    selectedTag,
+    setSelectedTag,
+    availableTags
   } = useDesignCatalog(targetRetailerId);
+
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const toggleFilters = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsFilterExpanded(!isFilterExpanded);
+  };
 
   useEffect(() => {
   }, [targetRetailerId, designs.length, designsLoading]);
@@ -769,49 +746,38 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
 
   const [activeTab, setActiveTabRaw] = useState<'rates' | 'designs'>(initialTab || 'rates');
   const setActiveTab = (tab: 'rates' | 'designs') => {
-    if (Platform.OS !== 'web') {
-      const customAnim = {
-        duration: 250,
-        create: {
-          type: LayoutAnimation.Types.easeInEaseOut,
-          property: LayoutAnimation.Properties.opacity,
-        },
-        update: {
-          type: LayoutAnimation.Types.easeInEaseOut,
-        },
-        delete: {
-          type: LayoutAnimation.Types.easeInEaseOut,
-          property: LayoutAnimation.Properties.opacity,
-        },
-      };
-      LayoutAnimation.configureNext(customAnim);
-    }
     setActiveTabRaw(tab);
   };
   const headerAnim = useRef(new Animated.Value(activeTab === 'designs' ? 1 : 0)).current;
 
   useEffect(() => {
-    Animated.timing(headerAnim, {
+    Animated.spring(headerAnim, {
       toValue: activeTab === 'designs' ? 1 : 0,
-      duration: 350,
-      useNativeDriver: false, // Font size and dimensions don't support native driver
+      useNativeDriver: false,
+      tension: 60,
+      friction: 10,
     }).start();
   }, [activeTab]);
 
   const animatedLogoSize = headerAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      previewMode ? (config.logoSize || 80) * 0.8 : (config.logoSize || 80),
-      previewMode ? (config.logoSize || 80) * 0.4 : (config.logoSize || 80) * 0.5
+      previewMode ? Math.max(config.logoSize || 80, 80) * 0.9 : Math.max(config.logoSize || 80, 100),
+      previewMode ? Math.max(config.logoSize || 80, 80) * 0.45 : Math.max(config.logoSize || 80, 100) * 0.6
     ]
   });
 
   const animatedFontSize = headerAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      previewMode ? 20 : 36,
-      previewMode ? 16 : 22
+      previewMode ? 28 : (isDesktop ? 48 : 42),
+      previewMode ? 16 : (isDesktop ? 28 : 24)
     ]
+  });
+
+  const animatedHeaderTranslate = headerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -10]
   });
 
   const animatedHeaderPadding = headerAnim.interpolate({
@@ -923,176 +889,268 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
   const SafeContainer = previewMode ? View : SafeAreaView;
 
 
-    const bgBase = config.backgroundColor || "#FFFDF5";
-    const contrastColor = getContrastColor(bgBase);
-    const isDefaultBg = !config.backgroundColor || config.backgroundColor.toUpperCase() === "#FFFDF5" || config.backgroundColor.toUpperCase() === "#FFFFFF";
+  const bgBase = config.backgroundColor || "#FFFDF5";
+  const contrastColor = getContrastColor(bgBase);
+  const isDefaultBg = !config.backgroundColor || config.backgroundColor.toUpperCase() === "#FFFDF5" || config.backgroundColor.toUpperCase() === "#FFFFFF";
 
-    return (
-      <View style={styles.container}>
-        <LinearGradient
-          colors={isDefaultBg ? ["#FFF7ED", "#FDE6C8", "#F5D6B6"] : [bgBase, bgBase]}
-          locations={[0, 0.4, 1]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={StyleSheet.absoluteFillObject}
-        />
-        {isDefaultBg && (
-          <View style={{
-            position: 'absolute',
-            top: -100,
-            alignSelf: 'center',
-            width: 600,
-            height: 350,
-            borderRadius: 300,
-            backgroundColor: '#8B5A2B',
-            opacity: 0.15,
-            filter: 'blur(60px)' as any
-          }} />
-        )}
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={isDefaultBg ? ["#FFFDF5", "#FDF5E6", "#F5E6D3"] : [bgBase, bgBase]}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+      {isDefaultBg && (
+        <View style={{
+          position: 'absolute',
+          top: -100,
+          alignSelf: 'center',
+          width: 600,
+          height: 350,
+          borderRadius: 300,
+          backgroundColor: '#8B5A2B',
+          opacity: 0.15,
+          filter: 'blur(60px)' as any
+        }} />
+      )}
       <SafeContainer style={{ flex: 1 }}>
-        <View style={[styles.headerContainer, previewMode && { paddingBottom: 8, paddingTop: 5 }]}>
+        {previewMode && (
+          <View style={{
+            backgroundColor: '#F3E8C1',
+            paddingVertical: 10,
+            paddingHorizontal: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderTopLeftRadius: 18,
+            borderTopRightRadius: 18,
+            borderBottomWidth: 1,
+            borderBottomColor: 'rgba(0,0,0,0.05)',
+            gap: 8,
+          }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#10B981' }} />
+            <Text style={{ fontSize: 13, fontWeight: '800', color: '#78350F', letterSpacing: 0.5 }}>LIVE PREVIEW</Text>
+          </View>
+        )}
+
+        <View style={[styles.headerContainer, previewMode && { paddingBottom: 4, paddingTop: 8 }]}>
           {!previewMode && (
-            <View style={styles.topButtonRow}>
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  {
-                    marginRight: 8,
-                  },
-                  !isDefaultBg && {
-                    backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.05)",
-                    borderColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.1)"
-                  }
-                ]}
-                onPress={() => setShowQRModal(true)}
-              >
-                <MaterialCommunityIcons
-                  name="qrcode-scan"
-                  size={20}
-                  color={isDefaultBg ? "#78350F" : contrastColor}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.iconButton,
-                  !isDefaultBg && {
-                    backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.05)",
-                    borderColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.1)"
-                  }
-                ]}
-                onPress={() => onShare(activeTab)}
-              >
-                <Feather
-                  name="share-2"
-                  size={20}
-                  color={isDefaultBg ? "#78350F" : contrastColor}
-                />
-              </TouchableOpacity>
-
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              paddingHorizontal: 16,
+              paddingTop: 12,
+              width: '100%',
+              gap: 12,
+              position: 'absolute',
+              top: 0,
+              zIndex: 100,
+            }}>
               {!viewOnly && onSetupPress && (
                 <TouchableOpacity
-                  style={[
-                    styles.iconButton,
-                    { marginLeft: 8 },
-                    !isDefaultBg && {
-                      backgroundColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.05)",
-                      borderColor: contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.1)"
-                    }
-                  ]}
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 21,
+                    backgroundColor: '#FFFFFF',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: 'rgba(0,0,0,0.05)',
+                  }}
                   onPress={() => onSetupPress(activeTab)}
                 >
                   <Feather
                     name="settings"
                     size={20}
-                    color={isDefaultBg ? "#78350F" : contrastColor}
+                    color="#8B5A2B"
                   />
                 </TouchableOpacity>
               )}
+
+              <TouchableOpacity
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 21,
+                  backgroundColor: '#FFFFFF',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: 'rgba(0,0,0,0.05)',
+                }}
+                onPress={() => setShowQRModal(true)}
+              >
+                <MaterialCommunityIcons
+                  name="qrcode-scan"
+                  size={20}
+                  color="#8B5A2B"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 21,
+                  backgroundColor: '#FFFFFF',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: 'rgba(0,0,0,0.05)',
+                }}
+                onPress={() => onShare(activeTab)}
+              >
+                <Feather
+                  name="share-2"
+                  size={20}
+                  color="#8B5A2B"
+                />
+              </TouchableOpacity>
             </View>
           )}
-          <Animated.View style={[styles.centerContent, previewMode && { marginBottom: 8 }, { marginBottom: animatedHeaderPadding }]}>
+
+          <Animated.View style={[
+            styles.centerContent, 
+            { 
+              marginTop: previewMode ? 0 : 40, 
+              marginBottom: animatedHeaderPadding,
+              flexDirection: previewMode ? 'row' : 'column',
+              alignItems: 'center',
+              justifyContent: previewMode ? contentAlignItems : 'center',
+              transform: [{ translateY: animatedHeaderTranslate }]
+            }
+          ]}>
             <Animated.Image
-              source={config.logoBase64 ? { uri: config.logoBase64 } : require('../../assets/images/karatpay-removebg-preview.png')}
+              key={(config.logoBase64 && config.logoBase64.length > 50) ? 'custom' : 'default'}
+              source={(config.logoBase64 && config.logoBase64.length > 50) ? { uri: config.logoBase64 } : require('../../assets/images/karatpay-removebg-preview.png')}
               style={{
                 width: animatedLogoSize,
                 height: animatedLogoSize,
-                opacity: (config.logoBase64 ? config.logoOpacity : 0.8) ?? 1,
-                marginBottom: previewMode ? 4 : 8,
+                borderRadius: 4,
+                opacity: config.logoOpacity ?? 1,
+                marginHorizontal: previewMode ? 12 : 0,
+                marginBottom: previewMode ? 0 : 16,
               }}
               resizeMode="contain"
             />
+
             {config.showShopName && (
               <Animated.Text
                 style={[
                   styles.brandName,
                   {
-                    color: config.priceColor || contrastColor, // Use user selected color
+                    color: "#78350F",
                     fontSize: animatedFontSize,
-                    textAlign: "center",
+                    textAlign: previewMode ? textAlign : "center",
                     fontWeight: "900",
                     letterSpacing: -0.5,
+                    paddingHorizontal: 10,
                   },
                 ]}
               >
-                {config.shopName.toUpperCase()}
+                {(config.shopName || "Our Shop").toUpperCase()}
               </Animated.Text>
             )}
 
-            <View style={[
-              styles.tabContainer, 
-              previewMode && { width: '95%', marginTop: 8 },
-              { backgroundColor: isDefaultBg ? "rgba(255, 255, 255, 0.4)" : (contrastColor === "#FFFFFF" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.05)") },
-              isDefaultBg && { borderWidth: 0, shadowOpacity: 0.02 }
-            ]}>
-              <TouchableOpacity
-                onPress={() => setActiveTab('rates')}
-                style={[
-                  styles.tab,
-                  activeTab === 'rates' && styles.activeTab,
-                  activeTab === 'rates' && { backgroundColor: isDefaultBg ? "#FFFFFF" : (config.priceColor || "#C2410C") },
-                  previewMode && { paddingVertical: 6 }
-                ]}
-              >
-                <MaterialCommunityIcons 
-                  name="trending-up" 
-                  size={previewMode ? 14 : 18}
-                  color={activeTab === 'rates' ? (isDefaultBg ? config.priceColor : "#FFFFFF") : (isDefaultBg ? "rgba(120,53,15,0.7)" : (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8"))} 
-                />
-                <Text style={[
-                  styles.tabText,
-                  activeTab === 'rates' && { color: isDefaultBg ? config.priceColor : "#FFFFFF" },
-                  activeTab !== 'rates' && { color: isDefaultBg ? "rgba(120,53,15,0.7)" : (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8") },
-                  previewMode && { fontSize: 12 }
-                ]}>
-                  LIVE RATES
-                </Text>
-              </TouchableOpacity>
+            {!previewMode && (
+              <View style={{
+                flexDirection: 'row',
+                backgroundColor: 'rgba(139, 90, 43, 0.08)',
+                borderRadius: 14,
+                padding: 6,
+                width: '90%',
+                maxWidth: 360,
+                alignSelf: 'center',
+                marginTop: 10,
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.5)',
+              }}>
+                <TouchableOpacity
+                  onPress={() => setActiveTab('rates')}
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 12,
+                    borderRadius: 10,
+                    backgroundColor: activeTab === 'rates' ? '#FFFFFF' : 'transparent',
+                    shadowColor: activeTab === 'rates' ? '#000' : 'transparent',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: activeTab === 'rates' ? 2 : 0,
+                    gap: 8,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="trending-up"
+                    size={18}
+                    color={activeTab === 'rates' ? "#78350F" : "#8B5A2B"}
+                    style={{ opacity: activeTab === 'rates' ? 1 : 0.6 }}
+                  />
+                  <Text style={{
+                    fontSize: 15,
+                    fontWeight: '800',
+                    color: activeTab === 'rates' ? "#78350F" : "#8B5A2B",
+                    opacity: activeTab === 'rates' ? 1 : 0.6
+                  }}>
+                    Live Rates
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => setActiveTab('designs')}
-                style={[
-                  styles.tab,
-                  activeTab === 'designs' && styles.activeTab,
-                  activeTab === 'designs' && { backgroundColor: isDefaultBg ? "#FFFFFF" : (config.priceColor || "#C2410C") },
-                  previewMode && { paddingVertical: 6 }
-                ]}
-              >
-                <MaterialCommunityIcons 
-                  name="shopping-outline" 
-                  size={previewMode ? 14 : 18}
-                  color={activeTab === 'designs' ? (isDefaultBg ? config.priceColor : "#FFFFFF") : (isDefaultBg ? "rgba(120,53,15,0.7)" : (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8"))} 
-                />
-                <Text style={[
-                  styles.tabText,
-                  activeTab === 'designs' && { color: isDefaultBg ? config.priceColor : "#FFFFFF" },
-                  activeTab !== 'designs' && { color: isDefaultBg ? "rgba(120,53,15,0.7)" : (contrastColor === "#FFFFFF" ? "rgba(255,255,255,0.4)" : "#94A3B8") },
-                  previewMode && { fontSize: 12 }
-                ]}>
-                  DESIGNS
-                </Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  onPress={() => setActiveTab('designs')}
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingVertical: 12,
+                    borderRadius: 10,
+                    backgroundColor: activeTab === 'designs' ? '#FFFFFF' : 'transparent',
+                    shadowColor: activeTab === 'designs' ? '#000' : 'transparent',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: activeTab === 'designs' ? 2 : 0,
+                    gap: 8,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="shopping-outline"
+                    size={18}
+                    color={activeTab === 'designs' ? "#78350F" : "#8B5A2B"}
+                    style={{ opacity: activeTab === 'designs' ? 1 : 0.6 }}
+                  />
+                  <Text style={{
+                    fontSize: 15,
+                    fontWeight: '800',
+                    color: activeTab === 'designs' ? "#78350F" : "#8B5A2B",
+                    opacity: activeTab === 'designs' ? 1 : 0.6
+                  }}>
+                    Designs
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </Animated.View>
         </View>
         <ScrollView
@@ -1100,16 +1158,27 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
             styles.scrollContent,
             activeTab === 'rates' && orderedRateItems.length <= 3 && {
               flexGrow: 1,
-              justifyContent: 'center', // Center content vertically
-              paddingTop: previewMode ? 10 : 40 // Add space between header and cards
+              justifyContent: 'center', 
+              paddingTop: previewMode ? 4 : 40 
             },
-            previewMode && { paddingBottom: 20 }
+            previewMode && { paddingBottom: 6, paddingHorizontal: 4 }
           ]}
         >
           {activeTab === 'rates' ? (
-            <View style={[styles.grid, { marginHorizontal: 0 }]}>
+            <View style={[styles.grid, { marginHorizontal: 0, justifyContent: previewMode ? 'space-between' : 'center', paddingHorizontal: previewMode ? 4 : 4 }]}>
               {orderedRateItems.map((item) => (
-                <View key={item.key} style={[styles.gridItem, { paddingHorizontal: 0, marginBottom: 0 }]}>
+                <View
+                  key={item.key}
+                  style={[
+                    styles.gridItem,
+                    {
+                      paddingHorizontal: previewMode ? 2 : 0,
+                      marginBottom: 0,
+                      width: previewMode ? "49%" : isDesktop ? "80%" : "100%",
+                      maxWidth: isDesktop && !previewMode ? 800 : 1200,
+                    }
+                  ]}
+                >
                   <RateCard
                     label={item.label}
                     price={formatPrice(item.price)}
@@ -1126,14 +1195,33 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                     makingChargeValue={item.makingChargeValue}
                     makingChargeType={item.makingChargeType}
                     contrastColor={contrastColor}
+                    isDesktop={isDesktop}
                   />
                 </View>
               ))}
 
               {config.ratesFrozen && (
-                <View style={styles.frozenRow}>
-                  <MaterialCommunityIcons name="snowflake" size={16} color="#3B82F6" />
-                  <Text style={styles.frozenText}>RATES FROZEN</Text>
+                <View style={[
+                  styles.frozenRow,
+                  previewMode && { 
+                    backgroundColor: '#FEF2F2', 
+                    borderColor: '#FECACA', 
+                    borderWidth: 1,
+                    marginTop: 12,
+                    paddingVertical: 10,
+                  }
+                ]}>
+                  <MaterialCommunityIcons 
+                    name="snowflake" 
+                    size={16} 
+                    color={previewMode ? "#B91C1C" : "#3B82F6"} 
+                  />
+                  <Text style={[
+                    styles.frozenText,
+                    previewMode && { color: '#B91C1C', fontWeight: '800' }
+                  ]}>
+                    RATES FROZEN
+                  </Text>
                 </View>
               )}
 
@@ -1205,8 +1293,18 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                           style={styles.searchInput}
                         />
                       </View>
-                      <TouchableOpacity style={styles.filterButton}>
-                        <MaterialCommunityIcons name="filter-variant" size={22} color="#78350F" />
+                      <TouchableOpacity
+                        style={[
+                          styles.filterButton,
+                          isFilterExpanded && styles.activeFilterButton
+                        ]}
+                        onPress={toggleFilters}
+                      >
+                        <MaterialCommunityIcons 
+                          name={isFilterExpanded ? "filter-check" : "filter-variant"} 
+                          size={22} 
+                          color={isFilterExpanded ? "#FFF" : "#78350F"} 
+                        />
                       </TouchableOpacity>
                     </View>
 
@@ -1232,16 +1330,18 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                             onPress={() => setSelectedCategory(item.value)}
                             style={[
                               styles.collectionCard,
+                              isMobile && { padding: 10, minWidth: 80 },
                               isActive && styles.activeCollectionCard,
                             ]}
                           >
-                            <MaterialCommunityIcons 
-                              name={item.icon as any} 
-                              size={28} 
-                              color={isActive ? "#FFFFFF" : "#78350F"} 
+                            <MaterialCommunityIcons
+                              name={item.icon as any}
+                              size={isMobile ? 22 : 28}
+                              color={isActive ? "#FFFFFF" : "#78350F"}
                             />
                             <Text style={[
                               styles.collectionLabel,
+                              isMobile && { fontSize: 10, marginTop: 4 },
                               isActive && styles.activeCollectionLabel
                             ]}>
                               {item.label}
@@ -1266,11 +1366,13 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                             onPress={() => setSelectedCategory(category)}
                             style={[
                               styles.subCategoryChip,
+                              isMobile && { paddingHorizontal: 12, paddingVertical: 6 },
                               isActive && styles.activeSubCategoryChip
                             ]}
                           >
                             <Text style={[
                               styles.subCategoryText,
+                              isMobile && { fontSize: 11 },
                               isActive && styles.activeSubCategoryText
                             ]}>
                               {category}
@@ -1279,6 +1381,40 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                         );
                       })}
                     </ScrollView>
+
+                    {/* Collections / Extra Filters (Toggleable) */}
+                    {isFilterExpanded && (
+                      <View style={styles.expandedFilterContainer}>
+                        <View style={styles.tagsContainerRow}>
+                          <View style={[styles.filterTitleRow, isMobile && { paddingVertical: 6 }]}>
+                            <MaterialCommunityIcons name="tag-outline" size={isMobile ? 14 : 16} color="#78350F" style={{ opacity: 0.6 }} />
+                            <Text style={[styles.expandedFilterTitle, isMobile && { fontSize: 12 }]}>COLLECTIONS:</Text>
+                          </View>
+                          {availableTags.map(tag => {
+                            const isActive = selectedTag === tag;
+                            return (
+                              <TouchableOpacity
+                                key={tag}
+                                onPress={() => setSelectedTag(tag)}
+                                style={[
+                                  styles.tagChip,
+                                  isMobile && { paddingHorizontal: 12, paddingVertical: 6 },
+                                  isActive && styles.activeTagChip
+                                ]}
+                              >
+                                <Text style={[
+                                  styles.tagText,
+                                  isMobile && { fontSize: 12 },
+                                  isActive && styles.activeTagText
+                                ]}>
+                                  {tag === "All" ? "All Collections" : tag}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    )}
 
                     {/* Result Count */}
                     <Text style={styles.resultCountText}>
@@ -1295,6 +1431,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                         config={config}
                         calculatedRates={calculatedRates}
                         onPress={handleDesignPress}
+                        isDesktop={isDesktop}
                       />
                     ))}
                     {filteredDesigns.length === 0 && (
@@ -1326,16 +1463,22 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
 
                 </>
               )}
-              <DesignDetailModal
-                visible={showDetailModal}
-                design={selectedDesign}
-                config={config}
-                calculatedRates={calculatedRates}
-                shareUrl={shareUrl}
-                onClose={() => setShowDetailModal(false)}
-              />
             </View>
           )}
+
+
+
+          <DesignDetailModal
+            visible={showDetailModal}
+            design={selectedDesign}
+            config={config}
+            calculatedRates={calculatedRates}
+            shareUrl={shareUrl}
+            onClose={() => setShowDetailModal(false)}
+          />
+
+
+
 
           {previewMode ? (
             <View style={styles.announcementsSection}>
@@ -1513,9 +1656,9 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
                 <>
                   <View style={styles.separator} />
                   <View style={{ alignItems: 'center', opacity: 0.4, marginBottom: 16 }}>
-                    <Image 
-                      source={require('../../assets/images/karatpay-removebg-preview.png')} 
-                      style={{ width: 44, height: 44, tintColor: config.textColor || '#8B5A2B' }} 
+                    <Image
+                      source={require('../../assets/images/karatpay-removebg-preview.png')}
+                      style={{ width: 44, height: 44, tintColor: config.textColor || '#8B5A2B' }}
                       resizeMode="contain"
                     />
                   </View>
@@ -1541,7 +1684,7 @@ export const RateDisplayContent: React.FC<RateDisplayContentProps> = ({
               </View>
             </View>
           )}
-        </ScrollView>
+      </ScrollView>
       </SafeContainer>
 
       {/* QR Code Modal */}
@@ -1685,6 +1828,21 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     width: "100%",
   },
+  frozenRow: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  frozenText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#3B82F6',
+    letterSpacing: 0.5,
+  },
   topButtonRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -1778,14 +1936,12 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -10,
+    paddingHorizontal: 8,
     justifyContent: "center",
   },
   gridItem: {
-    width: "100%",
-    maxWidth: 800,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
     alignSelf: "center",
   },
   animatedCardContainer: {
@@ -2183,6 +2339,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1E293B',
     fontWeight: '500',
+    ...(Platform.OS === 'web' && { outlineStyle: 'none' } as any),
   },
   filterButton: {
     width: 52,
@@ -2200,6 +2357,65 @@ const styles = StyleSheet.create({
   collectionScrollContent: {
     gap: 12,
     paddingRight: 20,
+    paddingVertical: 10,
+  },
+  expandedFilterContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
+    marginTop: 4,
+  },
+  filterTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginRight: 8,
+    paddingVertical: 9, // Match chip height roughly
+  },
+  expandedFilterTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.6,
+    opacity: 0.9,
+  },
+  tagsContainerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    alignItems: 'center',
+  },
+  tagChip: {
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 22,
+    backgroundColor: '#FAF9F6',
+    borderWidth: 1.2,
+    borderColor: '#EFECE6',
+  },
+  activeTagChip: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#78350F',
+    shadowColor: '#78350F',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  tagText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8B6B4D',
+  },
+  activeTagText: {
+    color: '#78350F',
+    fontWeight: '800',
+  },
+  activeFilterButton: {
+    backgroundColor: '#78350F',
+    borderColor: '#78350F',
   },
   collectionCard: {
     backgroundColor: 'rgba(139, 90, 43, 0.04)',
@@ -2360,6 +2576,11 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '600',
     marginBottom: 4,
+  },
+  designPrice: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#D97706',
   },
   priceOnRequest: {
     fontSize: 12,
@@ -2642,12 +2863,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-  designPrice: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#D97706',
-    marginTop: 4,
-  },
+
   estimateHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -3057,24 +3273,5 @@ const styles = StyleSheet.create({
   viewAllTeaserText: {
     fontWeight: '700',
     color: '#1E293B',
-  },
-  frozenRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FEE2E2',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginTop: 12,
-    alignSelf: 'center',
-    gap: 8,
-    width: '90%',
-  },
-  frozenText: {
-    color: '#EF4444',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 1,
   },
 });

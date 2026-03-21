@@ -38,18 +38,20 @@ export const useRateSetup = (
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: false,
-                quality: 1,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
             });
 
             if (result.canceled) return;
 
             const asset = result.assets[0];
+            // Resize to 200px and compress heavily so it stays well under Firestore's 1MB doc limit
             const manipResult = await ImageManipulator.manipulateAsync(
                 asset.uri,
-                [{ resize: { width: 600 } }],
+                [{ resize: { width: 200 } }],
                 {
-                    compress: 0.7,
+                    compress: 0.5,
                     format: ImageManipulator.SaveFormat.JPEG,
                     base64: true,
                 }
@@ -61,13 +63,21 @@ export const useRateSetup = (
             }
 
             const base64SizeKB = (manipResult.base64.length * 3) / 4 / 1024;
-            if (base64SizeKB > 1000) {
-                Alert.alert("Too Large", "Image is too large even after compression.");
+            if (base64SizeKB > 750) {
+                Alert.alert(
+                    "Image Too Large",
+                    `The image is ${Math.round(base64SizeKB)}KB after compression. Please choose a smaller image (max ~750KB).`
+                );
                 return;
             }
 
             const base = "data:image/jpeg;base64," + manipResult.base64;
+            // Update local state
             activeUpdate({ logoBase64: base });
+            // Also immediately persist to Firestore so it shows in the display page
+            try {
+                await updateConfig({ logoBase64: base });
+            } catch (_) {}
         } catch (error) {
             console.error(error);
             Alert.alert("Error", "Failed to pick image");

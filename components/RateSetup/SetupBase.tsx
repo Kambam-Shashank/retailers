@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { RateConfig } from "@/contexts/RateConfigContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const GOLD = "#D4AF37";
 
@@ -18,41 +18,43 @@ interface RateSetupTabsProps {
 
 export const RateSetupTabs: React.FC<RateSetupTabsProps> = ({ activeTab, onTabChange, isMobile }) => {
     const tabs: { id: TabType; label: string; icon: any }[] = [
-        { id: "profile", label: "Profile", icon: "storefront" },
-        { id: "rates", label: "Rates", icon: "star-shooting-outline" },
+        { id: "profile", label: "Profile", icon: "store-outline" },
+        { id: "rates", label: "Rates", icon: "chart-line-variant" },
         { id: "visual", label: "Theme", icon: "palette-outline" },
-        { id: "catalog", label: "Catalogue", icon: "upload-outline" },
+        { id: "catalog", label: "Catalogue", icon: "share-variant-outline" },
     ];
 
     return (
-        <View style={tabStyles.container}>
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={tabStyles.scroll}
-            >
-                {tabs.map((tab) => (
-                    <TouchableOpacity
-                        key={tab.id}
-                        onPress={() => onTabChange(tab.id)}
-                        style={[tabStyles.tab, activeTab === tab.id && tabStyles.activeTab]}
-                    >
-                        <MaterialCommunityIcons
-                            name={tab.icon}
-                            size={isMobile ? 18 : 20}
-                            color={activeTab === tab.id ? "#000" : "#666"}
-                        />
-                        <Text style={[tabStyles.label, activeTab === tab.id && tabStyles.activeLabel]}>
-                            {tab.label}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+        <View style={tabStyles.outerContainer}>
+            <View style={tabStyles.container}>
+                {tabs.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <TouchableOpacity
+                            key={tab.id}
+                            onPress={() => onTabChange(tab.id)}
+                            style={[tabStyles.tab, isActive && tabStyles.activeTab]}
+                        >
+                            <MaterialCommunityIcons
+                                name={tab.icon}
+                                size={isMobile ? 18 : 20}
+                                color={isActive ? "#1E293B" : "#94A3B8"}
+                            />
+                            <Text style={[
+                                tabStyles.label,
+                                isActive && tabStyles.activeLabel,
+                                isMobile && { fontSize: 11 }
+                            ]}>
+                                {tab.label}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
+            </View>
         </View>
     );
 };
 
-// ====== LivePreview ======
 const MOCK_BASE_RATES = {
     gold999: 138255,
     gold916: 126650,
@@ -65,7 +67,7 @@ const MOCK_BASE_RATES = {
 
 const MOCK_PRICE_CHANGE = { hasChanged: false, isIncrease: false, isDecrease: false, change: 0, previousPrice: 0, percentageChange: 0 };
 
-export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
+export const LivePreview: React.FC<{ config: RateConfig; isMobile?: boolean }> = ({ config, isMobile }) => {
     const [withGST, setWithGST] = useState(true);
     const { user } = useAuth();
 
@@ -80,15 +82,12 @@ export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
         keys.forEach(key => {
             const base = MOCK_BASE_RATES[key];
 
-            // Apply margin
             const marginKey = key === "gold916" ? "gold22kMargin" : (key + "Margin") as keyof RateConfig;
             const margin = (config as any)[marginKey] || 0;
             const withMargin = base + margin;
 
-            // Apply GST
             const withGSTPrice = withGST ? withMargin * (1 + GST_RATE) : withMargin;
 
-            // Apply Making Charges
             let mc = 0;
             if (config.makingChargesEnabled) {
                 const mcKeyPrefix = key === "gold916" ? "22k" : key === "gold999" ? "24k" : key.replace('gold', '').replace('silver', '');
@@ -114,7 +113,7 @@ export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
     }, [config, withGST]);
 
     return (
-        <View style={previewStyles.container}>
+        <View style={[previewStyles.container, { padding: isMobile ? 12 : 24 }]}>
             <View style={previewStyles.header}>
                 <View style={previewStyles.dot} />
                 <Text style={previewStyles.title}>Live Preview</Text>
@@ -144,38 +143,46 @@ export const LivePreview: React.FC<{ config: RateConfig }> = ({ config }) => {
 };
 
 const tabStyles = StyleSheet.create({
-    container: {
-        borderBottomWidth: 1,
-        borderBottomColor: "#EEE",
-        backgroundColor: "#FFF",
-        height: 60,
+    outerContainer: {
         width: '100%',
-    },
-    scroll: {
         paddingHorizontal: 16,
-        alignItems: 'center',
-        gap: 12,
+        paddingVertical: 12,
+        alignItems: 'flex-start',
+    },
+    container: {
+        flexDirection: 'row',
+        backgroundColor: '#F1F5F9',
+        borderRadius: 12,
+        padding: 6,
+        width: '100%',
+        gap: 8,
     },
     tab: {
-        flexDirection: "row",
+        flex: 1,
+        flexDirection: 'row',
         alignItems: "center",
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        backgroundColor: "#F5F5F5",
+        justifyContent: "center",
+        paddingVertical: 10,
+        borderRadius: 10,
         gap: 6,
-        height: 40,
     },
-    activeTab: { backgroundColor: GOLD },
-    label: { fontSize: 13, fontWeight: "600", color: "#666" },
-    activeLabel: { color: "#000" },
+    activeTab: {
+        backgroundColor: "#FFFFFF",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    label: { fontSize: 13, fontWeight: "600", color: "#64748B" },
+    activeLabel: { color: "#1E293B" },
 });
 
 const previewStyles = StyleSheet.create({
-    container: { backgroundColor: "#FFF", borderRadius: 16, borderWidth: 1, borderColor: "#E2E8F0", marginHorizontal: 0, marginTop: 10, marginBottom: 8, padding: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 },
-    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, paddingHorizontal: 0 },
+    container: { backgroundColor: "#FFF", borderRadius: 16, borderWidth: 1, borderColor: "#E2E8F0", marginTop: 8, marginBottom: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 12, elevation: 2 },
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingHorizontal: 0 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E', marginRight: 10 },
     title: { fontSize: 16, fontWeight: '700', color: '#1A1A1A' },
-    content: { backgroundColor: "#FFFFFF", borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0', padding: 0 },
+    content: { backgroundColor: "#FFFFFF", borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0' },
     wrapper: { width: "100%", minHeight: 400, overflow: "hidden" },
 });

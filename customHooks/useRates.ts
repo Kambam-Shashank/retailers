@@ -29,6 +29,16 @@ export const CATEGORIES = [
     "Others"
 ];
 
+export const PREDEFINED_COLLECTIONS = [
+    "New Designs",
+    "Limited Edition",
+    "Best Sellers",
+    "Wedding",
+    "Festive",
+    "Daily Wear",
+    "Gifting"
+];
+
 export function useFetch<T = any>(
     url: string,
     options: { responseType?: "json" | "text" } = {}
@@ -155,6 +165,7 @@ export const useDesignCatalog = (retailerId: string | undefined) => {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [selectedTag, setSelectedTag] = useState("All");
 
     useEffect(() => {
         let isMounted = true;
@@ -180,6 +191,15 @@ export const useDesignCatalog = (retailerId: string | undefined) => {
         // Always include "All" at the beginning
         return ["All", ...CATEGORIES.filter(c => c !== "All" && categoriesInUse.has(c))];
     }, [designs]);
+    
+    const availableTags = useMemo(() => {
+        const tagsInUse = new Set<string>(PREDEFINED_COLLECTIONS);
+        designs.forEach(d => {
+            if (d.tags) d.tags.forEach(t => tagsInUse.add(t));
+            if (d.isNew) tagsInUse.add("New Designs");
+        });
+        return ["All", ...Array.from(tagsInUse)];
+    }, [designs]);
 
     const filteredDesigns = useMemo(() => {
         return designs.filter(design => {
@@ -201,11 +221,18 @@ export const useDesignCatalog = (retailerId: string | undefined) => {
                 !selectedCategory ||
                 selectedCategory === "All" ||
                 category.toLowerCase() === selectedCategory.toLowerCase();
+            
+            const matchesTag =
+                !selectedTag ||
+                selectedTag === "All" ||
+                (selectedTag === "New Designs" && design.isNew) ||
+                (design.tags && design.tags.some(t => t.toLowerCase() === selectedTag.toLowerCase())) ||
+                (design.category && design.category.toLowerCase() === selectedTag.toLowerCase());
 
-            return matchesSearch && matchesCategory;
+            return matchesSearch && matchesCategory && matchesTag;
         })
             .sort((a, b) => (Number(a.sortOrder) || 999) - (Number(b.sortOrder) || 999));
-    }, [designs, searchQuery, selectedCategory]);
+    }, [designs, searchQuery, selectedCategory, selectedTag]);
 
     return {
         designs,
@@ -215,7 +242,10 @@ export const useDesignCatalog = (retailerId: string | undefined) => {
         searchQuery,
         setSearchQuery,
         selectedCategory,
-        setSelectedCategory
+        setSelectedCategory,
+        selectedTag,
+        setSelectedTag,
+        availableTags
     };
 };
 

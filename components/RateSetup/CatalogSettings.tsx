@@ -7,7 +7,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
     ActivityIndicator,
     Alert,
-    Dimensions,
     Image,
     Modal,
     Platform,
@@ -18,10 +17,9 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    useWindowDimensions,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
-const COLUMN_WIDTH = (width - 48) / 2;
 
 const CATEGORIES = [
     "Necklace",
@@ -78,8 +76,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        marginTop: 16,
-        marginBottom: 20,
+        marginTop: 12,
+        marginBottom: 16,
     },
     backNavText: {
         fontSize: 15,
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
     filterSection: {
-        marginBottom: 28,
+        marginBottom: 16,
     },
     filterScroll: {
         gap: 6,
@@ -150,8 +148,8 @@ const styles = StyleSheet.create({
         color: "#FFF",
     },
     listContainer: {
-        gap: 16,
-        paddingBottom: 60,
+        gap: 10,
+        paddingBottom: 80,
     },
     listItem: {
         flexDirection: "row",
@@ -537,6 +535,10 @@ const DropdownPicker = ({ label, value, options, onSelect }: {
 
 export const CatalogSettings = ({ onBack }: { onBack?: () => void }) => {
     const { user } = useAuth();
+    const { width } = useWindowDimensions();
+    const isMobile = width < 420;
+    const isSmallMobile = width < 360;
+    const isDesktop = width >= 1024;
     const [designs, setDesigns] = useState<Design[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -853,21 +855,21 @@ export const CatalogSettings = ({ onBack }: { onBack?: () => void }) => {
         <View style={styles.container}>
             {/* Nav Row */}
             <TouchableOpacity style={styles.backNav} onPress={onBack}>
-                <Feather name="arrow-left" size={20} color="#64748B" />
-                <Text style={styles.backNavText}>Back to Setup</Text>
+                <Feather name="arrow-left" size={isMobile ? 18 : 20} color="#64748B" />
+                <Text style={[styles.backNavText, isMobile && { fontSize: 13 }]}>Back to Setup</Text>
             </TouchableOpacity>
 
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.title}>Product Catalogue</Text>
-                    <Text style={styles.subtitle}>{designs.length} products</Text>
+                <View style={{ flex: 1, marginRight: 12 }}>
+                    <Text style={[styles.title, { fontSize: isSmallMobile ? 22 : isMobile ? 26 : isDesktop ? 38 : 32 }]}>Product Catalogue</Text>
+                    <Text style={[styles.subtitle, { fontSize: isSmallMobile ? 12 : isMobile ? 13 : 16 }]}>{designs.length} products</Text>
                 </View>
                 <TouchableOpacity
-                    style={styles.addButton}
+                    style={[styles.addButton, isMobile && { paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12 }]}
                     onPress={() => setIsModalVisible(true)}
                 >
-                    <MaterialCommunityIcons name="plus" size={24} color="#000" />
-                    <Text style={styles.addButtonText}>Add Product</Text>
+                    <MaterialCommunityIcons name="plus" size={isMobile ? 20 : 24} color="#000" />
+                    <Text style={[styles.addButtonText, isMobile && { fontSize: 13 }]}>Add Product</Text>
                 </TouchableOpacity>
             </View>
 
@@ -899,60 +901,67 @@ export const CatalogSettings = ({ onBack }: { onBack?: () => void }) => {
                     <Text style={styles.emptySubText}>Start building your digital catalog by adding your first design.</Text>
                 </View>
             ) : (
-                <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
                     {sortedDesigns
                         .filter(d => !selectedCategory || d.category === selectedCategory)
                         .map((design) => (
-                        <View key={design.id} style={[styles.listItem, design.isActive === false && { opacity: 0.7 }]}>
-                            <View style={styles.itemImageContainer}>
+                        <View key={design.id} style={[
+                            styles.listItem,
+                            design.isActive === false && { opacity: 0.7 },
+                            isMobile && { padding: 10, borderRadius: 16 },
+                        ]}>
+                            <View style={[
+                                styles.itemImageContainer,
+                                isMobile && { width: 62, height: 62, borderRadius: 10 },
+                            ]}>
                                 {design.imageUrl ? (
                                     <Image source={{ uri: design.imageUrl }} style={styles.itemImage} />
                                 ) : (
                                     <View style={[styles.itemImage, styles.imagePlaceholder]}>
-                                        <MaterialCommunityIcons name="image-outline" size={24} color="#CBD5E1" />
+                                        <MaterialCommunityIcons name="image-outline" size={isMobile ? 18 : 24} color="#CBD5E1" />
                                     </View>
                                 )}
                             </View>
                             
-                            <View style={styles.itemInfo}>
-                                <Text style={styles.itemName} numberOfLines={1}>{design.name}</Text>
-                                <Text style={styles.itemMeta}>
-                                    {design.category} • Gold {design.purity}
+                            <View style={[styles.itemInfo, isMobile && { marginLeft: 12 }]}>
+                                <Text style={[styles.itemName, isMobile && { fontSize: 14, marginBottom: 3 }]} numberOfLines={1}>{design.name}</Text>
+                                <Text style={[styles.itemMeta, isMobile && { fontSize: 12 }]}>
+                                    {design.category} • {design.type} {design.purity}
                                 </Text>
                             </View>
 
-                            <View style={styles.itemActions}>
+                            <View style={[styles.itemActions, isMobile && { gap: 4, paddingLeft: 4 }]}>
                                 <TouchableOpacity
-                                    style={styles.actionBtn}
+                                    style={[styles.actionBtn, isMobile && { width: 32, height: 32, borderRadius: 16 }]}
                                     onPress={() => handleToggleStock(design)}
                                 >
                                     <Feather
                                         name="box"
-                                        size={18}
+                                        size={isMobile ? 15 : 18}
                                         color={design.stockStatus === "In Stock" ? "#10B981" : "#EF4444"}
                                     />
                                 </TouchableOpacity>
                                 <TouchableOpacity 
-                                    style={styles.actionBtn}
+                                    style={[styles.actionBtn, isMobile && { width: 32, height: 32, borderRadius: 16 }]}
                                     onPress={() => handleToggleActive(design)}
                                 >
                                     <MaterialCommunityIcons 
                                         name={design.isActive === false ? "eye-off-outline" : "eye-outline"} 
-                                        size={20} 
+                                        size={isMobile ? 16 : 20} 
                                         color="#333" 
                                     />
                                 </TouchableOpacity>
                                 <TouchableOpacity 
-                                    style={styles.actionBtn}
+                                    style={[styles.actionBtn, isMobile && { width: 32, height: 32, borderRadius: 16 }]}
                                     onPress={() => handleEdit(design)}
                                 >
-                                    <MaterialCommunityIcons name="pencil-outline" size={20} color="#333" />
+                                    <MaterialCommunityIcons name="pencil-outline" size={isMobile ? 16 : 20} color="#333" />
                                 </TouchableOpacity>
                                 <TouchableOpacity 
-                                    style={styles.actionBtn}
+                                    style={[styles.actionBtn, isMobile && { width: 32, height: 32, borderRadius: 16 }]}
                                     onPress={() => handleDelete(design)}
                                 >
-                                    <MaterialCommunityIcons name="trash-can-outline" size={20} color="#EF4444" />
+                                    <MaterialCommunityIcons name="trash-can-outline" size={isMobile ? 16 : 20} color="#EF4444" />
                                 </TouchableOpacity>
                             </View>
                         </View>
